@@ -3,8 +3,6 @@ language: c
 env:
   - LUA=lua5.1
   - LUA=lua5.2
-  - LUA=luajit
-
 
 install:
   - sudo apt-get  install -qq lua5.1
