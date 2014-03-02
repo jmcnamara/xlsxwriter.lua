@@ -16,4 +16,4 @@ install:
   - sudo ln -s /usr/local/share/lua/5.1 /usr/local/share/lua/5.2
 
 script:
-  - make test_travis
+  - prove --exec="$LUA" --ext=lua -r test
