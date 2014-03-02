@@ -30,7 +30,7 @@ function Worksheet:_convert_cell_args(...)
     -- Convert 'A1' style cell to row, col.
     local cell = ...
     local row, col = Utility.cell_to_rowcol(cell)
-    return row, col, table.unpack({...}, 2)
+    return row, col, unpack({...}, 2)
   else
     -- Parameters are already in row, col format.
     return ...
