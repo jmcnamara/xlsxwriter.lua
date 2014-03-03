@@ -23,119 +23,129 @@ local xl_strmax = 32767
 ----
 -- The constructor inherits from xmlwriter.lua.
 --
-local Worksheet = Xmlwriter:new{
-  optimization           = false,
 
-  ext_sheets             = {},
-  fileclosed             = false,
-  excel_version          = 2007,
-  xls_rowmax             = rowmax,
-  xls_colmax             = colmax,
-  xls_strmax             = strmax,
-  dim_rowmin             = nil,
-  dim_rowmax             = nil,
-  dim_colmin             = nil,
-  dim_colmax             = nil,
-  colinfo                = {},
-  selections             = {},
-  hidden                 = false,
-  active                 = false,
-  tab_color              = 0,
-  panes                  = {},
-  active_pane            = 3,
-  selected               = false,
-  page_setup_changed     = false,
-  paper_size             = 0,
-  orientation            = 1,
-  print_options_changed  = false,
-  hcenter                = false,
-  vcenter                = false,
-  print_gridlines        = false,
-  screen_gridlines       = true,
-  print_headers          = false,
-  header_footer_changed  = false,
-  header                 = "",
-  footer                 = "",
-  margin_left            = 0.7,
-  margin_right           = 0.7,
-  margin_top             = 0.75,
-  margin_bottom          = 0.75,
-  margin_header          = 0.3,
-  margin_footer          = 0.3,
-  repeat_rows            = "",
-  repeat_cols            = "",
-  print_area             = "",
-  page_order             = false,
-  black_white            = false,
-  draft_quality          = false,
-  print_comments         = false,
-  page_start             = 0,
-  fit_page               = false,
-  fit_width              = 0,
-  fit_height             = 0,
-  hbreaks                = {},
-  vbreaks                = {},
-  protect                = false,
-  password               = nil,
-  set_cols               = {},
-  set_rows               = {},
-  zoom                   = 100,
-  zoom_scale_normal      = true,
-  print_scale            = 100,
-  right_to_left          = false,
-  show_zeros             = true,
-  leading_zeros          = false,
-  outline_row_level      = 0,
-  outline_col_level      = 0,
-  outline_style          = 0,
-  outline_below          = true,
-  outline_right          = true,
-  outline_on             = true,
-  outline_changed        = false,
-  default_row_height     = 15,
-  default_row_zeroed     = false,
-  names                  = {},
-  write_match            = {},
-  table                  = {},
-  merge                  = {},
-  has_vml                = false,
-  has_comments           = false,
-  comments               = {},
-  comments_array         = {},
-  comments_author        = "",
-  comments_visible       = false,
-  vml_shape_id           = 1024,
-  buttons_array          = {},
-  autofilter             = "",
-  filter_on              = false,
-  filter_range           = {},
-  filter_cols            = {},
-  col_sizes              = {},
-  row_sizes              = {},
-  col_formats            = {},
-  col_size_changed       = false,
-  row_size_changed       = false,
-  last_shape_id          = 1,
-  rel_count              = 0,
-  hlink_count            = 0,
-  hlink_refs             = {},
-  external_hyper_links   = {},
-  external_drawing_links = {},
-  external_comment_links = {},
-  external_vml_links     = {},
-  external_table_links   = {},
-  drawing_links          = {},
-  charts                 = {},
-  images                 = {},
-  tables                 = {},
-  sparklines             = {},
-  shapes                 = {},
-  shape_hash             = {},
-  has_shapes             = false,
-  drawing                = false,
-  rstring                = "",
-  previous_row           = 0,
-};
+local Worksheet = {}
+setmetatable(Worksheet,{__index = Xmlwriter})
+
+function Worksheet:new()
+  local instance = {
+    optimization           = false,
+    data_table             = {},
+
+    ext_sheets             = {},
+    fileclosed             = false,
+    excel_version          = 2007,
+    xls_rowmax             = rowmax,
+    xls_colmax             = colmax,
+    xls_strmax             = strmax,
+    dim_rowmin             = nil,
+    dim_rowmax             = nil,
+    dim_colmin             = nil,
+    dim_colmax             = nil,
+    colinfo                = {},
+    selections             = {},
+    hidden                 = false,
+    active                 = false,
+    tab_color              = 0,
+    panes                  = {},
+    active_pane            = 3,
+    selected               = false,
+    page_setup_changed     = false,
+    paper_size             = 0,
+    orientation            = 1,
+    print_options_changed  = false,
+    hcenter                = false,
+    vcenter                = false,
+    print_gridlines        = false,
+    screen_gridlines       = true,
+    print_headers          = false,
+    header_footer_changed  = false,
+    header                 = "",
+    footer                 = "",
+    margin_left            = 0.7,
+    margin_right           = 0.7,
+    margin_top             = 0.75,
+    margin_bottom          = 0.75,
+    margin_header          = 0.3,
+    margin_footer          = 0.3,
+    repeat_rows            = "",
+    repeat_cols            = "",
+    print_area             = "",
+    page_order             = false,
+    black_white            = false,
+    draft_quality          = false,
+    print_comments         = false,
+    page_start             = 0,
+    fit_page               = false,
+    fit_width              = 0,
+    fit_height             = 0,
+    hbreaks                = {},
+    vbreaks                = {},
+    protect                = false,
+    password               = nil,
+    set_cols               = {},
+    set_rows               = {},
+    zoom                   = 100,
+    zoom_scale_normal      = true,
+    print_scale            = 100,
+    right_to_left          = false,
+    show_zeros             = true,
+    leading_zeros          = false,
+    outline_row_level      = 0,
+    outline_col_level      = 0,
+    outline_style          = 0,
+    outline_below          = true,
+    outline_right          = true,
+    outline_on             = true,
+    outline_changed        = false,
+    default_row_height     = 15,
+    default_row_zeroed     = false,
+    names                  = {},
+    write_match            = {},
+    merge                  = {},
+    has_vml                = false,
+    has_comments           = false,
+    comments               = {},
+    comments_array         = {},
+    comments_author        = "",
+    comments_visible       = false,
+    vml_shape_id           = 1024,
+    buttons_array          = {},
+    autofilter             = "",
+    filter_on              = false,
+    filter_range           = {},
+    filter_cols            = {},
+    col_sizes              = {},
+    row_sizes              = {},
+    col_formats            = {},
+    col_size_changed       = false,
+    row_size_changed       = false,
+    last_shape_id          = 1,
+    rel_count              = 0,
+    hlink_count            = 0,
+    hlink_refs             = {},
+    external_hyper_links   = {},
+    external_drawing_links = {},
+    external_comment_links = {},
+    external_vml_links     = {},
+    external_table_links   = {},
+    drawing_links          = {},
+    charts                 = {},
+    images                 = {},
+    tables                 = {},
+    sparklines             = {},
+    shapes                 = {},
+    shape_hash             = {},
+    has_shapes             = false,
+    drawing                = false,
+    rstring                = "",
+    previous_row           = 0,
+  }
+
+  setmetatable(instance, self)
+  self.__index = self
+  return instance
+end
 
 
 ----
@@ -276,7 +286,13 @@ function Worksheet:_write_number(row, col, num, format)
     return -1
   end
 
-  self:_check_dimensions(row, col)
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  self.data_table[row][col] = {'n',  num, format}
+
+  return 0
 end
 
 ----
@@ -355,7 +371,7 @@ function Worksheet:set_zoom(scale)
     scale = 100
   end
 
-  self.zoom = scale - scale % 1
+  self.zoom = math.floor(scale)
 end
 
 ----
@@ -532,6 +548,74 @@ function Worksheet:_check_dimensions(row, col)
   end
 
   return true
+end
+
+----
+-- Calculate the "spans" attribute of the <row> tag. This is an XLSX
+-- optimisation and isn't strictly required. However, it makes comparing
+-- files easier.
+--
+-- The span is the same for each block of 16 rows.
+--
+function Worksheet:_calculate_spans()
+  local spans = {}
+  local span_min
+  local span_max
+
+  for row_num = self.dim_rowmin, self.dim_rowmax do
+    -- Calculate spans for cell data.
+    if self.data_table[row_num] then
+      for col_num = self.dim_colmin, self.dim_colmax do
+        if self.data_table[row_num][col_num] then
+          if not span_min then
+            span_min = col_num
+            span_max = col_num
+          else
+            if col_num < span_min then
+              span_min = col_num
+            end
+            if col_num > span_max then
+              span_max = col_num
+            end
+          end
+        end
+      end
+    end
+
+    -- Calculate spans for comments.
+    if self.comments[row_num] then
+      for col_num = self.dim_colmin, self.dim_colmax do
+        if self.comments[row_num][col_num] then
+          if not span_min then
+            span_min = col_num
+            span_max = col_num
+          else
+            if col_num < span_min then
+              span_min = col_num
+            end
+            if col_num > span_max then
+              span_max = col_num
+            end
+          end
+        end
+      end
+    end
+
+    if (row_num + 1) % 16 == 0  or row_num == self.dim_rowmax then
+      local span_index = math.floor(row_num / 16)
+
+      if span_min then
+        span_min = span_min + 1
+        span_max = span_max + 1
+        spans[span_index] = string.format("%d:%d", span_min, span_max)
+
+        span_min = nil
+        span_max = nil
+      end
+    end
+  end
+
+  self.row_spans = spans
 end
 
 
