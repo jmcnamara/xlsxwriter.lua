@@ -159,6 +159,34 @@ function Xmlwriter:_xml_formula_element(formula, result, attributes)
 end
 
 ----
+-- Optimised tag writer for inlineStr cell elements in the inner loop.
+--
+function Xmlwriter:_xml_inline_string(str, preserve, attributes)
+  local attr = _format_attributes(attributes)
+  local t_attr = ''
+
+  if preserve then
+    t_attr = ' xml:space="preserve"'
+  end
+
+  str = _escape_data(str)
+
+  self.fh:write(string.format('<c%s t="inlineStr"><is><t%s>%s</t></is></c>',
+                              attr, t_attr, str))
+end
+
+----
+-- Optimised tag writer for rich inlineStr in the inner loop.
+--
+function Xmlwriter:_xml_rich_inline_string(str, attributes)
+  local attr = _format_attributes(attributes)
+
+  str = _escape_data(str)
+
+  self.fh:write(string.format('<c%s t="inlineStr"><is>%s</is></c>', attr, str))
+end
+
+----
 -- Format attribute value pairs.
 --
 function _format_attributes(attributes)

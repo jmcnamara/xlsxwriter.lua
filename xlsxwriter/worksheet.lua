@@ -15,7 +15,7 @@ local xl_strmax = 32767
 
 ------------------------------------------------------------------------------
 --
--- Public/semi-private methods.
+-- Public methods.
 --
 ------------------------------------------------------------------------------
 
@@ -486,9 +486,6 @@ function Worksheet:set_margins(left, right, top, bottom)
   self.margin_bottom = bottom and bottom or 0.75
 end
 
-
-
-
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -550,73 +547,6 @@ function Worksheet:_check_dimensions(row, col)
   return true
 end
 
-----
--- Calculate the "spans" attribute of the <row> tag. This is an XLSX
--- optimisation and isn't strictly required. However, it makes comparing
--- files easier.
---
--- The span is the same for each block of 16 rows.
---
-function Worksheet:_calculate_spans()
-  local spans = {}
-  local span_min
-  local span_max
-
-  for row_num = self.dim_rowmin, self.dim_rowmax do
-    -- Calculate spans for cell data.
-    if self.data_table[row_num] then
-      for col_num = self.dim_colmin, self.dim_colmax do
-        if self.data_table[row_num][col_num] then
-          if not span_min then
-            span_min = col_num
-            span_max = col_num
-          else
-            if col_num < span_min then
-              span_min = col_num
-            end
-            if col_num > span_max then
-              span_max = col_num
-            end
-          end
-        end
-      end
-    end
-
-    -- Calculate spans for comments.
-    if self.comments[row_num] then
-      for col_num = self.dim_colmin, self.dim_colmax do
-        if self.comments[row_num][col_num] then
-          if not span_min then
-            span_min = col_num
-            span_max = col_num
-          else
-            if col_num < span_min then
-              span_min = col_num
-            end
-            if col_num > span_max then
-              span_max = col_num
-            end
-          end
-        end
-      end
-    end
-
-    if (row_num + 1) % 16 == 0  or row_num == self.dim_rowmax then
-      local span_index = math.floor(row_num / 16)
-
-      if span_min then
-        span_min = span_min + 1
-        span_max = span_max + 1
-        spans[span_index] = string.format("%d:%d", span_min, span_max)
-
-        span_min = nil
-        span_max = nil
-      end
-    end
-  end
-
-  self.row_spans = spans
-end
 
 
 ------------------------------------------------------------------------------
@@ -765,6 +695,22 @@ function Worksheet:_write_sheet_view()
 end
 
 ----
+-- Write the <pageMargins> element.
+--
+function Worksheet:_write_page_margins()
+  local attributes = {
+    {["left"]   = self.margin_left},
+    {["right"]  = self.margin_right},
+    {["top"]    = self.margin_top},
+    {["bottom"] = self.margin_bottom},
+    {["header"] = self.margin_header},
+    {["footer"] = self.margin_footer},
+  }
+
+  self:_xml_empty_tag("pageMargins", attributes)
+end
+
+----
 -- Write the <sheetFormatPr> element.
 --
 function Worksheet:_write_sheet_format_pr()
@@ -809,29 +755,362 @@ function Worksheet:_write_sheet_data()
     self:_xml_empty_tag("sheetData")
   else
     self:_xml_start_tag("sheetData")
-    --self:_write_rows()
+    self:_write_rows()
     self:_xml_end_tag("sheetData")
   end
 end
 
 
-----
--- Write the <pageMargins> element.
---
-function Worksheet:_write_page_margins()
-  local attributes = {
-    {["left"]   = self.margin_left},
-    {["right"]  = self.margin_right},
-    {["top"]    = self.margin_top},
-    {["bottom"] = self.margin_bottom},
-    {["header"] = self.margin_header},
-    {["footer"] = self.margin_footer},
-  }
 
-  self:_xml_empty_tag("pageMargins", attributes)
+----
+-- Write out the worksheet data as a series of rows and cells.
+--
+function Worksheet:_write_rows()
+  -- Calculate the row span attributes.
+  self:_calculate_spans()
+
+  for row_num = self.dim_rowmin, self.dim_rowmax do
+
+    -- Only write rows if they contain row formatting, cell data or a comment.
+    if self.set_rows[row_num] or self.data_table[row_num] or self.comments[row_num] then
+
+      local span_index = math.floor(row_num / 16)
+      local span       = self.row_spans[span_index]
+
+      -- Write the cells if the row contains data.
+      if self.data_table[row_num] then
+
+        if not self.set_rows[row_num] then
+          self:_write_row(row_num, span)
+        else
+          self:_write_row(row_num, span, unpack(self.set_rows[row_num]))
+        end
+
+        for col_num = self.dim_colmin, self.dim_colmax do
+          if self.data_table[row_num][col_num] then
+            self:_write_cell(row_num, col_num, self.data_table[row_num][col_num])
+          end
+        end
+
+        self:_xml_end_tag("row")
+
+      elseif self.comments[row_num] then
+        self:_write_empty_row(row_num, span, unpack(self.set_rows[row_num]))
+      else
+        -- Row attributes only.
+        self:_write_empty_row(row_num, span, unpack(self.set_rows[row_num]))
+      end
+    end
+  end
+end
+
+----
+-- Write out the worksheet data as a single row with cells. This method is
+-- used when memory optimisation is on. A single row is written and the data
+-- table is reset. That way only one row of data is kept in memory at any one
+-- time. We don't write span data in the optimised case since it is optional.
+--
+function Worksheet:_write_single_row(current_row)
+
+  local row_num = self.previous_row
+
+  -- Set the new previous row as the current row.
+  self.previous_row = current_row
+
+  -- Only write rows if they contain row formatting, cell data or a comment.
+  if self.set_rows[row_num] or self.data_table[row_num] or self.comments[row_num] then
+
+    -- Write the cells if the row contains data.
+    if self.data_table[row_num] then
+
+      if not self.set_rows[row_num] then
+        self:_write_row(row_num)
+      else
+        self:_write_row(row_num, nil, unpack(self.set_rows[row_num]))
+      end
+
+      for col_num = self.dim_colmin, self.dim_colmax do
+        if self.data_table[row_num][col_num] then
+          self:_write_cell(row_num, col_num, self.data_table[row_num][col_num])
+        end
+      end
+
+      self:_xml_end_tag("row")
+    else
+      -- Row attributes or comments only.
+      self:_write_empty_row(row_num, nil, unpack(self.set_rows[row_num]))
+    end
+
+    -- Reset table.
+    self.data_table = {}
+  end
 end
 
 
+----
+-- Calculate the "spans" attribute of the <row> tag. This is an XLSX
+-- optimisation and isn't strictly required. However, it makes comparing
+-- files easier.
+--
+-- The span is the same for each block of 16 rows.
+--
+function Worksheet:_calculate_spans()
+  local spans = {}
+  local span_min
+  local span_max
 
+  for row_num = self.dim_rowmin, self.dim_rowmax do
+    -- Calculate spans for cell data.
+    if self.data_table[row_num] then
+      for col_num = self.dim_colmin, self.dim_colmax do
+        if self.data_table[row_num][col_num] then
+          if not span_min then
+            span_min = col_num
+            span_max = col_num
+          else
+            if col_num < span_min then
+              span_min = col_num
+            end
+            if col_num > span_max then
+              span_max = col_num
+            end
+          end
+        end
+      end
+    end
+
+    -- Calculate spans for comments.
+    if self.comments[row_num] then
+      for col_num = self.dim_colmin, self.dim_colmax do
+        if self.comments[row_num][col_num] then
+          if not span_min then
+            span_min = col_num
+            span_max = col_num
+          else
+            if col_num < span_min then
+              span_min = col_num
+            end
+            if col_num > span_max then
+              span_max = col_num
+            end
+          end
+        end
+      end
+    end
+
+    if (row_num + 1) % 16 == 0  or row_num == self.dim_rowmax then
+      local span_index = math.floor(row_num / 16)
+
+      if span_min then
+        span_min = span_min + 1
+        span_max = span_max + 1
+        spans[span_index] = string.format("%d:%d", span_min, span_max)
+
+        span_min = nil
+        span_max = nil
+      end
+    end
+  end
+
+  self.row_spans = spans
+end
+
+----
+-- Write the <row> element.
+--
+function Worksheet:_write_row(r, spans, height, format, hidden, level, collapsed, empty_row)
+
+  local xf_index = 0
+
+  if not height then
+     height = self.default_row_height
+  end
+
+  local attributes = {{["r"] = r + 1}}
+
+  -- Get the format index.
+  if format then
+    -- xf_index = format:get_xf_index()
+    xf_index = format
+  end
+
+  -- TODO. Rewrite all as [#attributes + 1].
+  if spans then
+     table.insert(attributes, {["spans"] = spans})
+  end
+
+  if xf_index > 0 then
+     table.insert(attributes, {["s"] = xf_index})
+  end
+
+  if format then
+     table.insert(attributes, {["customFormat"] = "1"})
+  end
+
+  if height ~= 15 then
+     table.insert(attributes, {["ht"] = height})
+  end
+
+  if hidden then
+     table.insert(attributes, {["hidden"] = "1"})
+  end
+
+  if height ~= 15 then
+     table.insert(attributes, {["customHeight"] = 1})
+  end
+
+  if level then
+     table.insert(attributes, {["outlineLevel"] = level})
+  end
+
+  if collapsed then
+     table.insert(attributes, {["collapsed"]    = "1"})
+  end
+
+  if self.excel_version == 2010 then
+    table.insert(attributes, {["x14ac:dyDescent"] = "0.25"})
+  end
+
+  if empty_row then
+    self:_xml_empty_tag_unencoded("row", attributes)
+  else
+    self:_xml_start_tag_unencoded("row", attributes)
+  end
+end
+
+----
+-- Write and empty <row> element, i.e., attributes only, no cell data.
+--
+function Worksheet:_write_empty_row(r, spans, height, format, hidden, level, collapsed)
+  -- Set the $empty_row parameter.
+  local empty_row = 1
+  self:_write_row(r, spans, height, format, hidden, level, collapsed, empty_row)
+end
+
+
+----
+-- Write the <cell> element. This is the innermost loop so efficiency is
+-- important where possible. The basic methodology is that the data of every
+-- cell type is passed in as follows:
+--
+--      (row, col, cell)
+--
+-- The cell is a table containing the following structure in all types:
+--
+--     {cell_type, token, xf, args}
+--
+-- Where cell_type: represents the cell type, such as string, number, formula.
+--       token:     is the actual data for the string, number, formula, etc.
+--       xf:        is the XF format object.
+--       args:      additional args relevant to the specific data type.
+--
+function Worksheet:_write_cell(row, col, cell)
+
+  local cell_type = cell[1]
+  local token     = cell[2]
+  local xf        = cell[3]
+  local xf_index  = 0
+
+  -- Get the format index.
+  if xf then
+    xf_index = xf
+  end
+
+  local range = Utility.rowcol_to_cell(row, col)
+  local attributes = {{["r"] = range}}
+  -- TODO. Rewrite all as [#attributes + 1].
+
+  -- Add the cell format index.
+  if xf_index > 0 then
+
+    table.insert(attributes, {["s"] = xf_index})
+
+  elseif self.set_rows[row] and self.set_rows[row][1] then
+
+    local row_xf = self.set_rows[row][1]
+    table.insert(attributes, {["s"] = row_xf})
+
+  elseif self.col_formats[col] then
+
+    local col_xf = self.col_formats[col]
+    table.insert(attributes, {["s"] = col_xf})
+  end
+
+  -- Write the various cell types.
+  if cell_type == "n" then
+    -- Write a number.
+    self:_xml_number_element(token, attributes)
+
+  elseif cell_type == "s" then
+    -- Write a string.
+    if not self.optimization then
+      self:_xml_string_element(token, attributes)
+    else
+      local str = token
+      -- Escape control characters. See SharedString.pm for details.
+      --str =~ s/(_x[0-9a-fA-F]{4}_)/_x005F1/g
+      --str =~ s/([\x00-\x08\x0B-\x1F])/sprintf "_x04X_", ord(1)/eg
+
+      -- Write any rich strings without further tags.
+      -- if str =~ m{^<r>} and str =~ m{</r>$} then
+      --   self:_xml_rich_inline_string(str, attributes)
+      -- else
+
+      -- Add attribute to preserve leading or trailing whitespace.
+      local preserve = false
+      if string.match(str, "^%s") or string.match(str, "%s$") then
+        preserve = true
+      end
+      self:_xml_inline_string(str, preserve, attributes)
+    end
+
+  elseif cell_type == "f" then
+
+    -- Write a formula.
+    local value = cell[4] or 0
+
+    -- Check if the formula value is a string.
+    if type(value) == "string" then
+      table.insert(attributes, {["t"] = "str"})
+      value = Utility._escape_data(value)
+    end
+
+    self:_xml_formula_element(token, value, attributes)
+
+  elseif cell_type == "a" then
+
+    -- Write an array formula.
+    self:_xml_start_tag("c", attributes)
+    self:_write_cell_array_formula(token, cell[4])
+    self:_write_cell_value(cell[5])
+    self:_xml_end_tag("c")
+
+  elseif cell_type == "b" then
+    -- Write a empty cell.
+    self:_xml_empty_tag("c", attributes)
+  end
+end
+
+----
+-- Write the cell value <v> element.
+--
+function Worksheet:_write_cell_value(value)
+  self:_xml_data_element("v", value or '')
+end
+
+----
+-- Write the cell formula <f> element.
+--
+function Worksheet:_write_cell_formula(formula)
+  self:_xml_data_element("f", formula or '')
+end
+
+----
+-- Write the cell array formula <f> element.
+--
+function Worksheet:_write_cell_array_formula(formula, range)
+  local attributes = {{["t"] = "array"}, {["ref"] = range}}
+  self:_xml_data_element("f", formula, attributes)
+end
 
 return Worksheet
