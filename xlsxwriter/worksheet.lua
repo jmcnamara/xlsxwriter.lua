@@ -3,6 +3,7 @@
 --
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
+require "xlsxwriter.strict"
 
 local Utility   = require "xlsxwriter.utility"
 local Xmlwriter = require "xlsxwriter.xmlwriter"
@@ -35,9 +36,9 @@ function Worksheet:new()
     ext_sheets             = {},
     fileclosed             = false,
     excel_version          = 2007,
-    xls_rowmax             = rowmax,
-    xls_colmax             = colmax,
-    xls_strmax             = strmax,
+    xls_rowmax             = xl_rowmax,
+    xls_colmax             = xl_colmax,
+    xls_strmax             = xl_strmax,
     dim_rowmin             = nil,
     dim_rowmax             = nil,
     dim_colmin             = nil,

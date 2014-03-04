@@ -3,6 +3,7 @@
 --
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
+require "xlsxwriter.strict"
 
 local Utility = {}
 local char_A = string.byte('A')
@@ -25,7 +26,7 @@ function Utility.col_to_name_abs(col_num, col_abs)
     end
 
     -- Convert the remainder to a character.
-    col_letter = string.char(char_A + remainder - 1)
+    local col_letter = string.char(char_A + remainder - 1)
 
     -- Accumulate the column letters, right to left.
     col_str = col_letter .. col_str
@@ -43,7 +44,7 @@ end
 --
 function Utility.rowcol_to_cell(row, col)
   row = row + 1
-  col_str = Utility.col_to_name_abs(col, false)
+  local col_str = Utility.col_to_name_abs(col, false)
   return col_str .. row
 end
 

@@ -57,7 +57,7 @@ expected = '<row r="2" ht="30" customHeight="1">'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_row(1, undef, 30)
+worksheet:_write_row(1, nil, 30)
 
 got = worksheet:_get_data()
 
@@ -72,7 +72,7 @@ expected = '<row r="4" hidden="1">'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_row(3, undef, undef, undef, 1)
+worksheet:_write_row(3, nil, nil, nil, 1)
 
 got = worksheet:_get_data()
 
@@ -87,7 +87,7 @@ expected = '<row r="7" s="1" customFormat="1">'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_row(6, undef, undef, format)
+worksheet:_write_row(6, nil, nil, format)
 
 got = worksheet:_get_data()
 
@@ -102,7 +102,7 @@ expected = '<row r="10" ht="3" customHeight="1">'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_row(9, undef, 3)
+worksheet:_write_row(9, nil, 3)
 
 got = worksheet:_get_data()
 
@@ -117,7 +117,7 @@ expected = '<row r="13" ht="24" hidden="1" customHeight="1">'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_row(12, undef, 24, undef, 1)
+worksheet:_write_row(12, nil, 24, nil, 1)
 
 got = worksheet:_get_data()
 
@@ -132,7 +132,7 @@ expected = '<row r="13" ht="24" hidden="1" customHeight="1"/>'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_empty_row(12, undef, 24, undef, 1)
+worksheet:_write_empty_row(12, nil, 24, nil, 1)
 
 got = worksheet:_get_data()
 

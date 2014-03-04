@@ -3,6 +3,7 @@
 --
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
+require "xlsxwriter.strict"
 
 local Xmlwriter = {}
 
