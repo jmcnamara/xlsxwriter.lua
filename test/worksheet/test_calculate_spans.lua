@@ -4,7 +4,7 @@
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
 
-require 'Test.More'
+require "Test.More"
 
 plan(18)
 
@@ -16,7 +16,7 @@ local expected
 local caption
 local row
 local col
-local Worksheet = require 'xlsxwriter.worksheet'
+local Worksheet = require "xlsxwriter.worksheet"
 local worksheet
 
 ----

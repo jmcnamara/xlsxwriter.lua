@@ -4,7 +4,7 @@
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
 
-require 'Test.More'
+require "Test.More"
 
 local Xmlwriter = require "xlsxwriter.xmlwriter"
 local writer = Xmlwriter:new()

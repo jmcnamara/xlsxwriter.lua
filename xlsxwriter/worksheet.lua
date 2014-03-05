@@ -506,9 +506,9 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
 
   -- Set the optional column values.
   options = options or {}
-  local hidden    = options["hidden"]
-  local collapsed = options["collapsed"]
-  local level     = options["level"] or 0
+  local hidden    = options["hidden"]    or false
+  local collapsed = options["collapsed"] or false
+  local level     = options["level"]     or 0
 
   -- Check that cols are valid and store max and min values with default row.
   -- NOTE: The check shouldn't modify the row dimensions and should only modify
@@ -529,7 +529,6 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
     return -1
   end
 
-
   -- Set the limits for the outline levels (0 <= x <= 7).
   if level < 0 then level = 0  end
   if level > 7 then level = 7  end
@@ -538,15 +537,14 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
     self.outline_col_level = level
   end
 
-
-  -- Store the column data based on the first column. Padded for sorting.
-  self.colinfo[string.format("%05d", firstcol)] = {["firstcol"]  = firstcol,
-                                                   ["lastcol"]   = lastcol,
-                                                   ["width"]     = width,
-                                                   ["format"]    = format,
-                                                   ["hidden"]    = hidden,
-                                                   ["level"]     = level,
-                                                   ["collapsed"] = collapsed}
+  -- Store the column data based on the first column.
+  self.colinfo[firstcol] = {["firstcol"]  = firstcol,
+                            ["lastcol"]   = lastcol,
+                            ["width"]     = width,
+                            ["format"]    = format,
+                            ["hidden"]    = hidden,
+                            ["level"]     = level,
+                            ["collapsed"] = collapsed}
 
   -- Store the column change to allow optimisations.
   self.col_size_changed = 1

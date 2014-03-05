@@ -4,8 +4,8 @@
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
 
-require 'Test.More'
-require 'Test.LongString'
+require "Test.More"
+require "Test.LongString"
 
 plan(1)
 
