@@ -13,14 +13,13 @@ local char_A = string.byte('A')
 --
 function Utility.col_to_name_abs(col_num, col_abs)
   local col_str = ''
-  local remainder
 
   col_num = col_num + 1
   col_abs = col_abs and '$' or ''
 
   while col_num > 0 do
     -- Set remainder from 1 .. 26
-    remainder = col_num % 26
+    local remainder = col_num % 26
     if remainder == 0 then
       remainder = 26
     end
@@ -32,8 +31,7 @@ function Utility.col_to_name_abs(col_num, col_abs)
     col_str = col_letter .. col_str
 
     -- Get the next order of magnitude.
-    col_num = (col_num - 1) / 26
-    col_num = col_num - col_num % 1
+    col_num = math.floor((col_num - 1) / 26)
   end
 
   return col_abs .. col_str
@@ -100,5 +98,22 @@ function Utility.range_abs(first_row, first_col, last_row, last_col)
   local range2 = Utility.rowcol_to_cell_abs(last_row,  last_col,  true, true)
   return range1 .. ':' .. range2
 end
+
+----
+-- Generator for returning table items in sorted order. From PIL 3rd Ed.
+--
+function Utility.sorted_pairs(sort_table, sort_function)
+  local array = {}
+  for n in pairs(sort_table) do array[#array + 1] = n end
+
+  table.sort(array, sort_function)
+
+  local i = 0
+  return function ()
+    i = i + 1
+    return array[i], sort_table[array[i]]
+  end
+end
+
 
 return Utility

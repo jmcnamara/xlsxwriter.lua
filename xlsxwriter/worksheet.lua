@@ -172,7 +172,7 @@ function Worksheet:_assemble_xml_file()
   self:_write_sheet_format_pr()
 
   -- Write the sheet column info.
-  -- self:_write_cols()
+  self:_write_cols()
 
   -- Write the worksheet data such as rows columns and cells.
   if self.optimization then
@@ -487,6 +487,84 @@ function Worksheet:set_margins(left, right, top, bottom)
   self.margin_bottom = bottom and bottom or 0.75
 end
 
+----
+-- Thin wrapper around _set_column() to handle "A:Z" notation.
+--
+function Worksheet:set_column(...)
+  self:_set_column(self:_convert_column_args(...))
+end
+
+----
+-- Set the width of a single column or a range of columns.
+--
+function Worksheet:_set_column(firstcol, lastcol, width, format, options)
+
+  -- Ensure 2nd col is larger than first. Also for KB918419 bug.
+  if firstcol > lastcol then
+    firstcol, lastcol = lastcol, firstcol
+  end
+
+  -- Set the optional column values.
+  options = options or {}
+  local hidden    = options["hidden"]
+  local collapsed = options["collapsed"]
+  local level     = options["level"] or 0
+
+  -- Check that cols are valid and store max and min values with default row.
+  -- NOTE: The check shouldn't modify the row dimensions and should only modify
+  --       the column dimensions in certain cases.
+  local ignore_row = true
+  local ignore_col = true
+
+  if format or (width and hidden) then
+    ignore_col = false
+  end
+
+
+  if not self:_check_dimensions(0, firstcol, ignore_row, ignore_col) then
+    return -1
+  end
+
+  if not self:_check_dimensions(0, lastcol, ignore_row, ignore_col) then
+    return -1
+  end
+
+
+  -- Set the limits for the outline levels (0 <= x <= 7).
+  if level < 0 then level = 0  end
+  if level > 7 then level = 7  end
+
+  if level > self.outline_col_level then
+    self.outline_col_level = level
+  end
+
+
+  -- Store the column data based on the first column. Padded for sorting.
+  self.colinfo[string.format("%05d", firstcol)] = {["firstcol"]  = firstcol,
+                                                   ["lastcol"]   = lastcol,
+                                                   ["width"]     = width,
+                                                   ["format"]    = format,
+                                                   ["hidden"]    = hidden,
+                                                   ["level"]     = level,
+                                                   ["collapsed"] = collapsed}
+
+  -- Store the column change to allow optimisations.
+  self.col_size_changed = 1
+
+  -- Store the col sizes for use when calculating image vertices taking
+  -- hidden columns into account. Also store the column formats.
+  if hidden then width = 0 end
+
+  for col = firstcol, lastcol do
+    self.col_sizes[col] = width
+    if format then
+      self.col_formats[col] = format
+    end
+  end
+end
+
+
+
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -509,13 +587,36 @@ function Worksheet:_convert_cell_args(...)
   end
 end
 
+----
+-- Decorator function to convert "A:Z" column range calls to column numbers.
+--
+function Worksheet:_convert_column_args(...)
+  if type(...) == "string" then
+    -- Convert "A:Z" style range to col, col.
+    local range = ...
+    local range_start, range_end = range:match("(%S+):(%S+)")
+    local _, col_1 = Utility.cell_to_rowcol(range_start .. "1")
+    local _, col_2 = Utility.cell_to_rowcol(range_end   .. "1")
+    return col_1, col_2, unpack({...}, 2)
+  else
+    -- Parameters are already in col, col format.
+    return ...
+  end
+end
+
+
 
 
 ----
 -- Check that row and col are valid and store max and min values for use in
 -- other methods/elements.
 --
-function Worksheet:_check_dimensions(row, col)
+-- The ignore_row/ignore_col flags is used to indicate that we wish to
+-- perform the dimension check without storing the value.
+--
+-- The ignore flags are use by set_row() and data_validate.
+--
+function Worksheet:_check_dimensions(row, col, ignore_row, ignore_col)
 
   if row >= xl_rowmax or col >= xl_colmax then
     return false
@@ -523,26 +624,30 @@ function Worksheet:_check_dimensions(row, col)
 
   -- In optimization mode we don't change dimensions for rows that are
   -- already written.
-  if self.optimization then
+  if self.optimization and not ignore_row and not ignore_col then
     if row < self.previous_row then
-      return false
+      return -2
     end
   end
 
-  if not self.dim_rowmin or row < self.dim_rowmin then
-    self.dim_rowmin = row
+  if not ignore_row then
+    if not self.dim_rowmin or row < self.dim_rowmin then
+      self.dim_rowmin = row
+    end
+
+    if not self.dim_rowmax or row > self.dim_rowmax then
+      self.dim_rowmax = row
+    end
   end
 
-  if not self.dim_rowmax or row > self.dim_rowmax then
-    self.dim_rowmax = row
-  end
+  if not ignore_col then
+    if not self.dim_colmin or col < self.dim_colmin then
+      self.dim_colmin = col
+    end
 
-  if not self.dim_colmin or col < self.dim_colmin then
-    self.dim_colmin = col
-  end
-
-  if not self.dim_colmax or col > self.dim_colmax then
-    self.dim_colmax = col
+    if not self.dim_colmax or col > self.dim_colmax then
+      self.dim_colmax = col
+    end
   end
 
   return true
@@ -1113,5 +1218,102 @@ function Worksheet:_write_cell_array_formula(formula, range)
   local attributes = {{["t"] = "array"}, {["ref"] = range}}
   self:_xml_data_element("f", formula, attributes)
 end
+
+----
+-- Write the <cols> element and <col> sub elements.
+--
+function Worksheet:_write_cols()
+
+  -- Return unless some column have been formatted.
+  if next(self.colinfo) == nil then return end
+
+  self:_xml_start_tag("cols")
+
+  for row, colinfo in Utility.sorted_pairs(self.colinfo) do
+    self:_write_col_info(self.colinfo[row])
+  end
+
+  self:_xml_end_tag("cols")
+end
+
+----
+-- Write the <col> element.
+--
+function Worksheet:_write_col_info(colinfo)
+
+  local firstcol     = colinfo["firstcol"]
+  local lastcol      = colinfo["lastcol"]
+  local width        = colinfo["width"]
+  local format       = colinfo["format"]
+  local hidden       = colinfo["hidden"]
+  local level        = colinfo["level"]
+  local collapsed    = colinfo["collapsed"]
+  local custom_width = true
+  local xf_index     = 0
+
+  -- Get the format index.
+  if format and format > 0 then
+    xf_index = format
+  end
+
+  -- Set the Excel default col width.
+  if not width then
+    if not hidden then
+      width        = 8.43
+      custom_width = false
+    else
+      width = 0
+    end
+  else
+
+    -- Width is defined but same as default.
+    if width == 8.43 then
+      custom_width = false
+    end
+  end
+
+  -- Convert column width from user units to character width.
+  local max_digit_width = 7    -- For Calabri 11.
+  local padding         = 5
+
+  if width > 0 then
+    if width < 1 then
+      width = math.floor((math.floor(width*(max_digit_width + padding) + 0.5))
+                           / max_digit_width * 256) / 256
+    else
+      width = math.floor((math.floor(width*max_digit_width + 0.5) + padding)
+                           / max_digit_width * 256) / 256
+    end
+  end
+
+  local attributes = {
+    {["min"]   = firstcol + 1},
+    {["max"]   = lastcol  + 1},
+    {["width"] = width},
+  }
+
+  if xf_index > 0 then
+     table.insert(attributes, {["style"] = xf_index})
+  end
+
+  if hidden then
+     table.insert(attributes, {["hidden"] = "1"})
+  end
+
+  if custom_width then
+     table.insert(attributes, {["customWidth"] = "1"})
+  end
+
+  if level > 0 then
+     table.insert(attributes, {["outlineLevel"] = level})
+  end
+
+  if collapsed then
+     table.insert(attributes, {["collapsed"] = "1"})
+  end
+
+  self:_xml_empty_tag("col", attributes)
+end
+
 
 return Worksheet
