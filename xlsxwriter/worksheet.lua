@@ -563,6 +563,59 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
   end
 end
 
+----
+-- This method is used to set the height and format for a row.
+--
+function Worksheet:set_row(row, height, format, options)
+
+  -- Set the optional column values.
+  options = options or {}
+  local hidden    = options["hidden"] or false
+  local collapsed = options["collapsed"] or false
+  local level     = options["level"] or 0
+
+  -- Use min col in _check_dimensions(). Default to 0 if undefined.
+  local min_col = self.dim_colmin and self.dim_colmin or 0
+
+  -- Check that row is valid.
+  if not self:_check_dimensions(row, min_col) then
+    return -1
+  end
+
+  -- Get the default row height.
+  local default_height = self.default_row_height
+
+  if not height then
+    height = default_height
+  end
+
+  -- If the height is 0 the row is hidden and the height is the default.
+  if height == 0 then
+    hidden = 1
+    height = default_height
+  end
+
+  -- Set the limits for the outline levels (0 <= x <= 7).
+  if level < 0 then level = 0  end
+  if level > 7 then level = 7  end
+
+  if level > self.outline_row_level then
+    self.outline_row_level = level
+  end
+
+  -- Store the row properties.
+  self.set_rows[row] = {height, format, hidden, level, collapsed}
+
+  -- Store the row change to allow optimisations.
+  self.row_size_changed = 1
+
+  -- Store the row sizes for use when calculating image vertices.
+  -- Hidden rows are calculted as 0.
+  if hidden then height = 0 end
+  self.row_sizes[row] = height
+
+end
+
 
 
 ------------------------------------------------------------------------------
@@ -1024,9 +1077,12 @@ end
 ----
 -- Write the <row> element.
 --
-function Worksheet:_write_row(r, spans, height, format, hidden, level, collapsed, empty_row)
+function Worksheet:_write_row(r, spans, height, format,
+                              hidden, level, collapsed, empty_row)
 
   local xf_index = 0
+
+  level = level or 0
 
   if not height then
     height = self.default_row_height
@@ -1065,7 +1121,7 @@ function Worksheet:_write_row(r, spans, height, format, hidden, level, collapsed
     table.insert(attributes, {["customHeight"] = 1})
   end
 
-  if level then
+  if level > 0 then
     table.insert(attributes, {["outlineLevel"] = level})
   end
 
