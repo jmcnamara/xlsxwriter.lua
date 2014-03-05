@@ -368,7 +368,7 @@ end
 function Worksheet:set_zoom(scale)
   -- Confine the scale to Excel's range
   if scale < 10 or scale > 400 then
-    -- carp "Zoom factor scale outside range: 10 <= zoom <= 400"
+    Utility.warn("Zoom factor scale outside range: 10 <= zoom <= 400")
     scale = 100
   end
 
@@ -453,7 +453,7 @@ end
 function Worksheet:set_header(header, margin)
 
   if #header >= 255 then
-    --carp "Header string must be less than 255 characters"
+    Utility.warn("Header string must be less than 255 characters")
     return
   end
 
@@ -468,7 +468,7 @@ end
 function Worksheet:set_footer(footer, margin)
 
   if #footer >= 255 then
-    --carp "Footer string must be less than 255 characters"
+    Utility.warn("Footer string must be less than 255 characters")
     return
   end
 
@@ -1029,7 +1029,7 @@ function Worksheet:_write_row(r, spans, height, format, hidden, level, collapsed
   local xf_index = 0
 
   if not height then
-     height = self.default_row_height
+    height = self.default_row_height
   end
 
   local attributes = {{["r"] = r + 1}}
@@ -1042,35 +1042,35 @@ function Worksheet:_write_row(r, spans, height, format, hidden, level, collapsed
 
   -- TODO. Rewrite all as [#attributes + 1].
   if spans then
-     table.insert(attributes, {["spans"] = spans})
+    table.insert(attributes, {["spans"] = spans})
   end
 
   if xf_index > 0 then
-     table.insert(attributes, {["s"] = xf_index})
+    table.insert(attributes, {["s"] = xf_index})
   end
 
   if format then
-     table.insert(attributes, {["customFormat"] = "1"})
+    table.insert(attributes, {["customFormat"] = "1"})
   end
 
   if height ~= 15 then
-     table.insert(attributes, {["ht"] = height})
+    table.insert(attributes, {["ht"] = height})
   end
 
   if hidden then
-     table.insert(attributes, {["hidden"] = "1"})
+    table.insert(attributes, {["hidden"] = "1"})
   end
 
   if height ~= 15 then
-     table.insert(attributes, {["customHeight"] = 1})
+    table.insert(attributes, {["customHeight"] = 1})
   end
 
   if level then
-     table.insert(attributes, {["outlineLevel"] = level})
+    table.insert(attributes, {["outlineLevel"] = level})
   end
 
   if collapsed then
-     table.insert(attributes, {["collapsed"]    = "1"})
+    table.insert(attributes, {["collapsed"]    = "1"})
   end
 
   if self.excel_version == 2010 then
@@ -1293,23 +1293,23 @@ function Worksheet:_write_col_info(colinfo)
   }
 
   if xf_index > 0 then
-     table.insert(attributes, {["style"] = xf_index})
+    table.insert(attributes, {["style"] = xf_index})
   end
 
   if hidden then
-     table.insert(attributes, {["hidden"] = "1"})
+    table.insert(attributes, {["hidden"] = "1"})
   end
 
   if custom_width then
-     table.insert(attributes, {["customWidth"] = "1"})
+    table.insert(attributes, {["customWidth"] = "1"})
   end
 
   if level > 0 then
-     table.insert(attributes, {["outlineLevel"] = level})
+    table.insert(attributes, {["outlineLevel"] = level})
   end
 
   if collapsed then
-     table.insert(attributes, {["collapsed"] = "1"})
+    table.insert(attributes, {["collapsed"] = "1"})
   end
 
   self:_xml_empty_tag("col", attributes)

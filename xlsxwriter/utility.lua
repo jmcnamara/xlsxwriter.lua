@@ -115,5 +115,26 @@ function Utility.sorted_pairs(sort_table, sort_function)
   end
 end
 
+----
+-- Print a non-fatal warning at the highest/calling program stack level.
+--
+function Utility.warn(...)
+  local level = 0
+  local info
+
+  -- Find the last highest stack level.
+  for i = 1, math.huge do
+    info = debug.getinfo(i, "Sl")
+    if not info then break end
+    level = level + 1
+  end
+
+  -- Print warning to stderr at the calling program stack level.
+  info = debug.getinfo(level -1, "Sl")
+  io.stderr:write(string.format("Warning:\n\t%s:%d: ",
+                                info.short_src,
+                                info.currentline))
+  io.stderr:write(string.format(...))
+end
 
 return Utility
