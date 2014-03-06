@@ -7,7 +7,7 @@
 require "Test.More"
 require "Test.LongString"
 
-plan(8)
+plan(4)
 
 ----
 -- Tests setup.
@@ -30,40 +30,28 @@ end
 caption = " \tSharedstrings:"
 expected = _clean_xml_string([[
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="7" uniqueCount="3">
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="3" uniqueCount="3">
   <si>
-    <t>neptune</t>
+    <t>abcdefg</t>
   </si>
   <si>
-    <t>mars</t>
+    <t xml:space="preserve">   abcdefg</t>
   </si>
   <si>
-    <t>venus</t>
+    <t xml:space="preserve">abcdefg   </t>
   </si>
 </sst>]])
 
 sharedstrings = Sharedstrings:new()
 sharedstrings:_set_filehandle(io.tmpfile())
 
-index = sharedstrings:_get_string_index("neptune")
+index = sharedstrings:_get_string_index("abcdefg")
 is(index, 0, caption .. " _get_string_index()")
 
-index = sharedstrings:_get_string_index("mars")
+index = sharedstrings:_get_string_index("   abcdefg")
 is(index, 1, caption .. " _get_string_index()")
 
-index = sharedstrings:_get_string_index("venus")
-is(index, 2, caption .. " _get_string_index()")
-
-index = sharedstrings:_get_string_index("neptune")
-is(index, 0, caption .. " _get_string_index()")
-
-index = sharedstrings:_get_string_index("mars")
-is(index, 1, caption .. " _get_string_index()")
-
-index = sharedstrings:_get_string_index("venus")
-is(index, 2, caption .. " _get_string_index()")
-
-index = sharedstrings:_get_string_index("venus")
+index = sharedstrings:_get_string_index("abcdefg   ")
 is(index, 2, caption .. " _get_string_index()")
 
 

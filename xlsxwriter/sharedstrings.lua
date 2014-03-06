@@ -58,6 +58,30 @@ function SharedStrings:_assemble_xml_file()
 
 end
 
+----
+-- Get the index of the string in the Shared String table.
+--
+function SharedStrings:_get_string_index(str)
+
+  local index = self.string_table[str]
+
+  if index then
+    -- String exists in the table.
+    self.string_count =  self.string_count + 1
+    return index
+  else
+    -- String isn't already stored in the table so add it.
+    index = self.unique_count
+    self.string_table[str] = index
+    self.string_array[index + 1] = str
+    self.string_count =  self.string_count + 1
+    self.unique_count =  self.unique_count + 1
+    return index
+  end
+
+end
+
+
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -117,7 +141,7 @@ function SharedStrings:_write_si(str)
 
   -- Add attribute to preserve leading or trailing whitespace.
   if string.match(str, "^%s") or string.match(str, "%s$") then
-    attributes = { ["xml:space"] = "preserve" }
+    attributes = {{["xml:space"] = "preserve"}}
   end
 
   -- Write any rich strings without further tags.
