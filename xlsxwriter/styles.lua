@@ -821,4 +821,5 @@ function Styles:_write_extend()
   self:_xml_empty_tag("extend", attributes)
 end
 
+
 return Styles
