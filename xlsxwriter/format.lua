@@ -5,6 +5,7 @@
 --
 require "xlsxwriter.strict"
 
+local Utility   = require "xlsxwriter.utility"
 local Xmlwriter = require "xlsxwriter.xmlwriter"
 
 ------------------------------------------------------------------------------
@@ -17,7 +18,7 @@ local Xmlwriter = require "xlsxwriter.xmlwriter"
 local Format = {}
 setmetatable(Format,{__index = Xmlwriter})
 
-function Format:new()
+function Format:new(properties)
 
   local instance = {
     xf_format_indices  = {},
@@ -89,6 +90,14 @@ function Format:new()
 
   setmetatable(instance, self)
   self.__index = self
+
+  -- Set any property initialisers.
+  if type(properties) == 'table' then
+    for property, value in pairs(properties) do
+      Format._set_property(instance, property, value)
+    end
+  end
+
   return instance
 end
 
@@ -198,9 +207,33 @@ end
 ----
 -- Set the align property.
 --
-function Format:set_align(value)
-  if not value then return end
-  self.align = value
+function Format:set_align(location)
+  if not location then return end
+
+  -- Set the horizontal alignment properties.
+  if location == "left"          then self:set_text_h_align(1) end
+  if location == "centre"        then self:set_text_h_align(2) end
+  if location == "center"        then self:set_text_h_align(2) end
+  if location == "right"         then self:set_text_h_align(3) end
+  if location == "fill"          then self:set_text_h_align(4) end
+  if location == "justify"       then self:set_text_h_align(5) end
+  if location == "center_across" then self:set_text_h_align(6) end
+  if location == "centre_across" then self:set_text_h_align(6) end
+  if location == "distributed"   then self:set_text_h_align(7) end
+
+  if location == "justify_distributed" then
+     self:set_text_h_align(7)
+     self.just_distrib = 1
+  end
+
+  -- Set the vertical alignment properties.
+  if location == "top"          then self:set_text_v_align(1) end
+  if location == "vcentre"      then self:set_text_v_align(2) end
+  if location == "vcenter"      then self:set_text_v_align(2) end
+  if location == "bottom"       then self:set_text_v_align(3) end
+  if location == "vjustify"     then self:set_text_v_align(4) end
+  if location == "vdistributed" then self:set_text_v_align(5) end
+
 end
 
 ----
@@ -220,9 +253,25 @@ end
 ----
 -- Set the rotation property.
 --
-function Format:set_rotation(value)
-  if not value then return end
-  self.rotation = value
+function Format:set_rotation(rotation)
+  if not rotation then return end
+
+  -- Excel only allows integer angles.
+  rotation = math.floor(rotation)
+
+  -- Convert user angle to Excel angle.
+  if rotation == 270 then
+    rotation = 255
+  elseif rotation >= -90 or rotation <= 90 then
+    if rotation < 0 then
+       rotation = -rotation + 90
+    end
+  else
+    Utility.warn("Rotation rotation outside range: -90 <= angle <= 90")
+    rotation = 0
+  end
+
+  self.rotation = rotation
 end
 
 ----
@@ -260,7 +309,7 @@ end
 --
 function Format:set_bg_color(value)
   if not value then return end
-  self.bg_color = value
+  self.bg_color = Utility.excel_color(value)
 end
 
 ----
@@ -268,7 +317,7 @@ end
 --
 function Format:set_fg_color(value)
   if not value then return end
-  self.fg_color = value
+  self.fg_color = Utility.excel_color(value)
 end
 
 ----
@@ -276,7 +325,11 @@ end
 --
 function Format:set_border(value)
   if not value then return end
-  self.border = value
+
+  self:set_bottom(value)
+  self:set_top(value)
+  self:set_left(value)
+  self:set_right(value)
 end
 
 ----
@@ -284,7 +337,11 @@ end
 --
 function Format:set_border_color(value)
   if not value then return end
-  self.border_color = value
+
+  self:set_bottom_color(value)
+  self:set_top_color(value)
+  self:set_left_color(value)
+  self:set_right_color(value)
 end
 
 ----
@@ -300,7 +357,7 @@ end
 --
 function Format:set_bottom_color(value)
   if not value then return end
-  self.bottom_color = value
+  self.bottom_color = Utility.excel_color(value)
 end
 
 ----
@@ -324,7 +381,7 @@ end
 --
 function Format:set_left_color(value)
   if not value then return end
-  self.left_color = value
+  self.left_color = Utility.excel_color(value)
 end
 
 ----
@@ -340,7 +397,7 @@ end
 --
 function Format:set_right_color(value)
   if not value then return end
-  self.right_color = value
+  self.right_color = Utility.excel_color(value)
 end
 
 ----
@@ -356,7 +413,7 @@ end
 --
 function Format:set_top_color(value)
   if not value then return end
-  self.top_color = value
+  self.top_color = Utility.excel_color(value)
 end
 
 ----
@@ -364,7 +421,7 @@ end
 --
 function Format:set_diag_color(value)
   if not value then return end
-  self.diag_color = value
+  self.diag_color = Utility.excel_color(value)
 end
 
 ----
@@ -451,9 +508,12 @@ end
 
 ----
 -- Set the valign property.
+-- This is required to differentiate between the vertical and horizontal
+-- properties passed to the constructor.
 --
 function Format:set_valign()
-  self.valign = true
+  if not value then return end
+  self.valign = value
 end
 
 ----
@@ -502,12 +562,6 @@ function Format:set_theme(value)
   self.theme = value
 end
 
-----
--- Set the hyperlink property.
---
-function Format:set_hyperlink()
-  self.hyperlink = true
-end
 
 ----
 -- Set the color_indexed property.
@@ -533,12 +587,12 @@ end
 ----
 -- Funtion to call the appropriate method for a constructor format parameter.
 --
-function Format:_set_property(property)
+function Format:_set_property(property, value)
 
   local setter = self["set_" .. property]
 
   if setter and type(setter) == "function" then
-    setter(self)
+    setter(self, value)
   else
     Utility.warn("Unknown property: %s\n", property)
   end
@@ -674,7 +728,7 @@ end
 ----
 -- Returns a unique hash key for the parts of the Format object.
 --
-function Format._get_key(memebers)
+function Format._get_key(members)
   local str = ""
 
   for k, v in ipairs(members) do
@@ -689,14 +743,14 @@ end
 --
 function Format:_get_format_key()
 
-  return Format._get_key(
+  return Format._get_key{
     self:_get_font_key(),
     self:_get_border_key(),
     self:_get_fill_key(),
     self:_get_alignment_key(),
     self.num_format,
     self.locked,
-    self.hidden)
+    self.hidden}
 end
 
 ----
@@ -704,7 +758,7 @@ end
 --
 function Format:_get_font_key()
 
-  return Format._get_key(
+  return Format._get_key{
     self.bold,
     self.color,
     self.font_charset,
@@ -716,7 +770,7 @@ function Format:_get_font_key()
     self.font,
     self.italic,
     self.size,
-    self.underline)
+    self.underline}
 end
 
 ----
@@ -724,7 +778,7 @@ end
 --
 function Format:_get_border_key()
 
-  return Format._get_key(
+  return Format._get_key{
     self.bottom,
     self.bottom_color,
     self.diag_border,
@@ -735,7 +789,7 @@ function Format:_get_border_key()
     self.right,
     self.right_color,
     self.top,
-    self.top_color)
+    self.top_color}
 end
 
 ----
@@ -743,10 +797,10 @@ end
 --
 function Format:_get_fill_key()
 
-  return Format._get_key(
+  return Format._get_key{
     self.pattern,
     self.bg_color,
-    self.fg_color)
+    self.fg_color}
 end
 
 ----
@@ -754,14 +808,14 @@ end
 --
 function Format:_get_alignment_key()
 
-  return Format._get_key(
+  return Format._get_key{
     self.text_h_align,
     self.text_v_align,
     self.indent,
     self.rotation,
     self.text_wrap,
     self.shrink,
-    self.reading_order)
+    self.reading_order}
 end
 
 ----
@@ -774,7 +828,7 @@ function Format:_get_xf_index()
     return self.xf_index
   else
     -- Format doesn't have an index number so assign one.
-    local key = self._get_format_key()
+    local key = self:_get_format_key()
 
     if self.xf_format_indices[key] then
       -- Format matches existing format with an index.
@@ -800,7 +854,7 @@ function Format:_get_dxf_index()
     return self.dxf_index
   else
     -- Format doesn't have an index number so assign one.
-    local key = self._get_format_key()
+    local key = self:_get_format_key()
 
     if self.dxf_format_indices[key] then
       -- Format matches existing format with an index.

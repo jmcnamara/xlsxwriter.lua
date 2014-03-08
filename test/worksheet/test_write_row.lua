@@ -15,8 +15,9 @@ local expected
 local got
 local caption
 local Worksheet = require "xlsxwriter.worksheet"
+local Format    = require "xlsxwriter.format"
 local worksheet
-local format = 1 -- TODO. Add format when available.
+local format = Format:new{xf_index = 1}
 
 ----
 -- 1. Test the _write_row() method.

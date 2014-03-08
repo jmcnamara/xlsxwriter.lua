@@ -16,6 +16,7 @@ local expected
 local got
 local caption
 local Worksheet = require "xlsxwriter.worksheet"
+local Format    = require "xlsxwriter.format"
 local worksheet
 
 -- Remove extra whitespace in the formatted XML strings.
@@ -49,7 +50,7 @@ expected = _clean_xml_string([[
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-local format = 1 -- TODO
+local format = Format:new{xf_index = 1}
 
 worksheet:set_row(1, 30)
 worksheet:set_row(3, nil, nil, {['hidden'] = true})

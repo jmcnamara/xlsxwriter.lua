@@ -6,35 +6,35 @@
 require "xlsxwriter.strict"
 
 local Utility = {}
-local char_A = string.byte('A')
+local char_A = string.byte("A")
 
 local named_colors = {
-  ['black']   = '#000000',
-  ['blue']    = '#0000FF',
-  ['brown']   = '#800000',
-  ['cyan']    = '#00FFFF',
-  ['gray']    = '#808080',
-  ['green']   = '#008000',
-  ['lime']    = '#00FF00',
-  ['magenta'] = '#FF00FF',
-  ['navy']    = '#000080',
-  ['orange']  = '#FF6600',
-  ['pink']    = '#FF00FF',
-  ['purple']  = '#800080',
-  ['red']     = '#FF0000',
-  ['silver']  = '#C0C0C0',
-  ['white']   = '#FFFFFF',
-  ['yellow']  = '#FFFF00',
+  ["black"]   = "#000000",
+  ["blue"]    = "#0000FF",
+  ["brown"]   = "#800000",
+  ["cyan"]    = "#00FFFF",
+  ["gray"]    = "#808080",
+  ["green"]   = "#008000",
+  ["lime"]    = "#00FF00",
+  ["magenta"] = "#FF00FF",
+  ["navy"]    = "#000080",
+  ["orange"]  = "#FF6600",
+  ["pink"]    = "#FF00FF",
+  ["purple"]  = "#800080",
+  ["red"]     = "#FF0000",
+  ["silver"]  = "#C0C0C0",
+  ["white"]   = "#FFFFFF",
+  ["yellow"]  = "#FFFF00",
 }
 
 ----
 -- Convert a zero indexed column cell reference to an Excel column string.
 --
 function Utility.col_to_name_abs(col_num, col_abs)
-  local col_str = ''
+  local col_str = ""
 
   col_num = col_num + 1
-  col_abs = col_abs and '$' or ''
+  col_abs = col_abs and "$" or ""
 
   while col_num > 0 do
     -- Set remainder from 1 .. 26
@@ -71,7 +71,7 @@ end
 --
 function Utility.rowcol_to_cell_abs(row, col, row_abs, col_abs)
   row = row + 1
-  row_abs = row_abs and '$' or ''
+  row_abs = row_abs and "$" or ""
   local col_str = Utility.col_to_name_abs(col, col_abs)
   return col_str .. row_abs .. row
 end
@@ -106,7 +106,7 @@ end
 function Utility.range(first_row, first_col, last_row, last_col)
   local range1 = Utility.rowcol_to_cell(first_row, first_col)
   local range2 = Utility.rowcol_to_cell(last_row,  last_col )
-  return range1 .. ':' .. range2
+  return range1 .. ":" .. range2
 end
 
 ----
@@ -115,7 +115,7 @@ end
 function Utility.range_abs(first_row, first_col, last_row, last_col)
   local range1 = Utility.rowcol_to_cell_abs(first_row, first_col, true, true)
   local range2 = Utility.rowcol_to_cell_abs(last_row,  last_col,  true, true)
-  return range1 .. ':' .. range2
+  return range1 .. ":" .. range2
 end
 
 ----

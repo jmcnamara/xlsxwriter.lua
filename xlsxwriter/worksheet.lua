@@ -1090,8 +1090,7 @@ function Worksheet:_write_row(r, spans, height, format,
 
   -- Get the format index.
   if format then
-    -- xf_index = format:get_xf_index()
-    xf_index = format
+    xf_index = format:_get_xf_index()
   end
 
   -- TODO. Rewrite all as [#attributes + 1].
@@ -1168,13 +1167,14 @@ function Worksheet:_write_cell(row, col, cell)
 
   local cell_type = cell[1]
   local token     = cell[2]
-  local xf        = cell[3]
+  local format    = cell[3]
   local xf_index  = 0
 
   -- Get the format index.
-  if xf then
-    xf_index = xf
+  if format then
+    xf_index = format:_get_xf_index()
   end
+
 
   local range = Utility.rowcol_to_cell(row, col)
   local attributes = {{["r"] = range}}
@@ -1188,12 +1188,12 @@ function Worksheet:_write_cell(row, col, cell)
   elseif self.set_rows[row] and self.set_rows[row][1] then
 
     local row_xf = self.set_rows[row][1]
-    table.insert(attributes, {["s"] = row_xf})
+    table.insert(attributes, {["s"] = row_xf:_get_xf_index()})
 
   elseif self.col_formats[col] then
 
     local col_xf = self.col_formats[col]
-    table.insert(attributes, {["s"] = col_xf})
+    table.insert(attributes, {["s"] = col_xf:_get_xf_index()})
   end
 
   -- Write the various cell types.
@@ -1306,9 +1306,10 @@ function Worksheet:_write_col_info(colinfo)
   local xf_index     = 0
 
   -- Get the format index.
-  if format and format > 0 then
-    xf_index = format
+  if format then
+    xf_index = format:_get_xf_index()
   end
+
 
   -- Set the Excel default col width.
   if not width then

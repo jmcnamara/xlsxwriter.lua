@@ -15,8 +15,10 @@ local expected
 local got
 local caption
 local Worksheet = require "xlsxwriter.worksheet"
+local Format    = require "xlsxwriter.format"
 local worksheet
 local args = {}
+
 
 ----
 -- 1. Test the _write_col_info() method.
@@ -24,7 +26,7 @@ local args = {}
 args["firstcol"]  = 1
 args["lastcol"]   = 3
 args["width"]     = 5
-args["format"]    = 0
+args["format"]    = false
 args["hidden"]    = false
 args["level"]     = 0
 args["collapsed"] = false
@@ -46,7 +48,7 @@ is(got, expected, caption)
 args["firstcol"]  = 5
 args["lastcol"]   = 5
 args["width"]     = 8
-args["format"]    = 0
+args["format"]    = false
 args["hidden"]    = true
 args["level"]     = 0
 args["collapsed"] = false
@@ -68,7 +70,7 @@ is(got, expected, caption)
 args["firstcol"]  = 7
 args["lastcol"]   = 7
 args["width"]     = nil
-args["format"]    = 1
+args["format"]    = Format:new{xf_index = 1}
 args["hidden"]    = false
 args["level"]     = 0
 args["collapsed"] = false
@@ -90,7 +92,7 @@ is(got, expected, caption)
 args["firstcol"]  = 8
 args["lastcol"]   = 8
 args["width"]     = 8.43
-args["format"]    = 1
+args["format"]    = Format:new{xf_index = 1}
 args["hidden"]    = false
 args["level"]     = 0
 args["collapsed"] = false
@@ -112,7 +114,7 @@ is(got, expected, caption)
 args["firstcol"]  = 9
 args["lastcol"]   = 9
 args["width"]     = 2
-args["format"]    = 0
+args["format"]    = false
 args["hidden"]    = false
 args["level"]     = 0
 args["collapsed"] = false
@@ -134,7 +136,7 @@ is(got, expected, caption)
 args["firstcol"]  = 11
 args["lastcol"]   = 11
 args["width"]     = nil
-args["format"]    = 0
+args["format"]    = false
 args["hidden"]    = true
 args["level"]     = 0
 args["collapsed"] = false
