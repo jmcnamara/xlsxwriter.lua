@@ -8,6 +8,25 @@ require "xlsxwriter.strict"
 local Utility = {}
 local char_A = string.byte('A')
 
+local named_colors = {
+  ['black']   = '#000000',
+  ['blue']    = '#0000FF',
+  ['brown']   = '#800000',
+  ['cyan']    = '#00FFFF',
+  ['gray']    = '#808080',
+  ['green']   = '#008000',
+  ['lime']    = '#00FF00',
+  ['magenta'] = '#FF00FF',
+  ['navy']    = '#000080',
+  ['orange']  = '#FF6600',
+  ['pink']    = '#FF00FF',
+  ['purple']  = '#800080',
+  ['red']     = '#FF0000',
+  ['silver']  = '#C0C0C0',
+  ['white']   = '#FFFFFF',
+  ['yellow']  = '#FFFF00',
+}
+
 ----
 -- Convert a zero indexed column cell reference to an Excel column string.
 --
@@ -135,6 +154,29 @@ function Utility.warn(...)
                                 info.short_src,
                                 info.currentline))
   io.stderr:write(string.format(...))
+end
+
+----
+-- Convert a Html #RGB or named colour into an Excel ARGB formatted
+-- color. Used in conjunction with various xxx_color() methods.
+--
+function Utility.excel_color(color)
+  local rgb = color
+
+  -- Convert named colours.
+  if named_colors[color] then rgb = named_colors[color] end
+
+  -- Extract the RBG part of the color.
+  rgb = rgb:match("^#(%x%x%x%x%x%x)$")
+
+  if rgb then
+    -- Convert the RGB colour to the Excel ARGB format.
+    return "FF" .. rgb:upper()
+  else
+    Utility.warn("Color '%s' is not a valid Excel color.\n", color)
+    return "FF000000" -- Return Black as a default on error.
+  end
+
 end
 
 return Utility
