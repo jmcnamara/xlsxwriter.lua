@@ -148,6 +148,26 @@ function Worksheet:new()
   return instance
 end
 
+----
+-- Initialise the worksheet from the workbook.
+--
+function Worksheet:_initialize(init_data)
+
+  self.name                = init_data['name']
+  self.index               = init_data['index']
+  self.str_table           = init_data['str_table']
+  self.worksheet_meta      = init_data['worksheet_meta']
+  self.optimization        = init_data['optimization']
+  self.tmpdir              = init_data['tmpdir']
+  self.date_1904           = init_data['date_1904']
+  self.strings_to_numbers  = init_data['strings_to_numbers']
+  self.strings_to_formulas = init_data['strings_to_formulas']
+  self.strings_to_urls     = init_data['strings_to_urls']
+  self.default_date_format = init_data['default_date_format']
+  self.default_url_format  = init_data['default_url_format']
+
+end
+
 
 ----
 -- Assemble and write the XML file.
@@ -314,7 +334,7 @@ function Worksheet:activate()
   -- Active worksheet can't be hidden.
   self.hidden   = false
   self.selected = true
-  -- ${ self.activesheet } = self.index
+  self.worksheet_meta.activesheet = self.index
 end
 
 ----
@@ -325,8 +345,6 @@ function Worksheet:hide()
 
   -- A hidden worksheet shouldn't be active or selected.
   self.selected = false
-  -- ${ self.activesheet } = false
-  -- ${ self.firstsheet }  = false
 end
 
 ----
@@ -337,7 +355,7 @@ end
 function Worksheet:set_first_sheet()
   -- Active worksheet can't be hidden.
   self.hidden = false
-  -- ${ self.firstsheet } = self.index
+  self.worksheet_meta.firstsheet = self.index
 end
 
 ----
