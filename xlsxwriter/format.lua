@@ -18,16 +18,16 @@ local Xmlwriter = require "xlsxwriter.xmlwriter"
 local Format = {}
 setmetatable(Format,{__index = Xmlwriter})
 
-function Format:new(properties)
+function Format:new(properties, xf_indices, dxf_indices)
 
   local instance = {
-    xf_format_indices  = {},
-    dxf_format_indices = {},
+    xf_format_indices  = xf_indices,
+    dxf_format_indices = dxf_indices,
     xf_index           = nil,
     dxf_index          = nil,
     xf_format_count    = 1,
     dxf_format_count   = 0,
-    num_format         = '',
+    num_format         = 0,
     num_format_index   = 0,
     font_index         = 0,
     has_font           = false,
@@ -37,7 +37,7 @@ function Format:new(properties)
     italic             = false,
     font_name          = "Calibri",
     font_size          = 11,
-    font_color         = 0,
+    font_color         = false,
     font_strikeout     = false,
     font_outline       = false,
     font_shadow        = false,
@@ -52,13 +52,13 @@ function Format:new(properties)
     hidden             = false,
     locked             = true,
     text_wrap          = false,
-    text_h_align       = 0,
-    text_v_align       = 0,
+    text_h_align       = false,
+    text_v_align       = false,
     text_justlast      = false,
-    rotation           = 0,
+    rotation           = false,
     center_across      = false,
-    fg_color           = 0,
-    bg_color           = 0,
+    fg_color           = false,
+    bg_color           = false,
     pattern            = 0,
     has_fill           = false,
     has_dxf_fill       = false,
@@ -68,18 +68,18 @@ function Format:new(properties)
     has_border         = false,
     has_dxf_border     = 0,
     border_count       = 0,
-    bottom             = 0,
-    bottom_color       = 0,
-    diag_border        = 0,
-    diag_color         = 0,
+    bottom             = false,
+    bottom_color       = false,
+    diag_border        = false,
+    diag_color         = false,
     diag_type          = 0,
-    left               = 0,
-    left_color         = 0,
-    right              = 0,
-    right_color        = 0,
-    top                = 0,
-    top_color          = 0,
-    indent             = 0,
+    left               = false,
+    left_color         = false,
+    right              = false,
+    right_color        = false,
+    top                = false,
+    top_color          = false,
+    indent             = false,
     reading_order      = 0,
     shrink             = false,
     merge_range        = false,
@@ -607,8 +607,8 @@ function Format:_get_align_properties()
 
   -- Check if any alignment options in the format have been changed.
   if self.text_h_align or self.text_v_align or self.indent or self.rotation
-  or self.text_wrap or self.shrink or self.reading_order then
-    change = true
+  or self.text_wrap or self.shrink or self.reading_order ~= 0 then
+    changed = true
   else
     return changed, align
   end

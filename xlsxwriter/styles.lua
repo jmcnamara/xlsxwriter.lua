@@ -103,6 +103,13 @@ function Styles:_set_style_properties(properties)
   self.dxf_formats      = properties[8]
 end
 
+----
+-- Convert the RGB color.
+--
+function Styles:_get_palette_color(color)
+  color = color:gsub('#','')
+  return "FF" .. color:upper()
+end
 
 ------------------------------------------------------------------------------
 --
@@ -218,7 +225,7 @@ function Styles:_write_fonts()
   self:_xml_start_tag("fonts", attributes)
 
   -- Write the font elements for format objects that have them.
-  for format in ipairs(self.xf_formats) do
+  for _, format in ipairs(self.xf_formats) do
     if format.has_font then
       self:_write_font(format)
     end
@@ -230,7 +237,7 @@ end
 ----
 -- Write the <font> element.
 --
-function Styles:_write_font(format, dxf_formats)
+function Styles:_write_font(format, is_dxf_format)
 
   self:_xml_start_tag("font")
 
@@ -276,31 +283,31 @@ function Styles:_write_font(format, dxf_formats)
     self:_write_vert_align("subscript")
   end
 
-  if not dxf_format then
-    self:_xml_empty_tag("sz", 'val', format.size)
+  if not is_dxf_format then
+    self:_xml_empty_tag("sz", {{['val'] = format.font_size}})
   end
 
   local theme = format.theme
   local index = format.color_indexed
-  local color = format.color
+  local color = format.font_color
 
   if theme then
-    self:_write_color({["theme"] = theme})
+    self:_write_color("theme", theme)
   elseif index then
-    self:_write_color({["indexed"] = index})
+    self:_write_color("indexed", index)
   elseif color then
     color = self:_get_palette_color(color)
     self:_write_color({["rgb"] = color})
-  elseif not dxf_format then
-    self:_write_color({["theme"] = "1"})
+  elseif not is_dxf_format then
+    self:_write_color("theme", "1")
   end
 
-  if not dxf_format then
-    self:_xml_empty_tag("name",   'val', format.font)
-    self:_xml_empty_tag("family", 'val', format.font_family)
+  if not is_dxf_format then
+    self:_xml_empty_tag("name",   {{['val'] = format.font_name}})
+    self:_xml_empty_tag("family", {{['val'] = format.font_family}})
 
-    if format.font == "Calibri" and not format.hyperlink then
-      self:_xml_empty_tag( "scheme", {["val"] = format.font_scheme})
+    if format.font_name == "Calibri" and not format.hyperlink then
+      self:_xml_empty_tag( "scheme", {{["val"] = format.font_scheme}})
     end
   end
 
@@ -357,7 +364,7 @@ function Styles:_write_fills()
   self:_write_default_fill("gray125")
 
   -- Write the fill elements for format objects that have them.
-  for format in ipairs(self.xf_formats) do
+  for _, format in ipairs(self.xf_formats) do
     if format.has_fill then
       self:_write_fill(format)
     end
@@ -372,7 +379,7 @@ end
 --
 function Styles:_write_default_fill(pattern_type)
   self:_xml_start_tag("fill")
-  self:_xml_empty_tag("patternFill", 'patternType', pattern_type)
+  self:_xml_empty_tag("patternFill", {{['patternType'] = pattern_type}})
   self:_xml_end_tag("fill")
 end
 
@@ -420,20 +427,20 @@ function Styles:_write_fill(format, dxf_format)
     self:_xml_start_tag("patternFill")
   else
     self:_xml_start_tag("patternFill",
-                        {"patternType", patterns[format.pattern + 1]})
+                        {{["patternType"] = patterns[format.pattern + 1]}})
   end
 
   if fg_color then
     fg_color = self:_get_palette_color(fg_color)
-    self:_xml_empty_tag("fgColor", {["rgb"] = fg_color})
+    self:_xml_empty_tag("fgColor", {{["rgb"] = fg_color}})
   end
 
   if bg_color then
     bg_color = self:_get_palette_color(bg_color)
-    self:_xml_empty_tag("bgColor", {["rgb"] = bg_color})
+    self:_xml_empty_tag("bgColor", {{["rgb"] = bg_color}})
   else
     if not dxf_format then
-      self:_xml_empty_tag("bgColor", {["indexed"] = "64"})
+      self:_xml_empty_tag("bgColor", {{["indexed"] = "64"}})
     end
   end
 
@@ -451,7 +458,7 @@ function Styles:_write_borders()
   self:_xml_start_tag("borders", attributes)
 
   -- Write the border elements for format objects that have them.
-  for format in ipairs(self.xf_formats) do
+  for _, format in ipairs(self.xf_formats) do
     if format.has_border then
       self:_write_border(format)
     end
@@ -477,7 +484,7 @@ function Styles:_write_border(format, dxf_format)
   end
 
   -- Ensure that a default diag border is set if the diag type is set.
-  if format.diag_type and not format.diag_border then
+  if format.diag_type > 0 and not format.diag_border then
     format.diag_border = 1
   end
 
@@ -566,10 +573,9 @@ function Styles:_write_cell_xfs()
 
   -- Workaround for when the last format is used for the comment font
   -- and shouldn't be used for cellXfs.
-  local last_format = formats[-1]
-
-  if last_format.font_only then
-    -- pop formats
+  local last_format = formats[#formats]
+  if last_format and last_format.font_only then
+    formats[#formats] = nil
   end
 
   local count = #formats
@@ -578,7 +584,7 @@ function Styles:_write_cell_xfs()
   self:_xml_start_tag("cellXfs", attributes)
 
   -- Write the xf elements.
-  for format in ipairs(formats) do
+  for _, format in ipairs(formats) do
     self:_write_xf(format)
   end
 
@@ -613,8 +619,8 @@ function Styles:_write_xf(format)
   local fill_id     = format.fill_index
   local border_id   = format.border_index
   local xf_id       = 0
-  local has_align   = 0
-  local has_protect = 0
+  local has_align   = false
+  local has_protect = false
 
   local attributes = {
     {["numFmtId"] = num_fmt_id},
@@ -644,11 +650,11 @@ function Styles:_write_xf(format)
   end
 
   -- Check if XF format has alignment properties set.
-  local apply_align, align = format:get_align_properties()
+  local apply_align, align = format:_get_align_properties()
 
   -- Check if an alignment sub-element should be written.
   if apply_align and align then
-    has_align = 1
+    has_align = true
   end
 
   -- We can also have applyAlignment without a sub-element.
@@ -657,11 +663,10 @@ function Styles:_write_xf(format)
   end
 
   -- Check for cell protection properties.
-  local protection = format:get_protection_properties()
-
-  if protection then
+  local protection = format:_get_protection_properties()
+  if #protection > 0 then
     table.insert(attributes, {["applyProtection"] = "1"})
-    has_protect = 1
+    has_protect = true
   end
 
   -- Write XF with sub-elements if required.
@@ -724,7 +729,7 @@ function Styles:_write_dxfs()
     self:_xml_start_tag("dxfs", attributes)
 
     -- Write the font elements for format objects that have them.
-    for format in ipairs(self.dxf_formats) do
+    for _, format in ipairs(self.dxf_formats) do
       self:_xml_start_tag("dxf")
       if format.has_dxf_font then
         self:_write_font(format, 1)
@@ -773,9 +778,9 @@ end
 -- Write the <colors> element.
 --
 function Styles:_write_colors()
-  local custom_colors = self.custom_colors
+  local custom_colors = #self.custom_colors
 
-  if not custom_colors then return end
+  if custom_colors == 0 then return end
 
   self:_xml_start_tag("colors")
   self:_write_mru_colors(custom_colors)
@@ -820,6 +825,5 @@ function Styles:_write_extend()
   local attributes = {{["val"] = "0"}}
   self:_xml_empty_tag("extend", attributes)
 end
-
 
 return Styles

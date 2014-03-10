@@ -27,8 +27,8 @@ function Workbook:new()
     fileclosed         = false,
     filehandle         = false,
     internal_fh        = false,
-    sheet_name         = 'Sheet',
-    chart_name         = 'Chart',
+    sheet_name         = "Sheet",
+    chart_name         = "Chart",
     worksheet_count    = 0,
     sheetname_count    = 0,
     chartname_count    = 0,
@@ -71,6 +71,9 @@ function Workbook:new()
   setmetatable(instance, self)
   self.__index = self
 
+  -- Add the default cell format.
+  instance.xf_formats[1] = Format:new{xf_index = 0}
+
 
   return instance
 end
@@ -87,7 +90,7 @@ end
 function Workbook:_assemble_xml_file()
 
   -- Prepare format object for passing to Style.pm.
-  --self:_prepare_format_properties()
+  self:_prepare_format_properties()
 
   self:_xml_declaration()
 
@@ -124,7 +127,7 @@ end
 -- Add a new worksheet to the Excel workbook.
 --
 -- Args:
---     name: The worksheet name. Defaults to 'Sheet1', etc.
+--     name: The worksheet name. Defaults to "Sheet1", etc.
 --
 -- Returns:
 --     Reference to a worksheet object.
@@ -133,15 +136,38 @@ function Workbook:add_worksheet(name)
   return self:_add_sheet(name)
 end
 
+----
+-- Add a new Format to the Excel Workbook.
+--
+-- Args:
+--     properties: The format properties.
+--
+-- Returns:
+--     Reference to a Format object.
+--
+function Workbook:add_format(properties)
 
+  local format = Format:new(properties,
+                            self.xf_format_indices,
+                            self.dxf_format_indices)
+  -- Store format reference
+  self.formats[#self.formats + 1] = format
 
+  return format
+end
 
 
 
 
 
 ----
--- Calls finalization methods.
+-- Call finalisation code and close file.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Workbook:close()
   if not self.fileclosed then
@@ -240,7 +266,6 @@ function Workbook:_store_workbook()
 
 end
 
-
 ----
 -- Check for valid worksheet names. We check the length, if it contains any
 -- invalid characters and if the name is unique in the workbook.
@@ -268,8 +293,9 @@ function Workbook:_check_sheetname(name, is_chartsheet)
   assert(#name <= 31, string.format("Sheetname '%s' must be <= 31 chars", name))
 
   -- Check that sheetname doesn't contain any invalid characters
-  if name:match('[%[%]:%*%?/\\]') then
-    error("Invalid character '[]:*?/\\' in worksheet name: " .. name)
+  if name:match("[%[%]:%*%?/\\]") then
+    error(string.format("Invalid Excel character '[]:*?/\\' in name: '%s'",
+                        name))
   end
 
   -- Check that the worksheet name doesn't already exist since this is a fatal
@@ -280,7 +306,7 @@ function Workbook:_check_sheetname(name, is_chartsheet)
 
     if name_a:lower() == name_b:lower() then
       error(string.format(
-              "Worksheet name "%s", with case ignored, is already used.",
+              "Worksheet name '%s', with case ignored, is already used.",
               name))
     end
   end
@@ -288,7 +314,238 @@ function Workbook:_check_sheetname(name, is_chartsheet)
   return name
 end
 
+----
+-- Prepare all of the format properties prior to passing them to Styles.pm.
+--
+function Workbook:_prepare_format_properties()
 
+  -- Separate format objects into XF and DXF formats.
+  self:_prepare_formats()
+
+  -- Set the font index for the format objects.
+  self:_prepare_fonts()
+
+  -- Set the number format index for the format objects.
+  self:_prepare_num_formats()
+
+  -- Set the border index for the format objects.
+  self:_prepare_borders()
+
+  -- Set the fill index for the format objects.
+  self:_prepare_fills()
+
+end
+
+----
+-- Iterate through the XF Format objects and separate them into XF and DXF
+-- formats.
+--
+function Workbook:_prepare_formats()
+  for _, format in ipairs(self.formats) do
+    local xf_index  = format.xf_index
+    local dxf_index = format.dxf_index
+
+    if xf_index then
+      self.xf_formats[xf_index + 1] = format
+    end
+
+    if dxf_index then
+      self.dxf_formats[dxf_index + 1] = format
+    end
+  end
+end
+
+----
+-- Set the default index for each format. This is only used for testing.
+--
+function Workbook:_set_default_xf_indices()
+  for _, format in ipairs(self.formats) do
+    format:_get_xf_index()
+  end
+end
+
+----
+-- Iterate through the XF Format objects and give them an index to non-default
+-- font elements.
+--
+function Workbook:_prepare_fonts()
+
+  local fonts = {}
+  local index = 0
+
+  for _, format in ipairs(self.xf_formats) do
+    local key = format:_get_font_key()
+
+    if fonts[key] then
+      -- Font has already been used.
+      format.font_index = fonts[key]
+      format.has_font   = 0
+    else
+
+      -- This is a new font.
+      fonts[key]        = index
+      format.font_index = index
+      format.has_font   = 1
+      index = index + 1
+    end
+  end
+
+  self.font_count = index
+
+  -- For the DXF formats we only need to check if the properties have changed.
+  for _, format in ipairs(self.dxf_formats) do
+    -- The only font properties that can change for a DXF format are: color,
+    -- bold, italic, underline and strikethrough.
+    if format.color or format.bold or format.italic or format.underline
+    or format.font_strikeout then
+      format.has_dxf_font = 1
+    end
+  end
+end
+
+----
+-- Iterate through the XF Format objects and give them an index to non-default
+-- number format elements.
+--
+-- User defined records start from index 0xA4.
+--
+function Workbook:_prepare_num_formats()
+  local num_formats      = {}
+  local index            = 164
+  local num_format_count = 0
+
+  -- Merge the XF and DXF tables in order to iterate over them.
+  local formats = {unpack(self.xf_formats)}
+  for i = 1, #self.dxf_formats do
+    formats[#formats + 1] = self.dxf_formats[i]
+  end
+
+  for _, format in ipairs(formats) do
+    local num_format = format.num_format
+
+    -- Check if num_format is an index to a built-in number format.
+    if type(num_format) == 'number' then
+      format.num_format_index = num_format
+    elseif num_formats[num_format] then
+      -- Number format has already been used.
+      format.num_format_index = num_formats[num_format]
+    else
+      -- Add a new number format.
+      num_formats[num_format] = index
+      format.num_format_index = index
+      index = index + 1
+      -- Only increase font count for XF formats (not for DXF formats).
+      if format.xf_index then num_format_count = num_format_count + 1 end
+    end
+  end
+
+  self.num_format_count = num_format_count
+end
+
+----
+-- Iterate through the XF Format objects and give them an index to non-default
+-- border elements.
+--
+function Workbook:_prepare_borders()
+  local borders = {}
+  local index   = 0
+
+  for _, format in ipairs(self.xf_formats) do
+    local key = format:_get_border_key()
+
+    if borders[key] then
+      -- Border has already been used.
+      format.border_index = borders[key]
+      format.has_border   = false
+    else
+      -- This is a new border.
+      borders[key]        = index
+      format.border_index = index
+      format.has_border   = true
+      index = index + 1
+    end
+  end
+
+  self.border_count = index
+
+  -- For the DXF formats we only need to check if the properties have changed.
+  for _, format in ipairs(self.dxf_formats) do
+    local key = format:_get_border_key()
+
+    if key:match('[^0:false]') then
+      -- The key contains a non-default value.
+      format.has_dxf_border = 1
+    end
+  end
+end
+
+----
+-- Iterate through the XF Format objects and give them an index to non-default
+-- fill elements.
+--
+-- The user defined fill properties start from 2 since there are 2 default
+-- fills: patternType="none" and patternType="gray125".
+--
+function Workbook:_prepare_fills()
+  -- Add the default fills.
+  local fills = {["0:false:false:"] = 0, ["17:false:false:"] = 1}
+  local index = 2  -- Start from 2. See above.
+
+  -- Store the DXF colours separately since them may be reversed below.
+  for _, format in ipairs(self.dxf_formats) do
+    if format.pattern or format.bg_color or format.fg_color then
+      format.has_dxf_fill = true
+      format.dxf_bg_color = format.bg_color
+      format.dxf_fg_color = format.fg_color
+    end
+  end
+
+  for _, format in ipairs(self.xf_formats) do
+    -- The following logical statements jointly take care of special cases
+    -- in relation to cell colours and patterns:
+    -- 1. For a solid fill (_pattern == 1) Excel reverses the role of
+    --    foreground and background colours, and
+    -- 2. If the user specifies a foreground or background colour without
+    --    a pattern they probably wanted a solid fill, so we fill in the
+    --    defaults.
+    --
+    if  format.pattern == 1 and format.bg_color ~= 0
+    and format.fg_color ~= 0 then
+      local tmp = format.fg_color
+      format.fg_color = format.bg_color
+      format.bg_color = tmp
+    end
+
+    if format.pattern <= 1 and format.bg_color ~= 0
+    and format.fg_color == 0 then
+      format.fg_color = format.bg_color
+      format.bg_color = 0
+      format.pattern  = 1
+    end
+
+    if format.pattern <= 1 and format.bg_color == 0
+    and format.fg_color ~= 0 then
+      format.bg_color = 0
+      format.pattern  = 1
+    end
+
+    local key = format:_get_fill_key()
+
+    if fills[key] then
+      -- Fill has already been used.
+      format.fill_index = fills[key]
+      format.has_fill   = false
+    else
+      -- This is a new fill.
+      fills[key]        = index
+      format.fill_index = index
+      format.has_fill   = 1
+      index = index + 1
+    end
+  end
+
+  self.fill_count = index
+end
 
 
 ------------------------------------------------------------------------------
@@ -447,11 +704,11 @@ end
 function Workbook:_write_calc_pr()
   local attributes = {{["calcId"] = 124519}}
 
-  if self.calc_mode == 'manual' then
-    table.insert(attributes, {['calcMode'] = self.calc_mode})
-    table.insert(attributes, {['calcOnSave'] = "0"})
-  elseif self.calc_mode == 'autoNoTable' then
-    table.insert(attributes, {['calcMode'] = self.calc_mode})
+  if self.calc_mode == "manual" then
+    table.insert(attributes, {["calcMode"] = self.calc_mode})
+    table.insert(attributes, {["calcOnSave"] = "0"})
+  elseif self.calc_mode == "autoNoTable" then
+    table.insert(attributes, {["calcMode"] = self.calc_mode})
   end
 
   if self.calc_on_load then
