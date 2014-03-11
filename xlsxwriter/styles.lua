@@ -423,11 +423,11 @@ function Styles:_write_fill(format, dxf_format)
   self:_xml_start_tag("fill")
 
   -- The "none" pattern is handled differently for dxf formats.
-  if dxf_format and format.pattern <= 1 then
+  if dxf_format and pattern <= 1 then
     self:_xml_start_tag("patternFill")
   else
     self:_xml_start_tag("patternFill",
-                        {{["patternType"] = patterns[format.pattern + 1]}})
+                        {{["patternType"] = patterns[pattern + 1]}})
   end
 
   if fg_color then
@@ -595,11 +595,6 @@ end
 -- Write the style <xf> element.
 --
 function Styles:_write_style_xf()
-  local num_fmt_id = 0
-  local font_id    = 0
-  local fill_id    = 0
-  local border_id  = 0
-
   local attributes = {
     {["numFmtId"] = "0"},
     {["fontId"]   = "0"},

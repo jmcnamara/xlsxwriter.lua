@@ -72,8 +72,13 @@ function Workbook:new()
   self.__index = self
 
   -- Add the default cell format.
-  instance.xf_formats[1] = Format:new{xf_index = 0}
+  instance.formats[1] = Workbook.add_format(instance, {xf_index = 0})
 
+  -- The (d)xf_format_indices tables are used to share unique format IDs
+  -- between formats controlled by the workbook. We also store the number
+  -- of indices in "n". The xf value is 1 since we added a default format.
+  instance.xf_format_indices.n  = 1
+  instance.dxf_format_indices.n = 0
 
   return instance
 end

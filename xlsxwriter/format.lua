@@ -25,8 +25,6 @@ function Format:new(properties, xf_indices, dxf_indices)
     dxf_format_indices = dxf_indices,
     xf_index           = nil,
     dxf_index          = nil,
-    xf_format_count    = 1,
-    dxf_format_count   = 0,
     num_format         = 0,
     num_format_index   = 0,
     font_index         = 0,
@@ -511,7 +509,7 @@ end
 -- This is required to differentiate between the vertical and horizontal
 -- properties passed to the constructor.
 --
-function Format:set_valign()
+function Format:set_valign(value)
   if not value then return end
   self.valign = value
 end
@@ -629,8 +627,6 @@ function Format:_get_align_properties()
   if self.text_h_align ~= 7 then self.just_distrib = false end
   if self.indent            then self.just_distrib = false end
 
-  local continuous = "centerContinuous"
-
   if self.text_h_align == 1 then
     table.insert(align, {["horizontal"] = "left"})
   end
@@ -731,7 +727,7 @@ end
 function Format._get_key(members)
   local str = ""
 
-  for k, v in ipairs(members) do
+  for _, v in ipairs(members) do
     str = str .. tostring(v) .. ":"
   end
 
@@ -760,16 +756,16 @@ function Format:_get_font_key()
 
   return Format._get_key{
     self.bold,
-    self.color,
+    self.italic,
+    self.font_color,
     self.font_charset,
     self.font_family,
     self.font_outline,
     self.font_script,
     self.font_shadow,
     self.font_strikeout,
-    self.font,
-    self.italic,
-    self.size,
+    self.font_name,
+    self.font_size,
     self.underline}
 end
 
@@ -835,10 +831,10 @@ function Format:_get_xf_index()
       return self.xf_format_indices[key]
     else
       -- New format requiring an index.
-      local index = self.xf_format_count
-      self.xf_format_indices[key] = index
+      local index = self.xf_format_indices.n
       self.xf_index               = index
-      self.xf_formats_count       = index + 1
+      self.xf_format_indices[key] = index
+      self.xf_format_indices.n    = index + 1
       return index
     end
   end
@@ -861,10 +857,10 @@ function Format:_get_dxf_index()
       return self.dxf_format_indices[key]
     else
       -- New format requiring an index.
-      local index = self.dxf_format_count
-      self.dxf_format_indices[key] = index
+      local index = self.dxf_format_indices.n
       self.dxf_index               = index
-      self.dxf_formats_count       = index + 1
+      self.dxf_format_indices[key] = index
+      self.dxf_format_indices.n    = index + 1
       return index
     end
   end
