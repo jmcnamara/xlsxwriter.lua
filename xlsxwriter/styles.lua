@@ -103,14 +103,6 @@ function Styles:_set_style_properties(properties)
   self.dxf_formats      = properties[8]
 end
 
-----
--- Convert the RGB color.
---
-function Styles:_get_palette_color(color)
-  color = color:gsub('#','')
-  return "FF" .. color:upper()
-end
-
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -296,8 +288,7 @@ function Styles:_write_font(format, is_dxf_format)
   elseif index then
     self:_write_color("indexed", index)
   elseif color then
-    color = self:_get_palette_color(color)
-    self:_write_color({["rgb"] = color})
+    self:_write_color("rgb", color)
   elseif not is_dxf_format then
     self:_write_color("theme", "1")
   end
@@ -386,14 +377,14 @@ end
 ----
 -- Write the <fill> element.
 --
-function Styles:_write_fill(format, dxf_format)
+function Styles:_write_fill(format, is_dxf_format)
   local pattern    = format.pattern
   local bg_color   = format.bg_color
   local fg_color   = format.fg_color
 
   -- Colors for dxf formats are handled differently from normal formats since
   -- the normal format reverses the meaning of BG and FG for solid fills.
-  if dxf_format then
+  if is_dxf_format then
     bg_color = format.dxf_bg_color
     fg_color = format.dxf_fg_color
   end
@@ -423,7 +414,7 @@ function Styles:_write_fill(format, dxf_format)
   self:_xml_start_tag("fill")
 
   -- The "none" pattern is handled differently for dxf formats.
-  if dxf_format and pattern <= 1 then
+  if is_dxf_format and pattern <= 1 then
     self:_xml_start_tag("patternFill")
   else
     self:_xml_start_tag("patternFill",
@@ -431,15 +422,13 @@ function Styles:_write_fill(format, dxf_format)
   end
 
   if fg_color then
-    fg_color = self:_get_palette_color(fg_color)
     self:_xml_empty_tag("fgColor", {{["rgb"] = fg_color}})
   end
 
   if bg_color then
-    bg_color = self:_get_palette_color(bg_color)
     self:_xml_empty_tag("bgColor", {{["rgb"] = bg_color}})
   else
-    if not dxf_format then
+    if not is_dxf_format then
       self:_xml_empty_tag("bgColor", {{["indexed"] = "64"}})
     end
   end
@@ -470,7 +459,7 @@ end
 ----
 -- Write the <border> element.
 --
-function Styles:_write_border(format, dxf_format)
+function Styles:_write_border(format, is_dxf_format)
   local attributes = {}
 
   -- Diagonal borders add attributes to the <border> element.
@@ -498,12 +487,12 @@ function Styles:_write_border(format, dxf_format)
   self:_write_sub_border("bottom", format.bottom, format.bottom_color)
 
   -- Condition DXF formats don't allow diagonal borders
-  if not dxf_format then
+  if not is_dxf_format then
     self:_write_sub_border("diagonal",
                            format.diag_border, format.diag_color)
   end
 
-  if dxf_format then
+  if is_dxf_format then
     self:_write_sub_border("vertical")
     self:_write_sub_border("horizontal")
   end
@@ -544,10 +533,9 @@ function Styles:_write_sub_border(border_type, style, color)
   self:_xml_start_tag(border_type, attributes)
 
   if color then
-    color = self:_get_palette_color(color)
-    self:_xml_empty_tag("color", {["rgb"] = color})
+    self:_xml_empty_tag("color", {{["rgb"] = color}})
   else
-    self:_xml_empty_tag("color", {["auto"] = "1"})
+    self:_xml_empty_tag("color", {{["auto"] = "1"}})
   end
 
   self:_xml_end_tag(border_type)
@@ -727,19 +715,19 @@ function Styles:_write_dxfs()
     for _, format in ipairs(self.dxf_formats) do
       self:_xml_start_tag("dxf")
       if format.has_dxf_font then
-        self:_write_font(format, 1)
+        self:_write_font(format, true)
       end
 
-      if format.num_format_index then
+      if format.num_format_index > 0 then
         self:_write_num_fmt(format.num_format_index, format.num_format)
       end
 
       if format.has_dxf_fill then
-        self:_write_fill(format, 1)
+        self:_write_fill(format, true)
       end
 
       if format.has_dxf_border then
-        self:_write_border(format, 1)
+        self:_write_border(format, true)
       end
 
       self:_xml_end_tag("dxf")
@@ -809,7 +797,7 @@ end
 -- Write the <condense> element.
 --
 function Styles:_write_condense()
-  local attributes = {{["val"] ="0"}}
+  local attributes = {{["val"]  = "0"}}
   self:_xml_empty_tag("condense", attributes)
 end
 

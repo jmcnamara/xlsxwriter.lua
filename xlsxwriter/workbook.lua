@@ -240,14 +240,14 @@ function Workbook:_store_workbook()
 
   -- Ensure that at least one worksheet has been selected.
   if self.activesheet == 0 then
-    self.worksheets[1].selected = 1
-    self.worksheets[1].hidden   = 0
+    self.worksheets[1].selected = true
+    self.worksheets[1].hidden   = false
   end
 
   -- Set the active sheet.
   for _, sheet in ipairs(self.worksheets) do
     if sheet.index == self.activesheet then
-      sheet.active = 1
+      sheet.active = true
     end
   end
 
@@ -384,13 +384,13 @@ function Workbook:_prepare_fonts()
     if fonts[key] then
       -- Font has already been used.
       format.font_index = fonts[key]
-      format.has_font   = 0
+      format.has_font   = false
     else
 
       -- This is a new font.
       fonts[key]        = index
       format.font_index = index
-      format.has_font   = 1
+      format.has_font   = true
       index = index + 1
     end
   end
@@ -401,9 +401,9 @@ function Workbook:_prepare_fonts()
   for _, format in ipairs(self.dxf_formats) do
     -- The only font properties that can change for a DXF format are: color,
     -- bold, italic, underline and strikethrough.
-    if format.color or format.bold or format.italic or format.underline
+    if format.font_color or format.bold or format.italic or format.underline
     or format.font_strikeout then
-      format.has_dxf_font = 1
+      format.has_dxf_font = true
     end
   end
 end
@@ -479,7 +479,7 @@ function Workbook:_prepare_borders()
 
     if key:match('[^0:false]') then
       -- The key contains a non-default value.
-      format.has_dxf_border = 1
+      format.has_dxf_border = true
     end
   end
 end
@@ -514,23 +514,20 @@ function Workbook:_prepare_fills()
     --    a pattern they probably wanted a solid fill, so we fill in the
     --    defaults.
     --
-    if  format.pattern == 1 and format.bg_color ~= 0
-    and format.fg_color ~= 0 then
+    if  format.pattern == 1 and format.bg_color and format.fg_color then
       local tmp = format.fg_color
       format.fg_color = format.bg_color
       format.bg_color = tmp
     end
 
-    if format.pattern <= 1 and format.bg_color ~= 0
-    and format.fg_color == 0 then
+    if format.pattern <= 1 and format.bg_color and not format.fg_color then
       format.fg_color = format.bg_color
-      format.bg_color = 0
+      format.bg_color = false
       format.pattern  = 1
     end
 
-    if format.pattern <= 1 and format.bg_color == 0
-    and format.fg_color ~= 0 then
-      format.bg_color = 0
+    if format.pattern <= 1 and not format.bg_color and format.fg_color then
+      format.bg_color = false
       format.pattern  = 1
     end
 
@@ -544,7 +541,7 @@ function Workbook:_prepare_fills()
       -- This is a new fill.
       fills[key]        = index
       format.fill_index = index
-      format.has_fill   = 1
+      format.has_fill   = true
       index = index + 1
     end
   end

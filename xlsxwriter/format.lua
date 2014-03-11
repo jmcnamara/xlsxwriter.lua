@@ -64,7 +64,7 @@ function Format:new(properties, xf_indices, dxf_indices)
     fill_count         = 0,
     border_index       = 0,
     has_border         = false,
-    has_dxf_border     = 0,
+    has_dxf_border     = false,
     border_count       = 0,
     bottom             = false,
     bottom_color       = false,
@@ -126,7 +126,7 @@ end
 --
 function Format:set_font_color(value)
   if not value then return end
-  self.font_color = value
+  self.font_color = Utility.excel_color(value)
 end
 
 ----
