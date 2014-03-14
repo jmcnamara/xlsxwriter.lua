@@ -23,7 +23,7 @@ local workbook
 caption  = " \tWorkbook: xml_declaration()"
 expected = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
 
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 workbook:_set_filehandle(io.tmpfile())
 
 workbook:_xml_declaration()

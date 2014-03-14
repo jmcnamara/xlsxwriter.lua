@@ -90,7 +90,7 @@ expected = _clean_xml_string([[
 </styleSheet>]])
 
 styles   = Styles:new()
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 
 workbook:add_format({
   left         = 1,

@@ -85,7 +85,7 @@ expected = _clean_xml_string([[
 </styleSheet>]])
 
 styles   = Styles:new()
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 
 local format1 = workbook:add_format{
   font_color    = '#9C0006',

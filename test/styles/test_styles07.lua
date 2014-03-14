@@ -99,7 +99,7 @@ expected = _clean_xml_string([[
 </styleSheet>]])
 
 styles   = Styles:new()
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 
 workbook:add_format({["pattern"] = 1,  ["bg_color"] = "red"})
 workbook:add_format({["pattern"] = 11, ["bg_color"] = "red"})

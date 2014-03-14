@@ -21,15 +21,18 @@ local SharedStrings = require "xlsxwriter.sharedstrings"
 local Workbook = {}
 setmetatable(Workbook,{__index = Xmlwriter})
 
-function Workbook:new()
+function Workbook:new(filename)
+
+  assert(filename, "Filename required by Workbook:new()")
+
   local instance = {
 
     worksheet_meta     = {activesheet = 0, firstsheet = 0},
-    selected           = 0,
+    filename           = filename,
     fileclosed         = false,
     filehandle         = false,
     internal_fh        = false,
-    sst                = SharedStrings:new(),
+    str_table          = SharedStrings:new(),
     sheet_name         = "Sheet",
     chart_name         = "Chart",
     worksheet_count    = 0,
@@ -58,7 +61,6 @@ function Workbook:new()
     window_width       = 16095,
     window_height      = 9660,
     tab_ratio          = 500,
-    str_table          = {},
     vba_project        = false,
     vba_codename       = false,
     image_types        = {},
@@ -163,10 +165,6 @@ function Workbook:add_format(properties)
   return format
 end
 
-
-
-
-
 ----
 -- Call finalisation code and close file.
 --
@@ -182,7 +180,6 @@ function Workbook:close()
     self:_store_workbook()
   end
 end
-
 
 ------------------------------------------------------------------------------
 --
@@ -241,7 +238,7 @@ function Workbook:_store_workbook()
   end
 
   -- Ensure that at least one worksheet has been selected.
-  if self.activesheet == 0 then
+  if self.worksheet_meta.activesheet == 0 then
     self.worksheets[1].selected = true
     self.worksheets[1].hidden   = false
   end
@@ -269,10 +266,11 @@ function Workbook:_store_workbook()
   --self:_prepare_tables()
 
   -- Package the workbook.
-  local packager = Packager:new()
+  local packager = Packager:new(self.filename)
 
   packager:_add_workbook(self)
   packager:_create_package()
+  packager = nil
 
 end
 

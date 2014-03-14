@@ -41,7 +41,7 @@ expected = _clean_xml_string([[
   <calcPr calcId="124519" fullCalcOnLoad="1"/>
 </workbook>]])
 
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 workbook:_set_filehandle(io.tmpfile())
 
 workbook:add_worksheet()

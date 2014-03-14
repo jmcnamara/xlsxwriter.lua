@@ -100,7 +100,7 @@ expected = _clean_xml_string([[
 </styleSheet>]])
 
 styles   = Styles:new()
-workbook = Workbook:new()
+workbook = Workbook:new("test.xlsx")
 
 local format1 = workbook:add_format{bold   = true}
 local format2 = workbook:add_format{italic = true}

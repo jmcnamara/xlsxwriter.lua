@@ -41,7 +41,7 @@
 --
 require "xlsxwriter.strict"
 
-local Xmlwriter     = require "xlsxwriter.xmlwriter"
+local ZipWriter     = require "ZipWriter"
 local App           = require "xlsxwriter.app"
 local Core          = require "xlsxwriter.core"
 local ContentTypes  = require "xlsxwriter.contenttypes"
@@ -57,8 +57,9 @@ local Relationships = require "xlsxwriter.relationships"
 
 local Packager = {}
 
-function Packager:new()
+function Packager:new(filename)
   local instance = {
+    filename         = filename,
     workbook         = false,
     sheet_names      = {},
     worksheet_count  = 0,
@@ -67,6 +68,11 @@ function Packager:new()
     drawing_count    = 0,
     table_count      = 0,
     named_ranges     = {},
+    file_descriptor  = {
+      istext   = true,
+      isfile   = true,
+      isdir    = false,
+      exattrib = 0x81800020},
   }
 
   setmetatable(instance, self)
@@ -108,6 +114,10 @@ end
 -- Write the xml files that make up the XLXS OPC package.
 --
 function Packager:_create_package()
+
+  self.zip = ZipWriter.new()
+  self.zip:open_stream(assert(io.open(self.filename, 'w+b')), true)
+
   self:_write_worksheet_files()
   self:_write_chartsheet_files()
   self:_write_workbook_file()
@@ -127,6 +137,8 @@ function Packager:_create_package()
   self:_write_chartsheet_rels_files()
   self:_write_drawing_rels_files()
   self:_add_image_files()
+
+  self.zip:close()
 end
 
 ------------------------------------------------------------------------------
@@ -140,10 +152,12 @@ end
 --
 function Packager:_add_to_zip(writer)
 
-  local dir = '/tmp/lua01'
-
-  writer:_set_xml_writer(dir .. writer.filename)
+  writer:_set_filehandle(io.tmpfile())
   writer:_assemble_xml_file()
+
+  self.zip:write(writer.filename, 
+                 self.file_descriptor,
+                 writer:_get_xml_reader())
 end
 
 ----
@@ -154,7 +168,7 @@ function Packager:_write_workbook_file()
   local dir      = self.package_dir
   local workbook = self.workbook
 
-  workbook:_set_filename("/xl/workbook.xml")
+  workbook:_set_filename("xl/workbook.xml")
   self:_add_to_zip(workbook)
 end
 
@@ -166,7 +180,7 @@ function Packager:_write_worksheet_files()
   local index = 1
   for _, worksheet in ipairs(self.workbook.worksheets) do
     if not worksheet.is_chartsheet then
-      worksheet:_set_filename("/xl/worksheets/sheet" .. index .. '.xml')
+      worksheet:_set_filename("xl/worksheets/sheet" .. index .. '.xml')
       self:_add_to_zip(worksheet)
       index = index + 1
     end
@@ -181,7 +195,7 @@ function Packager:_write_chartsheet_files()
   local index = 1
   for _, worksheet in ipairs(self.workbook.worksheets) do
     if worksheet.is_chartsheet then
-      worksheet:_set_filename("/xl/chartsheets/sheet" .. index .. '.xml')
+      worksheet:_set_filename("xl/chartsheets/sheet" .. index .. '.xml')
       self:_add_to_zip(worksheet)
       index = index + 1
     end
@@ -197,7 +211,7 @@ function Packager:_write_chart_files()
 
   local index = 1
   for _, chart in ipairs(self.workbook.charts) do
-    chart:_set_filename("/xl/charts/chart" .. index .. '.xml')
+    chart:_set_filename("xl/charts/chart" .. index .. '.xml')
     self:_add_to_zip(chart)
     index = index + 1
   end
@@ -212,7 +226,7 @@ function Packager:_write_drawing_files()
 
   local index = 1
   for _, drawing in ipairs(self.workbook.drawings) do
-    drawing:_set_filename("/xl/drawings/drawing" .. index .. '.xml')
+    drawing:_set_filename("xl/drawings/drawing" .. index .. '.xml')
     self:_add_to_zip(drawing)
     index = index + 1
   end
@@ -228,7 +242,7 @@ function Packager:_write_vml_files()
     if worksheet.has_vml then
       -- local vml = Vml:new()
 
-      -- vml:_set_filename("/xl/drawings/vmlDrawing" .. index .. '.vml')
+      -- vml:_set_filename("xl/drawings/vmlDrawing" .. index .. '.vml')
       -- vml:_assemble_xml_file(worksheet.vml_data_id, 
       --                        worksheet.vml_shape_id, 
       --                        worksheet.comments_array, 
@@ -248,7 +262,7 @@ function Packager:_write_comment_files()
     if not worksheet.has_comments then
       -- local comment = Comments:new()
 
-      -- comment:_set_filename("/xl/comments" .. index .. '.xml')
+      -- comment:_set_filename("xl/comments" .. index .. '.xml')
       -- comment:_assemble_xml_file(worksheet.comments_array)
       index = index + 1
     end
@@ -259,8 +273,8 @@ end
 -- Write the sharedStrings.xml file.
 --
 function Packager:_write_shared_strings_file()
-  local sst  = self.workbook.sst
-  sst:_set_filename("/xl/sharedStrings.xml")
+  local sst  = self.workbook.str_table
+  sst:_set_filename("xl/sharedStrings.xml")
   self:_add_to_zip(sst)
 end
 
@@ -304,7 +318,7 @@ function Packager:_write_app_file()
 
   app:_set_properties(properties)
 
-  app:_set_filename("/docProps/app.xml")
+  app:_set_filename("docProps/app.xml")
   self:_add_to_zip(app)
 end
 
@@ -317,7 +331,7 @@ function Packager:_write_core_file()
   local core       = Core:new()
 
   core:_set_properties(properties)
-  core:_set_filename("/docProps/core.xml")
+  core:_set_filename("docProps/core.xml")
   self:_add_to_zip(core)
 end
 
@@ -363,7 +377,7 @@ function Packager:_write_content_types_file()
   end
 
   -- Add the sharedString rel if there is string data in the workbook.
-  if self.workbook.sst.string_count > 0 then
+  if self.workbook.str_table.string_count > 0 then
     content:_add_shared_strings()
   end
 
@@ -372,7 +386,7 @@ function Packager:_write_content_types_file()
     content:_add_vba_project()
   end
 
-  content:_set_filename("/[Content_Types].xml")
+  content:_set_filename("[Content_Types].xml")
   self:_add_to_zip(content)
 end
 
@@ -393,7 +407,7 @@ function Packager:_write_styles_file()
   local styles = Styles:new()
 
   styles:_set_style_properties(properties)
-  styles:_set_filename("/xl/styles.xml")
+  styles:_set_filename("xl/styles.xml")
   self:_add_to_zip(styles)
 end
 
@@ -404,7 +418,7 @@ function Packager:_write_theme_file()
 
   local theme = Theme:new()
 
-  theme:_set_filename("/xl/theme/theme1.xml")
+  theme:_set_filename("xl/theme/theme1.xml")
   self:_add_to_zip(theme)
 end
 
@@ -422,7 +436,7 @@ function Packager:_write_table_files()
       for _, table_props in ipairs(table_props) do
         -- local table = Table:new()
 
-        -- table:_set_filename("/xl/tables/table" .. index .. '.xml')
+        -- table:_set_filename("xl/tables/table" .. index .. '.xml')
         -- table:_set_properties(table_props)
         -- self:_add_to_zip(table)
         -- self.table_count = table_count + 1
@@ -443,7 +457,7 @@ function Packager:_write_root_rels_file()
   rels:_add_package_relationship("/metadata/core-properties", 'docProps/core.xml')
   rels:_add_document_relationship("/extended-properties", 'docProps/app.xml')
 
-  rels:_set_filename("/_rels/.rels")
+  rels:_set_filename("_rels/.rels")
   self:_add_to_zip(rels)
 end
 
@@ -472,7 +486,7 @@ function Packager:_write_workbook_rels_file()
   rels:_add_document_relationship("/styles", 'styles.xml')
 
   -- Add the sharedString rel if there is string data in the workbook.
-  if self.workbook.sst.string_count > 0 then
+  if self.workbook.str_table.string_count > 0 then
     rels:_add_document_relationship("/sharedStrings", 'sharedStrings.xml')
   end
 
@@ -481,7 +495,7 @@ function Packager:_write_workbook_rels_file()
     rels:_add_ms_package_relationship("/vbaProject", 'vbaProject.bin')
   end
 
-  rels:_set_filename("/xl/_rels/workbook.xml.rels")
+  rels:_set_filename("xl/_rels/workbook.xml.rels")
   self:_add_to_zip(rels)
 end
 
@@ -511,7 +525,7 @@ function Packager:_write_worksheet_rels_files()
         end
 
         -- Create the .rels file such as /xl/worksheets/_rels/sheet1.xml.rels.
-        rels:_set_filename("/xl/worksheets/_rels/sheet" .. index .. '.xml.rels')
+        rels:_set_filename("xl/worksheets/_rels/sheet" .. index .. '.xml.rels')
         self:_add_to_zip(rels)
       end
     end
@@ -539,7 +553,7 @@ function Packager:_write_chartsheet_rels_files()
         end
 
         -- Create the .rels file such as /xl/chartsheets/_rels/sheet1.xml.rels.
-        rels:_set_filename("/xl/chartsheets/_rels/sheet" .. index .. '.xml.rels')
+        rels:_set_filename("xl/chartsheets/_rels/sheet" .. index .. '.xml.rels')
         self:_add_to_zip(rels)
       end
     end
@@ -566,7 +580,7 @@ function Packager:_write_drawing_rels_files()
       end
 
       -- Create the .rels file such as /xl/drawings/_rels/sheet1.xml.rels.
-      rels:_set_filename("/xl/drawings/_rels/drawing" .. index .. '.xml.rels')
+      rels:_set_filename("xl/drawings/_rels/drawing" .. index .. '.xml.rels')
       self:_add_to_zip(rels)
     end
   end
