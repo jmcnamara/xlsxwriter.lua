@@ -74,8 +74,10 @@ end
 -- 'Named Ranges'.
 --
 function App:_add_heading_pair(name, size)
-  table.insert(self.heading_pairs, {["lpstr"] = name})
-  table.insert(self.heading_pairs, {["i4"]    = size})
+  if size > 0 then
+    table.insert(self.heading_pairs, {["lpstr"] = name})
+    table.insert(self.heading_pairs, {["i4"]    = size})
+  end
 end
 
 ----

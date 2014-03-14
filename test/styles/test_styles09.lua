@@ -101,17 +101,17 @@ format1:_get_dxf_index()
 
 workbook:_prepare_format_properties()
 
-styles:_set_style_properties{
-  workbook.xf_formats,
-  workbook.palette,
-  workbook.font_count,
-  workbook.num_format_count,
-  workbook.border_count,
-  workbook.fill_count,
-  workbook.custom_colors,
-  workbook.dxf_formats,
-}
+local properties = {}
+properties["xf_formats"]       = workbook.xf_formats
+properties["palette"]          = workbook.palette
+properties["font_count"]       = workbook.font_count
+properties["num_format_count"] = workbook.num_format_count
+properties["border_count"]     = workbook.border_count
+properties["fill_count"]       = workbook.fill_count
+properties["custom_colors"]    = workbook.custom_colors
+properties["dxf_formats"]      = workbook.dxf_formats
 
+styles:_set_style_properties(properties)
 
 styles:_set_filehandle(io.tmpfile())
 

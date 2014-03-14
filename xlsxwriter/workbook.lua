@@ -5,9 +5,11 @@
 --
 require "xlsxwriter.strict"
 
-local Xmlwriter = require "xlsxwriter.xmlwriter"
-local Worksheet = require "xlsxwriter.worksheet"
-local Format    = require "xlsxwriter.format"
+local Xmlwriter     = require "xlsxwriter.xmlwriter"
+local Worksheet     = require "xlsxwriter.worksheet"
+local Format        = require "xlsxwriter.format"
+local Packager      = require "xlsxwriter.packager"
+local SharedStrings = require "xlsxwriter.sharedstrings"
 
 ------------------------------------------------------------------------------
 --
@@ -27,6 +29,7 @@ function Workbook:new()
     fileclosed         = false,
     filehandle         = false,
     internal_fh        = false,
+    sst                = SharedStrings:new(),
     sheet_name         = "Sheet",
     chart_name         = "Chart",
     worksheet_count    = 0,
@@ -41,7 +44,6 @@ function Workbook:new()
     xf_format_indices  = {},
     dxf_formats        = {},
     dxf_format_indices = {},
-    palette            = {},
     font_count         = 0,
     num_format_count   = 0,
     defined_names      = {},
@@ -267,7 +269,10 @@ function Workbook:_store_workbook()
   --self:_prepare_tables()
 
   -- Package the workbook.
-  -- TODO
+  local packager = Packager:new()
+
+  packager:_add_workbook(self)
+  packager:_create_package()
 
 end
 

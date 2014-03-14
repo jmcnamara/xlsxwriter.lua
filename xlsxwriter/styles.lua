@@ -93,14 +93,13 @@ end
 -- Pass in the Format objects and other properties used to set the styles.
 --
 function Styles:_set_style_properties(properties)
-  self.xf_formats       = properties[1]
-  self.palette          = properties[2]
-  self.font_count       = properties[3]
-  self.num_format_count = properties[4]
-  self.border_count     = properties[5]
-  self.fill_count       = properties[6]
-  self.custom_colors    = properties[7]
-  self.dxf_formats      = properties[8]
+  self.xf_formats       = properties["xf_formats"]
+  self.font_count       = properties["font_count"]
+  self.num_format_count = properties["num_format_count"]
+  self.border_count     = properties["border_count"]
+  self.fill_count       = properties["fill_count"]
+  self.custom_colors    = properties["custom_colors"]
+  self.dxf_formats      = properties["dxf_formats"]
 end
 
 ------------------------------------------------------------------------------

@@ -632,6 +632,12 @@ function Worksheet:set_row(row, height, format, options)
 
 end
 
+----
+-- Retrieve the worksheet name.
+--
+function Worksheet:get_name()
+  return self.name
+end
 
 
 ------------------------------------------------------------------------------
