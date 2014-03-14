@@ -89,7 +89,7 @@ end
 ----
 -- Add the workbook object to the package.
 --
-function Packager:_add_workbook(worbook)
+function Packager:_add_workbook(workbook)
 
   local sheet_names = workbook.sheetnames
 
