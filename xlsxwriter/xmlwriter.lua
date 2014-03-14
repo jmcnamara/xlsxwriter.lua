@@ -34,6 +34,13 @@ function Xmlwriter:_set_filehandle(filehandle)
 end
 
 ----
+-- Set the filename used in the zipfile.
+--
+function Xmlwriter:_set_filename(filename)
+  self.filename = filename
+end
+
+----
 -- Close the XML filehandle if we created it.
 --
 function Xmlwriter:_xml_close()
@@ -49,6 +56,19 @@ function Xmlwriter:_get_data()
   self.fh:seek('set', 0)
   return self.fh:read('*a')
 end
+
+----
+-- Return all of the data in the current filehandle as an iterator.
+--Used by the ZipWriter module.
+--
+function Xmlwriter:_get_xml_reader()
+  self.fh:seek('set', 0)
+  return function()
+           local buffer = self.fh:read(4096)
+           if buffer then return buffer end
+         end
+end
+
 
 ----
 -- Write the XML declaration.
