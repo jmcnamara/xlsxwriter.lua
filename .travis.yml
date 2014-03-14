@@ -11,6 +11,7 @@ install:
   - sudo apt-get  install luarocks
   - sudo luarocks install lua-testmore
   - sudo luarocks install lua-testlongstring
+  - sudo luarocks install zipwriter
   - sudo ln -s /usr/local/share/lua/5.1 /usr/local/share/lua/5.2
 
 script:
