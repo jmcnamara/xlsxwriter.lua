@@ -14,7 +14,8 @@ plan(10)
 local expected
 local got
 local caption
-local Worksheet = require "xlsxwriter.worksheet"
+local Worksheet     = require "xlsxwriter.worksheet"
+local Sharedstrings = require "xlsxwriter.sharedstrings"
 local worksheet
 local cell_ref
 
@@ -41,6 +42,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write(cell_ref, 'some string')
 worksheet:_write_dimension()
@@ -57,6 +59,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write(cell_ref, 'some string')
 worksheet:_write_dimension()
@@ -73,6 +76,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write(cell_ref, 'some string')
 worksheet:_write_dimension()
@@ -89,6 +93,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write(cell_ref, 'some string')
 worksheet:_write_dimension()
@@ -105,6 +110,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write(cell_ref, 'some string')
 worksheet:_write_dimension()
@@ -121,6 +127,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write('A1', 'some string')
 worksheet:write('B2', 'some string')
@@ -138,6 +145,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write('B2', 'some string')
 worksheet:write('A1', 'some string')
@@ -155,6 +163,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write('B2',  'some string')
 worksheet:write('H11', 'some string')
@@ -172,6 +181,7 @@ caption  = string.format(" \tWorksheet: _write_dimension('%s')", cell_ref)
 expected = string.format('<dimension ref="%s"/>', cell_ref)
 
 worksheet = Worksheet:new()
+worksheet.str_table = Sharedstrings:new()
 worksheet:_set_filehandle(io.tmpfile())
 worksheet:write('A1',         'some string')
 worksheet:write('XFD1048576', 'some string')
