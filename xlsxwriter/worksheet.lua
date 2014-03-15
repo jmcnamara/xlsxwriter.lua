@@ -283,7 +283,7 @@ end
 -- Thin wrapper around _write_number() to handle "A1" notation.
 --
 function Worksheet:write_number(...)
-  self:_write_string(self:_convert_cell_args(...))
+  self:_write_number(self:_convert_cell_args(...))
 end
 
 
@@ -295,6 +295,16 @@ function Worksheet:_write_string(row, col, str, format)
   if not self:_check_dimensions(row, col) then
     return -1
   end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  str = self.str_table:_get_string_index(str)
+
+  self.data_table[row][col] = {'s', str, format}
+
+  return 0
 
 end
 
@@ -311,7 +321,7 @@ function Worksheet:_write_number(row, col, num, format)
     self.data_table[row] = {}
   end
 
-  self.data_table[row][col] = {'n',  num, format}
+  self.data_table[row][col] = {'n', num, format}
 
   return 0
 end
@@ -693,7 +703,7 @@ end
 --
 function Worksheet:_check_dimensions(row, col, ignore_row, ignore_col)
 
-  if row >= xl_rowmax or col >= xl_colmax then
+  if row >= xl_rowmax or col >= xl_colmax or row < 0 or col < 0 then
     return false
   end
 

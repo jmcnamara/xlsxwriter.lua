@@ -126,6 +126,7 @@ function Packager:_create_package()
   self:_write_vml_files()
   self:_write_comment_files()
   self:_write_table_files()
+  self:_write_shared_strings_file()
   self:_write_app_file()
   self:_write_core_file()
   self:_write_content_types_file()
@@ -273,9 +274,11 @@ end
 -- Write the sharedStrings.xml file.
 --
 function Packager:_write_shared_strings_file()
-  local sst  = self.workbook.str_table
-  sst:_set_filename("xl/sharedStrings.xml")
-  self:_add_to_zip(sst)
+  if self.workbook.str_table.string_count > 0 then
+    local sst  = self.workbook.str_table
+    sst:_set_filename("xl/sharedStrings.xml")
+    self:_add_to_zip(sst)
+  end
 end
 
 ----
