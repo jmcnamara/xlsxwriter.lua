@@ -14,6 +14,7 @@ install:
   - sudo luarocks install lzlib ZLIB_LIBDIR=/lib/x86_64-linux-gnu/
   - sudo luarocks install zipwriter
   - sudo ln -s /usr/local/share/lua/5.1 /usr/local/share/lua/5.2
+  - sudo pip install pytest
 
 script:
   - prove --exec="$LUA" --ext=lua -r test/unit
