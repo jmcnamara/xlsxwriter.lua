@@ -2,7 +2,7 @@ language: c
 
 env:
   - LUA=lua5.1
-  - LUA=lua5.2
+#  - LUA=lua5.2
 
 install:
   - sudo apt-get  install -qq lua5.1
@@ -16,4 +16,4 @@ install:
   - sudo ln -s /usr/local/share/lua/5.1 /usr/local/share/lua/5.2
 
 script:
-  - prove --exec="$LUA" --ext=lua -r test
+  - prove --exec="$LUA" --ext=lua -r test/unit
