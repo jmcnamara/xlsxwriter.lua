@@ -15,4 +15,4 @@ install:
 
 script:
   - prove --exec="$LUA" --ext=lua -r test/unit
-  - py.test test/comparison/test*.py
+  - py.test test/comparison/test*.py -v
