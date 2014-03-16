@@ -11,6 +11,8 @@ class TestCompareXLSXFiles(base_test_class.XLSXBaseTest):
     """
     Test file created with xlsxwriter.lua against a file created by Excel.
 
+    These tests check simple data writing and range checking.
+
     """
 
     def test_data01(self):
