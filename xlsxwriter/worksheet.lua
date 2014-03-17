@@ -1127,41 +1127,40 @@ function Worksheet:_write_row(r, spans, height, format,
     xf_index = format:_get_xf_index()
   end
 
-  -- TODO. Rewrite all as [#attributes + 1].
   if spans then
-    table.insert(attributes, {["spans"] = spans})
+    attributes[#attributes + 1] = {["spans"] = spans}
   end
 
   if xf_index > 0 then
-    table.insert(attributes, {["s"] = xf_index})
+    attributes[#attributes + 1] = {["s"] = xf_index}
   end
 
   if format then
-    table.insert(attributes, {["customFormat"] = "1"})
+    attributes[#attributes + 1] = {["customFormat"] = "1"}
   end
 
   if height ~= 15 then
-    table.insert(attributes, {["ht"] = height})
+    attributes[#attributes + 1] = {["ht"] = height}
   end
 
   if hidden then
-    table.insert(attributes, {["hidden"] = "1"})
+    attributes[#attributes + 1] = {["hidden"] = "1"}
   end
 
   if height ~= 15 then
-    table.insert(attributes, {["customHeight"] = 1})
+    attributes[#attributes + 1] = {["customHeight"] = 1}
   end
 
   if level > 0 then
-    table.insert(attributes, {["outlineLevel"] = level})
+    attributes[#attributes + 1] = {["outlineLevel"] = level}
   end
 
   if collapsed then
-    table.insert(attributes, {["collapsed"]    = "1"})
+    attributes[#attributes + 1] = {["collapsed"]    = "1"}
   end
 
   if self.excel_version == 2010 then
-    table.insert(attributes, {["x14ac:dyDescent"] = "0.25"})
+    attributes[#attributes + 1] = {["x14ac:dyDescent"] = "0.25"}
   end
 
   if empty_row then
@@ -1212,22 +1211,21 @@ function Worksheet:_write_cell(row, col, cell)
 
   local range = Utility.rowcol_to_cell(row, col)
   local attributes = {{["r"] = range}}
-  -- TODO. Rewrite all as [#attributes + 1].
 
   -- Add the cell format index.
   if xf_index > 0 then
 
-    table.insert(attributes, {["s"] = xf_index})
+    attributes[#attributes + 1] = {["s"] = xf_index}
 
   elseif self.set_rows[row] and self.set_rows[row][1] then
 
     local row_xf = self.set_rows[row][1]
-    table.insert(attributes, {["s"] = row_xf:_get_xf_index()})
+    attributes[#attributes + 1] = {["s"] = row_xf:_get_xf_index()}
 
   elseif self.col_formats[col] then
 
     local col_xf = self.col_formats[col]
-    table.insert(attributes, {["s"] = col_xf:_get_xf_index()})
+    attributes[#attributes + 1] = {["s"] = col_xf:_get_xf_index()}
   end
 
   -- Write the various cell types.
@@ -1265,7 +1263,7 @@ function Worksheet:_write_cell(row, col, cell)
 
     -- Check if the formula value is a string.
     if type(value) == "string" then
-      table.insert(attributes, {["t"] = "str"})
+      attributes[#attributes + 1] = {["t"] = "str"}
       value = Utility._escape_data(value)
     end
 
