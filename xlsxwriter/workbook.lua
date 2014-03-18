@@ -603,20 +603,17 @@ end
 -- Write <workbookPr> element.
 --
 function Workbook:_write_workbook_pr()
-  local date_1904             = self.date_1904
-  local default_theme_version = 124226
-  local codename              = self.vba_codename
-  local attributes ={}
+  local attributes = {}
 
-  if codename then
+  if self.vba_codename then
      table.insert(attributes, {["codeName"] = codename})
   end
 
-  if date_1904 then
+  if self.date_1904 then
      table.insert(attributes, {["date1904"] = 1})
   end
 
-  table.insert(attributes, {["defaultThemeVersion"] = default_theme_version})
+  table.insert(attributes, {["defaultThemeVersion"] = "124226"})
 
   self:_xml_empty_tag("workbookPr", attributes)
 end

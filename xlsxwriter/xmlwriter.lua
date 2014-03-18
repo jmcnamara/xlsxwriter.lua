@@ -214,8 +214,8 @@ function _format_attributes(attributes)
   local attr = ''
 
   if attributes then
-    for _, attribute in ipairs(attributes) do
-      for key, value in pairs(attribute) do
+    for i = 1, #attributes do
+      for key, value in pairs(attributes[i]) do
         value = _escape_attributes(value)
         attr = attr .. string.format(' %s="%s"', key, value)
       end
@@ -234,8 +234,8 @@ function _format_attributes_unencoded(attributes)
   local attr = ''
 
   if attributes then
-    for _, attribute in ipairs(attributes) do
-      for key, value in pairs(attribute) do
+    for i = 1, #attributes do
+      for key, value in pairs(attributes[i]) do
         attr = attr .. string.format(' %s="%s"', key, value)
       end
     end

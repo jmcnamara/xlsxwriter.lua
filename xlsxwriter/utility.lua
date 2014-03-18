@@ -279,26 +279,37 @@ function Utility.convert_date_string(date_str, date_1904)
   -- Strip trailing Z in ISO8601 date.
   date_str = date_str:gsub("Z", "")
 
-  -- Split into date and time.
-  local date, time = string.match(date_str, "(.*)T(.*)")
+  -- Get the date and time parts of the date string.
+  local date = ""
+  local time = ""
 
-  -- We allow the time portion of the input DateTime to be optional.
+  if string.match(date_str, "T") then
+    date, time = string.match(date_str, "(.*)T(.*)")
+  elseif string.match(date_str, "^%d%d%d%d%-%d%d%-%d%d$") then
+    date = date_str
+  elseif string.match(date_str, "^%d%d:%d%d:%d%d") then
+    time = date_str
+  else
+    return nil
+  end
+
   if time ~= '' then
     -- Match times like hh:mm:ss.sss.
     local hour, min, sec = string.match(time, "^(%d%d):(%d%d):(.*)$")
-    date_time["hour"] = hour
-    date_time["min"]  = min
-    date_time["sec"]  = sec
+    date_time["hour"] = tonumber(hour)
+    date_time["min"]  = tonumber(min)
+    date_time["sec"]  = tonumber(sec)
   end
 
   if date ~= '' then
     -- Match date as yyyy-mm-dd.
-    local year, month, day = string.match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
-    date_time["year"]  = year
-    date_time["month"] = month
-    date_time["day"]   = day
+    local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)$")
+    date_time["year"]  = tonumber(year)
+    date_time["month"] = tonumber(month)
+    date_time["day"]   = tonumber(day)
   end
 
+  return Utility.convert_date_time(date_time, date_1904)
 end
 
 return Utility

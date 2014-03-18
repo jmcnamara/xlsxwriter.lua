@@ -1,5 +1,5 @@
 ----
--- Tests for the xlsxwriter.lua xml writer class.
+-- Tests for the xlsxwriter.lua xml utility class.
 --
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
@@ -9,13 +9,15 @@ require "Test.More"
 local utility = require "xlsxwriter.utility"
 local expected
 local got
+local expected_t
+local got_t
 local caption
 local tests
 
-plan(594)
+plan(4)
 
 ----
--- Test the utility cell_to_rowcol functions.
+-- Test the utility convert_date_time function.
 --
 
 -- Dates in the 1900 epoch.
@@ -220,15 +222,22 @@ tests = {
   {{9999, 12, 31}, 2958465},
 }
 
+got_t      = {}
+expected_t = {}
 for _, test in ipairs(tests) do
-  got      = utility.convert_date_time{year  = test[1][1], 
-                                       month = test[1][2], 
+  got      = utility.convert_date_time{year  = test[1][1],
+                                       month = test[1][2],
                                        day   = test[1][3]}
   expected = test[2]
-  caption  = string.format(" \tconvert(%d, %d, %d) -> %d",
-                           test[1][1], test[1][2], test[1][3], test[2])
-  is(got, expected, caption)
+
+  table.insert(got_t, got)
+  table.insert(expected_t, expected)
 end
+
+caption  = " \tconvert_date_time() Dates only. 1900 epoch."
+eq_array(got_t, expected_t, caption)
+
+
 
 -- Dates in the 1904 epoch.
 tests = {
@@ -434,16 +443,21 @@ tests = {
   {{9999, 12, 31}, 2957003},
 }
 
+got_t      = {}
+expected_t = {}
 for _, test in ipairs(tests) do
-  got      = utility.convert_date_time({year  = test[1][1], 
-                                       month = test[1][2], 
+  got      = utility.convert_date_time({year  = test[1][1],
+                                       month = test[1][2],
                                        day   = test[1][3]},
                                        true)
   expected = test[2]
-  caption  = string.format(" \tconvert(%d, %d, %d) -> %d",
-                           test[1][1], test[1][2], test[1][3], test[2])
-  is(got, expected, caption)
+
+  table.insert(got_t, got)
+  table.insert(expected_t, expected)
 end
+
+caption  = " \tconvert_date_time() Dates only. 1904 epoch."
+eq_array(got_t, expected_t, caption)
 
 tests = {
   {{1899, 12, 31,  0,  0,  0.000}, 0},
@@ -545,20 +559,24 @@ tests = {
   {{9834,  9, 10, 23, 17, 12.632}, 2898088.9702850925},
   {{9999, 12, 31, 23, 59, 59.000}, 2958465.999988426},
 }
+
+got_t      = {}
+expected_t = {}
 for _, test in ipairs(tests) do
-  got      = utility.convert_date_time{year  = test[1][1], 
-                                       month = test[1][2], 
+  got      = utility.convert_date_time{year  = test[1][1],
+                                       month = test[1][2],
                                        day   = test[1][3],
                                        hour  = test[1][4],
                                        min   = test[1][5],
                                        sec   = test[1][6]}
-
   expected = test[2]
-  caption  = string.format(" \tconvert(%d, %d, %d, %d, %d, %d) -> %g",
-                           test[1][1], test[1][2], test[1][3], 
-                           test[1][4], test[1][5], test[1][6], test[2])
-  is(got, expected, caption)
+
+  table.insert(got_t, got)
+  table.insert(expected_t, expected)
 end
+
+caption  = " \tconvert_date_time() Dates and times."
+eq_array(got_t, expected_t, caption)
 
 
 -- Times without dates.
@@ -663,17 +681,21 @@ tests = {
   {{23, 59, 59.999}, 0.99999998842592586},
 }
 
+got_t      = {}
+expected_t = {}
 for _, test in ipairs(tests) do
-  got      = utility.convert_date_time{hour = test[1][1], 
-                                       min  = test[1][2], 
+  got      = utility.convert_date_time{hour = test[1][1],
+                                       min  = test[1][2],
                                        sec  = test[1][3]}
   expected = test[2]
-  caption  = string.format(" \tconvert(%d, %d, %d) -> %g",
-                           test[1][1], test[1][2], test[1][3], test[2])
 
   -- Round to double precision before comparison.
   got      = string.format("%g", got)
   expected = string.format("%g", expected)
 
-  is(got, expected, caption)
+  table.insert(got_t, got)
+  table.insert(expected_t, expected)
 end
+
+caption  = " \tconvert_date_time() Times only."
+eq_array(got_t, expected_t, caption)

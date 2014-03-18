@@ -25,17 +25,16 @@ class XLSXBaseTest(unittest.TestCase):
         self.ignore_files = []
         self.ignore_elements = {}
 
-    def run_lua_test(self, lua_name, got_filename=None):
+    def run_lua_test(self, lua_name, exp_filename=None):
         """Run lua test and compare output xlsx file with the Excel file."""
 
         got = os.system("lua test/comparison/lua/%s.lua" % lua_name)
         self.assertEqual(got, self.no_system_error)
 
         # Create the path/file names for the xlsx files to compare.
-        exp_filename = lua_name.replace('test_', '') + '.xlsx'
-
-        if not got_filename:
-            got_filename = 'test_' + exp_filename
+        got_filename = lua_name + '.xlsx'
+        if not exp_filename:
+            exp_filename = lua_name.replace('test_', '') + '.xlsx'
 
         self.got_filename = got_filename
         self.exp_filename = 'test/comparison/xlsx_files/' + exp_filename

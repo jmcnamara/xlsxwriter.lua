@@ -286,45 +286,20 @@ function Worksheet:write_number(...)
   self:_write_number(self:_convert_cell_args(...))
 end
 
-
 ----
--- Write a string to a Worksheet cell.
+-- Thin wrapper around _write_date_time() to handle "A1" notation.
 --
-function Worksheet:_write_string(row, col, str, format)
-
-  if not self:_check_dimensions(row, col) then
-    return -1
-  end
-
-  if not self.data_table[row] then
-    self.data_table[row] = {}
-  end
-
-  str = self.str_table:_get_string_index(str)
-
-  self.data_table[row][col] = {'s', str, format}
-
-  return 0
-
+function Worksheet:write_date_time(...)
+  self:_write_date_time(self:_convert_cell_args(...))
 end
 
 ----
--- Write a number to a Worksheet cell.
+-- Thin wrapper around _write_date_string() to handle "A1" notation.
 --
-function Worksheet:_write_number(row, col, num, format)
-
-  if not self:_check_dimensions(row, col) then
-    return -1
-  end
-
-  if not self.data_table[row] then
-    self.data_table[row] = {}
-  end
-
-  self.data_table[row][col] = {'n', num, format}
-
-  return 0
+function Worksheet:write_date_string(...)
+  self:_write_date_string(self:_convert_cell_args(...))
 end
+
 
 ----
 -- Set the worksheet as a selected worksheet, i.e. the worksheet has its tab
@@ -689,6 +664,62 @@ function Worksheet:_convert_column_args(...)
   end
 end
 
+----
+-- Write a string to a Worksheet cell.
+--
+function Worksheet:_write_string(row, col, str, format)
+
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  str = self.str_table:_get_string_index(str)
+
+  self.data_table[row][col] = {'s', str, format}
+
+  return 0
+
+end
+
+----
+-- Write a number to a Worksheet cell.
+--
+function Worksheet:_write_number(row, col, num, format)
+
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  self.data_table[row][col] = {'n', num, format}
+
+  return 0
+end
+
+----
+-- Todo.
+--
+function Worksheet:_write_date_time(row, col, date_time, format)
+  local date = Utility.convert_date_time(date_time, self.date_1904)
+
+  self:_write_number(row, col, date, format)
+end
+
+----
+-- Todo.
+--
+function Worksheet:_write_date_string(row, col, date_string, format)
+  local date = Utility.convert_date_string(date_string, self.date_1904)
+
+  self:_write_number(row, col, date, format)
+end
 
 
 
