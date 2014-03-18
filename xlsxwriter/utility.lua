@@ -273,70 +273,32 @@ function Utility.convert_date_string(date_str, date_1904)
 
   local date_time = {}
 
-
   -- Check for invalid date char.
   if string.match(date_str, "[^0-9T:%-%.Z]") then return nil end
 
-
-  -- Check for "T" after date or before time.
-  if not date_str =~ /\dT|T\d/ then
-     return
-  end
-
-
   -- Strip trailing Z in ISO8601 date.
-  date_str =~ s/Z$//
+  date_str = date_str:gsub("Z", "")
 
   -- Split into date and time.
-  local (date, time) = split /T/, date_str
+  local date, time = string.match(date_str, "(.*)T(.*)")
 
   -- We allow the time portion of the input DateTime to be optional.
   if time ~= '' then
-
-    -- Match hh:mm:ss.sss+ where the seconds are optional
-    if time =~ /^(\d\d):(\d\d)(:(\d\d(\.\d+)?))?/ then
-      hour = 1
-      min  = 2
-      sec  = 4 or 0
-    else
-      return nil;    -- Not a valid time format.
-    end
-
-    -- Some boundary checks
-    if hour >= 24 then
-       return
-    end
-
-    if min >= 60 then
-       return
-    end
-
-    if sec >= 60 then
-       return
-    end
-
-
-    -- Excel expresses seconds as a fraction of the number in 24 hours.
-    seconds = (hour * 60 * 60 + min * 60 + sec) / (24 * 60 * 60)
+    -- Match times like hh:mm:ss.sss.
+    local hour, min, sec = string.match(time, "^(%d%d):(%d%d):(.*)$")
+    date_time["hour"] = hour
+    date_time["min"]  = min
+    date_time["sec"]  = sec
   end
 
-  -- We allow the date portion of the input DateTime to be optional.
-  if date == '' then
-     return seconds
-  end
-
-
-  -- Match date as yyyy-mm-dd.
-  if date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/ then
-    year  = 1
-    month = 2
-    day   = 3
-  else
-    return nil;    -- Not a valid date format.
+  if date ~= '' then
+    -- Match date as yyyy-mm-dd.
+    local year, month, day = string.match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+    date_time["year"]  = year
+    date_time["month"] = month
+    date_time["day"]   = day
   end
 
 end
-
-
 
 return Utility
