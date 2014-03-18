@@ -179,4 +179,164 @@ function Utility.excel_color(color)
 
 end
 
+
+
+----
+-- The function takes an os.time style date table and converts it to a decimal
+-- number representing a valid Excel date.
+--
+-- Dates and times in Excel are represented by real numbers. The integer part of
+-- the number stores the number of days since the epoch and the fractional part
+-- stores the percentage of the day in seconds. The epoch can be either 1900 or
+-- 1904.
+--
+function Utility.convert_date_time(date_time, date_1904)
+
+  local year  = date_time["year"]
+  local month = date_time["month"]
+  local day   = date_time["day"]
+  local hour  = date_time["hour"] or 0
+  local min   = date_time["min"]  or 0
+  local sec   = date_time["sec"]  or 0
+
+  -- For times without dates set the default date for the epoch
+  if not year then
+    if not date_1904 then
+      year  = 1899; month = 12; day = 31
+    else
+      year  = 1904; month = 1;  day = 1
+    end
+  end
+
+  -- Converte the Excel seconds to a fraction of the seconds in 24 hours.
+  local seconds = (hour * 60 * 60 + min * 60 + sec) / (24 * 60 * 60)
+
+  -- Special cases for Excel dates.
+  if not date_1904 then
+      -- Excel 1900 epoch.
+    if year == 1899 and month == 12 and day == 31 then return seconds end
+    if year == 1900 and month == 1  and day == 0  then return seconds end
+    -- Excel false leapday
+    if year == 1900 and month == 2 and day == 29 then return 60 + seconds end
+  end
+
+  -- We calculate the date by calculating the number of days since the epoch
+  -- and adjust for the number of leap days. We calculate the number of leap
+  -- days by normalising the year in relation to the epoch. Thus the year 2000
+  -- becomes 100 for 4-year and 100-year leapdays and 400 for 400-year leapdays.
+  --
+  local epoch  = date_1904 and 1904 or 1900
+  local offset = date_1904 and 4    or 0
+  local norm   = 300
+  local range  = year - epoch
+
+  -- Set month days and check for leap year.
+  local mdays = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+  local leap = 0
+  if year % 4 == 0 and year % 100 > 0 or year % 400 == 0 then
+     leap     = 1
+     mdays[2] = 29
+  end
+
+  -- Some boundary checks
+  if year  < epoch or year > 9999        then return nil end
+  if month < 1     or month > 12         then return nil end
+  if day   < 1     or day > mdays[month] then return nil end
+
+  -- Accumulate the number of days since the epoch.
+  local days = day    -- Add days for current month
+
+  for i = 1, month -1 do
+    -- Add days for past months.
+    days = days + mdays[i]
+  end
+
+  days = days + range * 365                               -- Past year days.
+  days = days + math.floor((range                ) /   4) -- 4   yr leapdays.
+  days = days - math.floor((range + offset       ) / 100) -- 100 yr leapdays.
+  days = days + math.floor((range + offset + norm) / 400) -- 400 yr leapdays.
+  days = days - leap                                      -- Already counted.
+
+  -- Adjust for Excel erroneously treating 1900 as a leap year.
+  if not date_1904 and days > 59 then days = days + 1 end
+
+  return days + seconds
+end
+
+----
+-- The function takes a date and time in ISO8601 "yyyy-mm-ddThh:mm:ss.ss" format
+-- and converts it to a decimal number representing a valid Excel date.
+--
+-- See convert_date_time() funciton above.
+--
+function Utility.convert_date_string(date_str, date_1904)
+
+  local date_time = {}
+
+
+  -- Check for invalid date char.
+  if string.match(date_str, "[^0-9T:%-%.Z]") then return nil end
+
+
+  -- Check for "T" after date or before time.
+  if not date_str =~ /\dT|T\d/ then
+     return
+  end
+
+
+  -- Strip trailing Z in ISO8601 date.
+  date_str =~ s/Z$//
+
+  -- Split into date and time.
+  local (date, time) = split /T/, date_str
+
+  -- We allow the time portion of the input DateTime to be optional.
+  if time ~= '' then
+
+    -- Match hh:mm:ss.sss+ where the seconds are optional
+    if time =~ /^(\d\d):(\d\d)(:(\d\d(\.\d+)?))?/ then
+      hour = 1
+      min  = 2
+      sec  = 4 or 0
+    else
+      return nil;    -- Not a valid time format.
+    end
+
+    -- Some boundary checks
+    if hour >= 24 then
+       return
+    end
+
+    if min >= 60 then
+       return
+    end
+
+    if sec >= 60 then
+       return
+    end
+
+
+    -- Excel expresses seconds as a fraction of the number in 24 hours.
+    seconds = (hour * 60 * 60 + min * 60 + sec) / (24 * 60 * 60)
+  end
+
+  -- We allow the date portion of the input DateTime to be optional.
+  if date == '' then
+     return seconds
+  end
+
+
+  -- Match date as yyyy-mm-dd.
+  if date =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/ then
+    year  = 1
+    month = 2
+    day   = 3
+  else
+    return nil;    -- Not a valid date format.
+  end
+
+end
+
+
+
 return Utility
