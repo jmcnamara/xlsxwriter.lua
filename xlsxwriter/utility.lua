@@ -7,6 +7,7 @@ require "xlsxwriter.strict"
 
 local Utility = {}
 local char_A = string.byte("A")
+local col_names = {}
 
 local named_colors = {
   ["black"]   = "#000000",
@@ -31,29 +32,35 @@ local named_colors = {
 -- Convert a zero indexed column cell reference to an Excel column string.
 --
 function Utility.col_to_name_abs(col_num, col_abs)
-  local col_str = ""
 
-  col_num = col_num + 1
-  col_abs = col_abs and "$" or ""
+  local col_str      = col_names[col_num]
+  local col_num_orig = col_num
 
-  while col_num > 0 do
-    -- Set remainder from 1 .. 26
-    local remainder = col_num % 26
-    if remainder == 0 then
-      remainder = 26
+  if not col_str then
+    col_str = ""
+    col_num = col_num + 1
+
+    while col_num > 0 do
+      -- Set remainder from 1 .. 26
+      local remainder = col_num % 26
+      if remainder == 0 then remainder = 26 end
+
+      -- Convert the remainder to a character.
+      local col_letter = string.char(char_A + remainder - 1)
+
+      -- Accumulate the column letters, right to left.
+      col_str = col_letter .. col_str
+
+      -- Get the next order of magnitude.
+      col_num = math.floor((col_num - 1) / 26)
     end
 
-    -- Convert the remainder to a character.
-    local col_letter = string.char(char_A + remainder - 1)
-
-    -- Accumulate the column letters, right to left.
-    col_str = col_letter .. col_str
-
-    -- Get the next order of magnitude.
-    col_num = math.floor((col_num - 1) / 26)
+    col_names[col_num_orig] = col_str
   end
 
-  return col_abs .. col_str
+  if col_abs then col_str = '$' .. col_str end
+
+  return col_str
 end
 
 ----
