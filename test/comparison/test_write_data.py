@@ -32,3 +32,9 @@ class TestCompareXLSXFiles(base_test_class.XLSXBaseTest):
 
     def test_data06(self):
         self.run_lua_test('test_data06')
+
+    def test_data07(self):
+        self.ignore_files = ['xl/calcChain.xml',
+                             '[Content_Types].xml',
+                             'xl/_rels/workbook.xml.rels']
+        self.run_lua_test('test_data07')

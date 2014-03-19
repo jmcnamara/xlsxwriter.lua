@@ -287,6 +287,13 @@ function Worksheet:write_number(...)
 end
 
 ----
+-- Thin wrapper around _write_formula() to handle "A1" notation.
+--
+function Worksheet:write_formula(...)
+  self:_write_formula(self:_convert_cell_args(...))
+end
+
+----
 -- Thin wrapper around _write_date_time() to handle "A1" notation.
 --
 function Worksheet:write_date_time(...)
@@ -702,6 +709,30 @@ function Worksheet:_write_number(row, col, num, format)
 
   return 0
 end
+
+
+----
+-- Write a formula to a Worksheet cell.
+--
+function Worksheet:_write_formula(row, col, formula, format, value)
+
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  -- Strip the formula = sign, if it exists.
+  if formula:match('^=') then formula = formula:sub(2) end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  self.data_table[row][col] = {'f', formula, format, value}
+
+  return 0
+end
+
+
 
 ----
 -- Todo.
