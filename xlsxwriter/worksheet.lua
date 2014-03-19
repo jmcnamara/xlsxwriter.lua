@@ -257,10 +257,19 @@ function Worksheet:_assemble_xml_file()
 end
 
 
-
 ----
--- Write data to a Worksheet cell by calling the appropriate _write_*()
+-- Write data to a worksheet cell by calling the appropriate write_*()
 -- method based on the type of data being passed.
+--
+-- Args:
+--     row:   The cell row (zero indexed).
+--     col:   The cell column (zero indexed).
+--     args:  Args to pass to sub functions.
+--
+-- Returns:
+--     0:     Success.
+--     -1:    Row or column is out of worksheet bounds.
+--     other: Return value of called method.
 --
 function Worksheet:write(...)
   local row, col, token, format = self:_convert_cell_args(...)
@@ -273,51 +282,127 @@ function Worksheet:write(...)
 end
 
 ----
--- Thin wrapper around _write_string() to handle "A1" notation.
+-- Write a string to a worksheet cell.
+--
+-- Args:
+--     row:    The cell row (zero indexed).
+--     col:    The cell column (zero indexed).
+--     string: Cell data. string.
+--     format: An optional cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--     -2: String > 32k characters.
 --
 function Worksheet:write_string(...)
   self:_write_string(self:_convert_cell_args(...))
 end
 
 ----
--- Thin wrapper around _write_number() to handle "A1" notation.
+-- Write a number to a worksheet cell.
+--
+-- Args:
+--     row:    The cell row (zero indexed).
+--     col:    The cell column (zero indexed).
+--     number: Cell data. number.
+--     format: An optional cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_number(...)
   self:_write_number(self:_convert_cell_args(...))
 end
 
 ----
--- Thin wrapper around _write_formula() to handle "A1" notation.
+-- Write a formula to a worksheet cell.
+--
+-- Args:
+--     first_row:    The first row of the cell range. (zero indexed).
+--     first_col:    The first column of the cell range.
+--     last_row:     The last row of the cell range. (zero indexed).
+--     last_col:     The last column of the cell range.
+--     formula:      Cell formula.
+--     format:       An optional cell Format object.
+--     value:        An optional value for the formula. Default is 0.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--
 --
 function Worksheet:write_formula(...)
   self:_write_formula(self:_convert_cell_args(...))
 end
 
 ----
--- Thin wrapper around _write_array_formula() to handle "A1" notation.
+-- Write a formula to a worksheet cell.
+--
+-- Args:
+--     first_row:    The first row of the cell range. (zero indexed).
+--     first_col:    The first column of the cell range.
+--     last_row:     The last row of the cell range. (zero indexed).
+--     last_col:     The last column of the cell range.
+--     formula:      Cell formula.
+--     format:       An optional cell Format object.
+--     value:        An optional value for the formula. Default is 0.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_array_formula(...)
   self:_write_array_formula(self:_convert_range_args(...))
 end
 
 ----
--- Thin wrapper around _write_date_time() to handle "A1" notation.
+-- Write an os.time style table as a date or time to a worksheet cell.
+--
+-- Args:
+--     row:         The cell row (zero indexed).
+--     col:         The cell column (zero indexed).
+--     date_time:   An os.time style table.
+--     format:      A cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_date_time(...)
   self:_write_date_time(self:_convert_cell_args(...))
 end
 
 ----
--- Thin wrapper around _write_date_string() to handle "A1" notation.
+-- Write a datetime string in ISO8601 "yyyy-mm-ddThh:mm:ss.ss" format as
+-- a date or time to a worksheet cell.
+--
+-- Args:
+--     row:         The cell row (zero indexed).
+--     col:         The cell column (zero indexed).
+--     date_string: An ISO8601 sytle date string.
+--     format:      A cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_date_string(...)
   self:_write_date_string(self:_convert_cell_args(...))
 end
 
-
 ----
--- Set the worksheet as a selected worksheet, i.e. the worksheet has its tab
--- highlighted.
+-- Set this worksheet as the active worksheet, i.e. the worksheet that is
+-- displayed when the workbook is opened. Also set it as selected.
+--
+-- Note: An active worksheet cannot be hidden.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:select()
   -- Selected worksheet can't be hidden.
@@ -329,6 +414,14 @@ end
 -- Set this worksheet as the active worksheet, i.e. the worksheet that is
 -- displayed when the workbook is opened. Also set it as selected.
 --
+-- Note: An active worksheet cannot be hidden.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:activate()
   -- Active worksheet can't be hidden.
   self.hidden   = false
@@ -337,7 +430,13 @@ function Worksheet:activate()
 end
 
 ----
--- Hide this worksheet.
+-- Hide the current worksheet.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:hide()
   self.hidden = true
@@ -347,9 +446,17 @@ function Worksheet:hide()
 end
 
 ----
--- Set this worksheet as the first visible sheet. This is necessary
+-- Set current worksheet as the first visible sheet. This is necessary
 -- when there are a large number of worksheets and the activated
 -- worksheet is not visible on the screen.
+--
+-- Note: A selected worksheet cannot be hidden.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_first_sheet()
   -- Active worksheet can't be hidden.
@@ -360,8 +467,13 @@ end
 ----
 -- Set the option to hide gridlines on the screen and the printed page.
 --
--- This was mainly useful for Excel 5 where printed gridlines were on by
--- default.
+-- Args:
+--     option:    0 : Don't hide gridlines
+--                1 : Hide printed gridlines only
+--                2 : Hide screen and printed gridlines
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:hide_gridlines(option)
 
@@ -382,6 +494,12 @@ end
 ----
 -- Set the worksheet zoom factor.
 --
+-- Args:
+--     zoom: Scale factor: 10 <= zoom <= 400.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:set_zoom(scale)
   -- Confine the scale to Excel's range
   if scale < 10 or scale > 400 then
@@ -393,14 +511,26 @@ function Worksheet:set_zoom(scale)
 end
 
 ----
--- Display the worksheet right to left for some eastern versions of Excel.
+-- Display the worksheet right to left for some versions of Excel.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_right_to_left()
   self.right_to_left = true
 end
 
 ----
--- Hide cell zero values.
+-- Hide zero values in worksheet cells.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:hide_zero()
   self.show_zeros = false
@@ -408,6 +538,12 @@ end
 
 ----
 -- Set the order in which pages are printed.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:print_across(page_order)
   if page_order then
@@ -419,7 +555,13 @@ function Worksheet:print_across(page_order)
 end
 
 ----
--- Set the start page number.
+-- Set the start page number when printing.
+--
+-- Args:
+--     start_page: Start page number.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_start_page(value)
   self.page_start   = value
@@ -429,6 +571,12 @@ end
 ----
 -- Set the page orientation as portrait.
 --
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:set_portrait()
   self.orientation        = true
   self.page_setup_changed = true
@@ -437,13 +585,25 @@ end
 ----
 -- Set the page orientation as landscape.
 --
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:set_landscape()
   self.orientation        = false
   self.page_setup_changed = true
 end
 
 ----
--- Set the page view mode for Mac Excel.
+-- Set the page view mode.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_page_view()
   self.page_view = true
@@ -452,12 +612,24 @@ end
 ----
 -- Set the colour of the worksheet tab.
 --
+-- Args:
+--     color: A #RGB color index.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:set_tab_color(color)
   self.tab_color = color
 end
 
 ----
--- Set the paper type. Ex. 1 = US Letter, 9 = A4
+-- Set the paper type. US Letter = 1, A4 = 9.
+--
+-- Args:
+--     paper_size: Paper index.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_paper(paper_size)
   self.paper_size         = paper_size
@@ -466,6 +638,13 @@ end
 
 ----
 -- Set the page header caption and optional margin.
+--
+-- Args:
+--     header: Header string.
+--     margin: Header margin.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_header(header, margin)
 
@@ -482,6 +661,13 @@ end
 ----
 -- Set the page footer caption and optional margin.
 --
+-- Args:
+--     footer: Footer string.
+--     margin: Footer margin.
+--
+-- Returns:
+--     Nothing.
+--
 function Worksheet:set_footer(footer, margin)
 
   if #footer >= 255 then
@@ -495,7 +681,16 @@ function Worksheet:set_footer(footer, margin)
 end
 
 ----
--- Set the page margins in inches.
+-- Set all the page margins in inches.
+--
+-- Args:
+--     left:   Left margin.
+--     right:  Right margin.
+--     top:    Top margin.
+--     bottom: Bottom margin.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:set_margins(left, right, top, bottom)
   self.margin_left   = left   and left   or 0.7
@@ -505,81 +700,37 @@ function Worksheet:set_margins(left, right, top, bottom)
 end
 
 ----
--- Thin wrapper around _set_column() to handle "A:Z" notation.
+-- Set the width, and other properties of a single column or a
+-- range of columns.
+--
+-- Args:
+--     firstcol:    First column (zero-indexed).
+--     lastcol:     Last column (zero-indexed). Can be same as firstcol.
+--     width:       Column width. (optional).
+--     format:      Column cell_format. (optional).
+--     options:     Dict of options such as hidden and level.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Column number is out of worksheet bounds.
 --
 function Worksheet:set_column(...)
   self:_set_column(self:_convert_column_args(...))
 end
 
 ----
--- Set the width of a single column or a range of columns.
+-- Set the width, and other properties of a row.
+-- range of columns.
 --
-function Worksheet:_set_column(firstcol, lastcol, width, format, options)
-
-  -- Ensure 2nd col is larger than first. Also for KB918419 bug.
-  if firstcol > lastcol then
-    firstcol, lastcol = lastcol, firstcol
-  end
-
-  -- Set the optional column values.
-  options = options or {}
-  local hidden    = options["hidden"]    or false
-  local collapsed = options["collapsed"] or false
-  local level     = options["level"]     or 0
-
-  -- Check that cols are valid and store max and min values with default row.
-  -- NOTE: The check shouldn't modify the row dimensions and should only modify
-  --       the column dimensions in certain cases.
-  local ignore_row = true
-  local ignore_col = true
-
-  if format or (width and hidden) then
-    ignore_col = false
-  end
-
-
-  if not self:_check_dimensions(0, firstcol, ignore_row, ignore_col) then
-    return -1
-  end
-
-  if not self:_check_dimensions(0, lastcol, ignore_row, ignore_col) then
-    return -1
-  end
-
-  -- Set the limits for the outline levels (0 <= x <= 7).
-  if level < 0 then level = 0  end
-  if level > 7 then level = 7  end
-
-  if level > self.outline_col_level then
-    self.outline_col_level = level
-  end
-
-  -- Store the column data based on the first column.
-  self.colinfo[firstcol] = {["firstcol"]  = firstcol,
-                            ["lastcol"]   = lastcol,
-                            ["width"]     = width,
-                            ["format"]    = format,
-                            ["hidden"]    = hidden,
-                            ["level"]     = level,
-                            ["collapsed"] = collapsed}
-
-  -- Store the column change to allow optimisations.
-  self.col_size_changed = 1
-
-  -- Store the col sizes for use when calculating image vertices taking
-  -- hidden columns into account. Also store the column formats.
-  if hidden then width = 0 end
-
-  for col = firstcol, lastcol do
-    self.col_sizes[col] = width
-    if format then
-      self.col_formats[col] = format
-    end
-  end
-end
-
-----
--- This method is used to set the height and format for a row.
+-- Args:
+--     row:         Row number (zero-indexed).
+--     height:      Row width. (optional).
+--     format:      Row cell_format. (optional).
+--     options:     Dict of options such as hidden, level and collapsed.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row number is out of worksheet bounds.
 --
 function Worksheet:set_row(row, height, format, options)
 
@@ -632,7 +783,13 @@ function Worksheet:set_row(row, height, format, options)
 end
 
 ----
--- Retrieve the worksheet name.
+-- Set the default author of the cell comments.
+--
+-- Args:
+--     author: Comment author name. String.
+--
+-- Returns:
+--     Nothing.
 --
 function Worksheet:get_name()
   return self.name
@@ -805,7 +962,7 @@ return 0
 end
 
 ----
--- Todo.
+-- Write a os.time() style table to a Worksheet cell.
 --
 function Worksheet:_write_date_time(row, col, date_time, format)
   local date = Utility.convert_date_time(date_time, self.date_1904)
@@ -814,6 +971,7 @@ function Worksheet:_write_date_time(row, col, date_time, format)
 end
 
 ----
+-- Write an ISO8601 style date string to a Worksheet cell.
 -- Todo.
 --
 function Worksheet:_write_date_string(row, col, date_string, format)
@@ -821,8 +979,6 @@ function Worksheet:_write_date_string(row, col, date_string, format)
 
   self:_write_number(row, col, date, format)
 end
-
-
 
 ----
 -- Check that row and col are valid and store max and min values for use in
@@ -870,7 +1026,67 @@ function Worksheet:_check_dimensions(row, col, ignore_row, ignore_col)
   return true
 end
 
+----
+-- Set the width of a single column or a range of columns.
+--
+function Worksheet:_set_column(firstcol, lastcol, width, format, options)
 
+  -- Ensure 2nd col is larger than first.
+  if firstcol > lastcol then firstcol, lastcol = lastcol, firstcol end
+
+  -- Set the optional column values.
+  options = options or {}
+  local hidden    = options["hidden"]    or false
+  local collapsed = options["collapsed"] or false
+  local level     = options["level"]     or 0
+
+  -- Check that cols are valid and store max and min values with default row.
+  -- NOTE: The check shouldn't modify the row dimensions and should only modify
+  --       the column dimensions in certain cases.
+  local ignore_row = true
+  local ignore_col = true
+
+  if format or (width and hidden) then ignore_col = false end
+
+  if not self:_check_dimensions(0, firstcol, ignore_row, ignore_col) then
+    return -1
+  end
+
+  if not self:_check_dimensions(0, lastcol, ignore_row, ignore_col) then
+    return -1
+  end
+
+  -- Set the limits for the outline levels (0 <= x <= 7).
+  if level < 0 then level = 0  end
+  if level > 7 then level = 7  end
+
+  if level > self.outline_col_level then
+    self.outline_col_level = level
+  end
+
+  -- Store the column data based on the first column.
+  self.colinfo[firstcol] = {["firstcol"]  = firstcol,
+                            ["lastcol"]   = lastcol,
+                            ["width"]     = width,
+                            ["format"]    = format,
+                            ["hidden"]    = hidden,
+                            ["level"]     = level,
+                            ["collapsed"] = collapsed}
+
+  -- Store the column change to allow optimisations.
+  self.col_size_changed = 1
+
+  -- Store the col sizes for use when calculating image vertices taking
+  -- hidden columns into account. Also store the column formats.
+  if hidden then width = 0 end
+
+  for col = firstcol, lastcol do
+    self.col_sizes[col] = width
+    if format then
+      self.col_formats[col] = format
+    end
+  end
+end
 
 ------------------------------------------------------------------------------
 --
