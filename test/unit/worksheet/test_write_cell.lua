@@ -87,7 +87,7 @@ expected = '<c r="A1"><f t="array" ref="A1">SUM(B1:C1*B2:C2)</f><v>9500</v></c>'
 worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
-worksheet:_write_cell(0, 0, {'a', 'SUM(B1:C1*B2:C2)', format, 'A1', 9500})
+worksheet:_write_cell(0, 0, {'a', 'SUM(B1:C1*B2:C2)', format, 9500, 'A1'})
 
 got = worksheet:_get_data()
 

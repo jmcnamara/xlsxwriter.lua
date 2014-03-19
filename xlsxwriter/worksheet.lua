@@ -294,6 +294,13 @@ function Worksheet:write_formula(...)
 end
 
 ----
+-- Thin wrapper around _write_array_formula() to handle "A1" notation.
+--
+function Worksheet:write_array_formula(...)
+  self:_write_array_formula(self:_convert_range_args(...))
+end
+
+----
 -- Thin wrapper around _write_date_time() to handle "A1" notation.
 --
 function Worksheet:write_date_time(...)
@@ -655,6 +662,23 @@ function Worksheet:_convert_cell_args(...)
 end
 
 ----
+-- Decorator function to convert "A1:G9" style ranges to row/cols.
+--
+function Worksheet:_convert_range_args(...)
+  if type(...) == "string" then
+    -- Convert "A1:G9" style range to row1, col1, row2, col2.
+    local range = ...
+    local range_start, range_end = range:match("(%S+):(%S+)")
+    local row_1, col_1 = Utility.cell_to_rowcol(range_start)
+    local row_2, col_2 = Utility.cell_to_rowcol(range_end)
+    return row_1, col_1, row_2, col_2, unpack({...}, 2)
+  else
+    -- Parameters are already in row, col format.
+    return ...
+  end
+end
+
+----
 -- Decorator function to convert "A:Z" column range calls to column numbers.
 --
 function Worksheet:_convert_column_args(...)
@@ -732,7 +756,53 @@ function Worksheet:_write_formula(row, col, formula, format, value)
   return 0
 end
 
+----
+-- Write a array_formula to a Worksheet cell.
+--
+function Worksheet:_write_array_formula(first_row, first_col,
+                                        last_row, last_col,
+                                        formula, format, value)
 
+  -- Swap last row/col with first row/col as necessary.
+  if first_row > last_row then first_row, last_row = last_row, first_row end
+  if first_col > last_col then first_col, last_col = last_col, first_col end
+
+  if not self:_check_dimensions(last_row, last_col) then
+    return -1
+  end
+
+  -- Define array range
+  local range
+  if first_row == last_row and first_col == last_col then
+    range = Utility.rowcol_to_cell(first_row, first_col)
+  else
+    range = Utility.range(first_row, first_col, last_row, last_col)
+  end
+
+  -- Remove array formula braces and the leading =.
+  if formula:match('^{') then formula = formula:sub(2) end
+  if formula:match('^=') then formula = formula:sub(2) end
+  if formula:match('}$') then formula = formula:sub(1, -2) end
+
+  if not self.data_table[first_row] then
+    self.data_table[first_row] = {}
+  end
+
+  self.data_table[first_row][first_col] = {'a', formula, format, value, range}
+
+  -- Pad out the rest of the area with formatted zeroes.
+  if not self.optimization then
+    for row = first_row, last_row do
+      for col = first_col, last_col do
+        if row ~= first_row or col ~= first_col then
+          self:write_number(row, col, 0, format)
+        end
+      end
+    end
+  end
+
+return 0
+end
 
 ----
 -- Todo.
@@ -1335,8 +1405,8 @@ function Worksheet:_write_cell(row, col, cell)
 
     -- Write an array formula.
     self:_xml_start_tag("c", attributes)
-    self:_write_cell_array_formula(token, cell[4])
-    self:_write_cell_value(cell[5])
+    self:_write_cell_array_formula(token, cell[5])
+    self:_write_cell_value(cell[4])
     self:_xml_end_tag("c")
 
   elseif cell_type == "b" then
