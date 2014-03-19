@@ -1,7 +1,7 @@
 ----
 -- Test cases for xlsxwriter.lua.
 --
--- Simple test case for cell formatting.
+-- Simple test case for dates.
 --
 -- Copyright 2014, John McNamara, jmcnamara@cpan.org
 --
