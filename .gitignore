@@ -3,14 +3,14 @@
 TAGS
 .#*
 *#
-~*xlsx
 *.pyc
 .project
 .pydevproject
 .coverage
 cover/
 .settings/
-test/comparison/_test_*.xlsx
+*.xlsx
+!test/comparison/xlsx_files/*.xlsx
 dev/docs/build/
 .DS_Store
 build/

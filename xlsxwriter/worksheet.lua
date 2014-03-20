@@ -275,7 +275,11 @@ function Worksheet:write(...)
   local row, col, token, format = self:_convert_cell_args(...)
 
   if type(token) == "string" then
-    self:_write_string(row, col, token, format)
+    if string.match(token, "^=") then
+      self:_write_formula(row, col, token, format)
+    else
+      self:_write_string(row, col, token, format)
+    end
   else
     self:_write_number(row, col, token, format)
   end
