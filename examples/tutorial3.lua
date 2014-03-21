@@ -23,7 +23,7 @@ local bold = workbook:add_format({bold = true})
 local money = workbook:add_format({num_format = "$#,##0"})
 
 -- Add an Excel date format.
-date_format = workbook:add_format({num_format = "mmmm d yyyy"})
+local date_format = workbook:add_format({num_format = "mmmm d yyyy"})
 
 -- Adjust the column width.
 worksheet:set_column('B:B', 15)
@@ -35,10 +35,10 @@ worksheet:write("C1", "Cost", bold)
 
 -- Some data we want to write to the worksheet.
 local expenses = {
-  {"Rent", '2013-01-13', 1000},
-  {"Gas",  '2013-01-14',  100},
-  {"Food", '2013-01-16',  300},
-  {"Gym",  '2013-01-20',   50},
+  {"Rent", "2013-01-13", 1000},
+  {"Gas",  "2013-01-14",  100},
+  {"Food", "2013-01-16",  300},
+  {"Gym",  "2013-01-20",   50},
 }
 
 -- Start from the first cell below the headers.

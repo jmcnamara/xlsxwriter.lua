@@ -77,17 +77,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/XlsxWriter.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/xlsxwriter.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/XlsxWriter.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/xlsxwriter.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/XlsxWriter"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/XlsxWriter"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/xlsxwriter"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/xlsxwriter"
 	@echo "# devhelp"
 
 epub:
@@ -102,7 +102,7 @@ latex:
 
 latexpdf:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
-	@perl ../release/modify_latex.pl $(BUILDDIR)/latex/XlsxWriter.tex
+	@perl ../release/modify_latex.pl $(BUILDDIR)/latex/xlsxwriter.tex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
 	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
