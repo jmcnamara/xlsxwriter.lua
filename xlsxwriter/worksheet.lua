@@ -1616,7 +1616,7 @@ function Worksheet:_write_cell(row, col, cell)
     -- Check if the formula value is a string.
     if type(value) == "string" then
       attributes[#attributes + 1] = {["t"] = "str"}
-      value = Utility._escape_data(value)
+      value = self._escape_data(value)
     end
 
     self:_xml_formula_element(token, value, attributes)

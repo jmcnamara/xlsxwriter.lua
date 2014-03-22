@@ -81,7 +81,7 @@ end
 -- Write an XML start tag with optional attributes.
 --
 function Xmlwriter:_xml_start_tag(tag, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
   self.fh:write(string.format('<%s%s>', tag, attr))
 end
@@ -90,7 +90,7 @@ end
 -- Write an XML start tag with optional, unencoded, attributes.
 --
 function Xmlwriter:_xml_start_tag_unencoded(tag, attributes)
-  local attr = _format_attributes_unencoded(attributes)
+  local attr = self._format_attributes_unencoded(attributes)
 
   self.fh:write(string.format('<%s%s>', tag, attr))
 end
@@ -106,7 +106,7 @@ end
 -- Write an XML empty tag with optional attributes.
 --
 function Xmlwriter:_xml_empty_tag(tag, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
   self.fh:write(string.format('<%s%s/>', tag, attr))
 end
@@ -115,7 +115,7 @@ end
 -- Write an XML empty tag with optional, unencoded, attributes.
 --
 function Xmlwriter:_xml_empty_tag_unencoded(tag, attributes)
-  local attr = _format_attributes_unencoded(attributes)
+  local attr = self._format_attributes_unencoded(attributes)
 
   self.fh:write(string.format('<%s%s/>', tag, attr))
 end
@@ -124,9 +124,9 @@ end
 -- Write an XML element containing data with optional attributes.
 --
 function Xmlwriter:_xml_data_element(tag, data, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
-  data = _escape_data(data)
+  data = self._escape_data(data)
 
   self.fh:write(string.format('<%s%s>%s</%s>', tag, attr, data, tag))
 end
@@ -135,7 +135,7 @@ end
 -- Optimised tag writer for <c> cell string elements in the inner loop.
 --
 function Xmlwriter:_xml_string_element(index, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
   self.fh:write(string.format('<c%s t="s"><v>%d</v></c>', attr, index))
 end
@@ -144,8 +144,8 @@ end
 -- Optimised tag writer for shared strings <si> elements.
 --
 function Xmlwriter:_xml_si_element(str, attributes)
-  local attr = _format_attributes(attributes)
-  str = _escape_data(str)
+  local attr = self._format_attributes(attributes)
+  str = self._escape_data(str)
 
   self.fh:write(string.format('<si><t%s>%s</t></si>', attr, str))
 end
@@ -161,7 +161,7 @@ end
 -- Optimised tag writer for <c> cell number elements in the inner loop.
 --
 function Xmlwriter:_xml_number_element(number, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
   self.fh:write(string.format('<c%s><v>%.15g</v></c>', attr, number))
 end
@@ -170,10 +170,10 @@ end
 -- Optimised tag writer for <c> cell formula elements in the inner loop.
 --
 function Xmlwriter:_xml_formula_element(formula, result, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
-  formula = _escape_data(formula)
-  result  = _escape_data(result)
+  formula = self._escape_data(formula)
+  result  = self._escape_data(result)
 
   self.fh:write(string.format('<c%s><f>%s</f><v>%s</v></c>',
                               attr, formula, result))
@@ -183,14 +183,14 @@ end
 -- Optimised tag writer for inlineStr cell elements in the inner loop.
 --
 function Xmlwriter:_xml_inline_string(str, preserve, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
   local t_attr = ''
 
   if preserve then
     t_attr = ' xml:space="preserve"'
   end
 
-  str = _escape_data(str)
+  str = self._escape_data(str)
 
   self.fh:write(string.format('<c%s t="inlineStr"><is><t%s>%s</t></is></c>',
                               attr, t_attr, str))
@@ -200,9 +200,9 @@ end
 -- Optimised tag writer for rich inlineStr in the inner loop.
 --
 function Xmlwriter:_xml_rich_inline_string(str, attributes)
-  local attr = _format_attributes(attributes)
+  local attr = self._format_attributes(attributes)
 
-  str = _escape_data(str)
+  str = self._escape_data(str)
 
   self.fh:write(string.format('<c%s t="inlineStr"><is>%s</is></c>', attr, str))
 end
@@ -210,13 +210,13 @@ end
 ----
 -- Format attribute value pairs.
 --
-function _format_attributes(attributes)
+function Xmlwriter._format_attributes(attributes)
   local attr = ''
 
   if attributes then
     for i = 1, #attributes do
       for key, value in pairs(attributes[i]) do
-        value = _escape_attributes(value)
+        value = Xmlwriter._escape_attributes(value)
         attr = attr .. string.format(' %s="%s"', key, value)
       end
     end
@@ -230,7 +230,7 @@ end
 -- This is a minor speed optimisation for elements that
 -- don't need encoding.
 --
-function _format_attributes_unencoded(attributes)
+function Xmlwriter._format_attributes_unencoded(attributes)
   local attr = ''
 
   if attributes then
@@ -247,7 +247,7 @@ end
 ----
 -- Escape XML characters in attributes.
 --
-function _escape_attributes(attribute)
+function Xmlwriter._escape_attributes(attribute)
   attribute = string.gsub(attribute, '&', '&amp;')
   attribute = string.gsub(attribute, '"', '&quot;')
   attribute = string.gsub(attribute, '<', '&lt;')
@@ -259,7 +259,7 @@ end
 -- Escape XML characters in data sections of tags. Double quotes
 -- are not escaped by Excel in XML data.
 --
-function _escape_data(data)
+function Xmlwriter._escape_data(data)
   data = string.gsub(data, '&', '&amp;')
   data = string.gsub(data, '<', '&lt;')
   data = string.gsub(data, '>', '&gt;')

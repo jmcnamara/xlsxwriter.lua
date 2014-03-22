@@ -606,7 +606,7 @@ function Workbook:_write_workbook_pr()
   local attributes = {}
 
   if self.vba_codename then
-     table.insert(attributes, {["codeName"] = codename})
+     table.insert(attributes, {["codeName"] = self.vba_codename})
   end
 
   if self.date_1904 then
@@ -730,7 +730,7 @@ function Workbook:_write_defined_names()
   self:_xml_start_tag("definedNames")
 
   for _, defined_name in ipairs(self.defined_names) do
-    self:_write_defined_name(aref)
+    self:_write_defined_name(defined_name)
   end
 
   self:_xml_end_tag("definedNames")
