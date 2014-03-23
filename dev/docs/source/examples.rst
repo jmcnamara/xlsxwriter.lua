@@ -10,3 +10,4 @@ directory of the xlsxwriter.lua distribution.
 
    example_hello_world.rst
    example_demo.rst
+   example_array_formula.rst

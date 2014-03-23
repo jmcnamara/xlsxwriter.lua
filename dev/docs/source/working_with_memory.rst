@@ -41,7 +41,7 @@ where the string data isn't displayed.
 
 The trade-off when using ``'constant_memory'`` mode is that you won't be able
 to take advantage of any new features that manipulate cell data after it is
-written. Currently the only such feature is :ref:`Worksheet Tables <tables>`.
+written.
 
 For larger files ``'constant_memory'`` mode also gives an increase in execution
 speed, see below.
