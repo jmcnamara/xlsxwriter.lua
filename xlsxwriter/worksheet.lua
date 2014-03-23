@@ -276,12 +276,12 @@ function Worksheet:write(...)
 
   if type(token) == "string" then
     if string.match(token, "^=") then
-      self:_write_formula(row, col, token, format)
+      return self:_write_formula(row, col, token, format)
     else
-      self:_write_string(row, col, token, format)
+      return self:_write_string(row, col, token, format)
     end
   else
-    self:_write_number(row, col, token, format)
+    return self:_write_number(row, col, token, format)
   end
 end
 
@@ -300,7 +300,7 @@ end
 --     -2: String > 32k characters.
 --
 function Worksheet:write_string(...)
-  self:_write_string(self:_convert_cell_args(...))
+  return self:_write_string(self:_convert_cell_args(...))
 end
 
 ----
@@ -317,7 +317,25 @@ end
 --     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_number(...)
-  self:_write_number(self:_convert_cell_args(...))
+  return self:_write_number(self:_convert_cell_args(...))
+end
+
+----
+-- Write a blank cell with formatting to a worksheet cell. The blank
+-- token is ignored and the format only is written to the cell.
+--
+-- Args:
+--     row:         The cell row (zero indexed).
+--     col:         The cell column (zero indexed).
+--     blank:       Any value. It is ignored.
+--     format:      An optional cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--
+function Worksheet:write_blank(...)
+  return self:_write_blank(self:_convert_cell_args(...))
 end
 
 ----
@@ -338,7 +356,7 @@ end
 --
 --
 function Worksheet:write_formula(...)
-  self:_write_formula(self:_convert_cell_args(...))
+  return self:_write_formula(self:_convert_cell_args(...))
 end
 
 ----
@@ -358,7 +376,7 @@ end
 --     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_array_formula(...)
-  self:_write_array_formula(self:_convert_range_args(...))
+  return self:_write_array_formula(self:_convert_range_args(...))
 end
 
 ----
@@ -375,7 +393,7 @@ end
 --     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_date_time(...)
-  self:_write_date_time(self:_convert_cell_args(...))
+  return self:_write_date_time(self:_convert_cell_args(...))
 end
 
 ----
@@ -393,7 +411,7 @@ end
 --     -1: Row or column is out of worksheet bounds.
 --
 function Worksheet:write_date_string(...)
-  self:_write_date_string(self:_convert_cell_args(...))
+  return self:_write_date_string(self:_convert_cell_args(...))
 end
 
 ----
@@ -719,7 +737,7 @@ end
 --     -1: Column number is out of worksheet bounds.
 --
 function Worksheet:set_column(...)
-  self:_set_column(self:_convert_column_args(...))
+  return self:_set_column(self:_convert_column_args(...))
 end
 
 ----
@@ -895,6 +913,26 @@ function Worksheet:_write_number(row, col, num, format)
   return 0
 end
 
+----
+-- Write a blank to a Worksheet cell.
+--
+function Worksheet:_write_blank(row, col, num, format)
+
+  -- Don't write a blank cell unless it has a format.
+  if not format then return 0 end
+
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  self.data_table[row][col] = {'b', num, format}
+
+  return 0
+end
 
 ----
 -- Write a formula to a Worksheet cell.
@@ -903,6 +941,11 @@ function Worksheet:_write_formula(row, col, formula, format, value)
 
   if not self:_check_dimensions(row, col) then
     return -1
+  end
+
+  -- Hand off array formulas.
+  if formula:match('^{') and formula:match('}$') then
+    return self:write_array_formula(row, col, row, col, formula, format, value)
   end
 
   -- Strip the formula = sign, if it exists.
@@ -945,6 +988,9 @@ function Worksheet:_write_array_formula(first_row, first_col,
   if formula:match('^=') then formula = formula:sub(2) end
   if formula:match('}$') then formula = formula:sub(1, -2) end
 
+  -- Set a default formula value.
+  value = value or 0
+
   if not self.data_table[first_row] then
     self.data_table[first_row] = {}
   end
@@ -971,7 +1017,7 @@ end
 function Worksheet:_write_date_time(row, col, date_time, format)
   local date = Utility.convert_date_time(date_time, self.date_1904)
 
-  self:_write_number(row, col, date, format)
+  return self:_write_number(row, col, date, format)
 end
 
 ----
@@ -981,7 +1027,7 @@ end
 function Worksheet:_write_date_string(row, col, date_string, format)
   local date = Utility.convert_date_string(date_string, self.date_1904)
 
-  self:_write_number(row, col, date, format)
+  return self:_write_number(row, col, date, format)
 end
 
 ----
@@ -1616,7 +1662,6 @@ function Worksheet:_write_cell(row, col, cell)
     -- Check if the formula value is a string.
     if type(value) == "string" then
       attributes[#attributes + 1] = {["t"] = "str"}
-      value = self._escape_data(value)
     end
 
     self:_xml_formula_element(token, value, attributes)
