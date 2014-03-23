@@ -1,6 +1,6 @@
-.. _format:
-
 .. highlight:: lua
+
+.. _format:
 
 The Format Class
 ================
@@ -10,6 +10,27 @@ formatting cells in Excel.
 
 The properties of a cell that can be formatted include: fonts, colours,
 patterns, borders, alignment and number formatting.
+
+
+Format objects are created by calling the workbook ``add_format()`` method as
+follows::
+
+    format = workbook:add_format()
+
+Format properties can be set by calling any of the methods shown in this section::
+
+    format = workbook:add_format()
+    format:set_bold()
+    format:set_font_color("red")
+
+Alternatively the properties can be set by passing a table of properties
+to the :func:`add_format()` constructor::
+
+    format = workbook:add_format({bold = true, font_color = "red"})
+
+The documentation below shows the property methods but the information is
+equally applicable when using them in the :func:`add_format()` constructor.
+
 
 .. image:: _images/formats_intro.png
 
@@ -804,5 +825,3 @@ format:set_right_color()
    :param color: The cell border color.
 
 See :func:`set_border_color` for details on the border colors.
-
-

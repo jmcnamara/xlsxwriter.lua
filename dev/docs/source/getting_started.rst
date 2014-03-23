@@ -7,10 +7,10 @@ Here are some easy instructions to get you up and running with the xlsxwriter
 module.
 
 
-Installing XlsxWriter
----------------------
+Installing Xlsxwriter.lua
+-------------------------
 
-The first step is to install the xlsxwriter module. There are several ways to
+The first step is to install the xlsxwriter.lua module. There are several ways to
 do this.
 
 Using LuaRocks
@@ -22,7 +22,7 @@ TODO.
 Installing from a tarball
 *************************
 
-If you download a tarball of the latest version of xlsxwriter you can install
+If you download a tarball of the latest version of xlsxwriter.lua you can install
 it as follows (change the version number to suit)::
 
     $ tar -zxvf XlsxWriter-1.2.3.tar.gz
@@ -42,8 +42,8 @@ A tarball of the latest code can be downloaded from GitHub as follows::
 Cloning from GitHub
 *******************
 
-The XlsxWriter source code and bug tracker is in the
-`xlsxwriter repository <http://github.com/jmcnamara/xlsxwriter.lua>`_ on GitHub.
+The Xlsxwriter.lua source code and bug tracker is in the
+`xlsxwriter.lua repository <http://github.com/jmcnamara/xlsxwriter.lua>`_ on GitHub.
 You can clone the repository and install from it as follows::
 
     $ git clone https://github.com/jmcnamara/xlsxwriter.lua.git
@@ -89,12 +89,12 @@ Documentation
 -------------
 
 The latest version of this document is hosted on
-`Read The Docs <http://xlsxwriter.lua.readthedocs.org>`_. It is also
+`Read The Docs <http://xlsxwriterlua.readthedocs.org>`_. It is also
 available as a
-`PDF <https://github.com/jmcnamara/XlsxWriter/raw/master/docs/xlsxwriter.lua.pdf>`_.
+`PDF <https://github.com/jmcnamara/XlsxWriter/raw/master/docs/xlsxwriter_lua.pdf>`_.
 
 Once you are happy that the module is installed and operational you can have a
-look at the rest of the XlsxWriter documentation. :ref:`tutorial1` is a good
+look at the rest of the Xlsxwriter.lua documentation. :ref:`tutorial1` is a good
 place to start.
 
 

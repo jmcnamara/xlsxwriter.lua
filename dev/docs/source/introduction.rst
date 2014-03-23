@@ -3,7 +3,7 @@
 Introduction
 ============
 
-**Xlsxwriter** is a Lua module for writing files in the Excel 2007+ XLSX
+**Xlsxwriter.lua** is a Lua module for writing files in the Excel 2007+ XLSX
 file format.
 
 It can be used to write text, numbers, and formulas to multiple worksheets and
@@ -19,8 +19,10 @@ The main advantages of using Xlswriter are:
    * It is fast and can be configured to use very little memory even for very
      large output files.
 
+However:
 
-Xlsxwriter is licensed under a MIT :ref:`License` and the source code is
-available on `GitHub <http://github.com/jmcnamara/xlsxwriter.lua>`_.
+   * It can only create **new files**. It cannot read or modify existing files.
+
+XLsxwriter.lua is a port of the Perl `Excel::Writer::XLSX <http://search.cpan.org/~jmcnamara/Excel-Writer-XLSX/>`_ and the Python `XlsxWriter <http://xlsxwriter.readthedocs.org>`_ modules and is licensed under an MIT :ref:`License`.
 
 To try out the module see the next section on :ref:`getting_started`.

@@ -13,7 +13,7 @@ Xlsxwriter is a Lua module for creating Excel XLSX files.
 
 Xlsxwriter is a Lua  module that can be used to write text, numbers and formulas
 to multiple worksheets in an Excel 2007+ XLSX file. It supports
-features such as formatting and many more, including:
+features such as:
 
 * 100% compatible Excel XLSX files.
 * Full formatting.
@@ -58,8 +58,8 @@ docs. Check back at the end of March.**
 .. toctree::
    :maxdepth: 1
 
-   working_with_cell_notation.rst
    working_with_formats.rst
+   working_with_cell_notation.rst
    working_with_dates_and_time.rst
    working_with_colors.rst
    working_with_memory.rst

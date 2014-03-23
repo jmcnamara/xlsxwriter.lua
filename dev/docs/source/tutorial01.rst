@@ -1,11 +1,11 @@
+.. highlight:: lua
+
 .. _tutorial1:
 
 Tutorial 1: Create a simple XLSX file
 =====================================
 
-.. highlight:: lua
-
-Let's start by creating a simple spreadsheet using Lua and the xlsxwriter
+Let's start by creating a simple spreadsheet using Lua and the xlsxwriter.lua
 module.
 
 Say that we have some data on monthly outgoings that we want to convert into an
@@ -69,14 +69,9 @@ The first step is to import the module::
 The next step is to create a new workbook object using the ``Workbook:new()``
 constructor.
 
-:func:`Workbook` takes one, non-optional, argument which is the filename that
-we want to create::
+:ref:`Workbook:new() <constructor>` takes one, non-optional, argument which is the filename that we want to create::
 
     local workbook = Workbook:new("Expensese01.xlsx")
-
-.. note::
-   xlsxwriter can only create *new files*. It cannot read or modify existing
-   files.
 
 The workbook object is then used to add a new worksheet via the
 :func:`add_worksheet` method::
@@ -96,7 +91,7 @@ method::
     worksheet:write(row, col, some_data)
 
 .. Note::
-   Throughout the xlsxwriter API *rows* and *columns* are zero indexed. Thus,
+   Throughout the xlsxwriter.lua API *rows* and *columns* are zero indexed. Thus,
    the first cell in a worksheet, ``A1``, is ``(0, 0)``.
 
 So in our example we iterate over our data and write it out as follows::
@@ -120,5 +115,5 @@ Finally, we close the Excel file via the :func:`close` method::
 And that's it. We now have a file that can be read by Excel and other
 spreadsheet applications.
 
-In the next sections we will see how we can use the xlsxwriter module to add
+In the next sections we will see how we can use the xlsxwriter.lua module to add
 formatting and other Excel features.

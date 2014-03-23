@@ -1,3 +1,5 @@
+.. highlight:: lua
+
 .. _working_with_dates_and_time:
 
 Working with Dates and Time

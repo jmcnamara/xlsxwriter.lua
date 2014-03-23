@@ -1,3 +1,5 @@
+.. highlight:: lua
+
 .. _memory_perf:
 
 Working with Memory and Performance

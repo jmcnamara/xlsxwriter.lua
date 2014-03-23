@@ -1,6 +1,6 @@
-.. _worksheet:
-
 .. highlight:: lua
+
+.. _worksheet:
 
 The Worksheet Class
 ===================
@@ -25,56 +25,44 @@ object::
 worksheet:write()
 -----------------
 
-.. function:: write(row, col, *args)
+.. function:: write(row, col, args)
 
    Write generic data to a worksheet cell.
 
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param args:        The additional args that are passed to the sub methods
-                       such as number, string and format.
+                       such as number, string or format.
 
-Excel makes a distinction between data types such as strings, numbers, blanks,
-formulas and hyperlinks. To simplify the process of writing data to an
-XlsxWriter file the ``write()`` method acts as a general alias for several
-more specific methods:
+Excel makes a distinction between data types such as strings, numbers, blanks and formulas. To simplify the process of writing data using xlsxwriter.lua the
+``write()`` method acts as a general alias for several more specific methods:
 
 * :func:`write_string()`
 * :func:`write_number()`
 * :func:`write_blank()`
 * :func:`write_formula()`
 * :func:`write_boolean()`
-* :func:`write_url()`
 
 The rules for handling data in ``write()`` are as follows:
 
-* Data types ``float``, ``int``, ``long``, :class:`decimal.Decimal` and
-  :class:`fractions.Fraction`  are written using :func:`write_number()`.
+* Variables of Lua type ``number`` are written using :func:`write_number()`.
 
-* ``nil`` and empty strings ``""`` are written using :func:`write_blank()`.
+* Empty strings and ``nil`` are written using :func:`write_blank()`.
 
-* Data type ``boolean`` is written using :func:`write_boolean()`.
+* Variables of Lua type ``boolean`` are written using :func:`write_boolean()`.
 
 Strings are then handled as follows:
 
-* Strings that start with ``"="`` are take to match a formula and are written
+* Strings that start with ``"="`` are taken to match a formula and are written
   using :func:`write_formula()`. This can be overridden, see below.
 
-* When the :func:`Workbook` constructor ``strings_to_numbers`` option is
-  ``true`` strings that convert to numbers using :func:`float()` are written
+* When the :ref:`Workbook:new() <constructor>` constructor ``strings_to_numbers`` option is
+  ``true`` strings that convert to numbers using ``tonumber()`` are written
   using :func:`write_number()` in order to avoid Excel warnings about "Numbers
   Stored as Text". See the note below.
 
 * Strings that don't match any of the above criteria are written using
   :func:`write_string()`.
-
-If none of the above types are matched the value is evaluated with ``float()``
-to see if it corresponds to a user defined float type. If it does then it is
-written using :func:`write_number()`.
-
-If not then it is evaluated with ``str()`` to see if it corresponds to a user
-defined string type. If it does then it is written using
-:func:`write_string()`.
 
 
 Here are some examples::
@@ -93,7 +81,7 @@ This creates a worksheet like the following:
 
 .. note::
 
-   The :func:`Workbook` constructor option takes three optional arguments
+   The :ref:`Workbook:new() <constructor>` constructor option takes three optional arguments
    that can be used to override string handling in the ``write()`` function.
    These options are shown below with their default values::
 
@@ -143,27 +131,23 @@ The ``format`` parameter is used to apply formatting to the cell. This
 parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
-Unicode strings are supported in UTF-8 encoding. This generally requires that
-your source file in also UTF-8 encoded::
+Unicode strings in Excel must be UTF-8 encoded. This generally requires that
+your source file in UTF-8 encoded::
 
-    -- _*_ coding: utf-8
-
-    worksheet:write("A1", u"Some UTF-8 text")
+    worksheet:write("A1", "Some UTF-8 text")
 
 .. image:: _images/worksheet02.png
 
-Alternatively, you can read data from an encoded file, convert it to UTF-8
-during reading and then write the data to an Excel file. There are several
-sample``unicode_\*.py`` programs like this in the ``examples`` directory of the XlsxWriter source tree.
+There are some sample UTF-8 sample programs in the ``examples`` directory of the xlsxwriter.lua source tree.
 
 The maximum string size supported by Excel is 32,767 characters. Strings longer
-than this will be truncated by ``write_string()``.
+than this will be ignored ``write_string()``.
 
 .. note::
 
    Even though Excel allows strings of 32,767 characters it can only
-   **display** 1000 in a cell. However, all 32,767 characters are displayed in the
-   formula bar.
+   **display** 1000 in a cell. However, all 32,767 characters are displayed
+   in the formula bar.
 
 
 worksheet:write_number()
@@ -178,22 +162,12 @@ worksheet:write_number()
    :param number:      Number to write to cell.
    :param format:      Optional Format object. :ref:`Format <format>`
 
-The ``write_number()`` method writes numeric types to the cell specified by
-``row`` and ``column``::
+The ``write_number()`` method writes Lua number type variable to the cell specified by ``row`` and ``column``::
 
     worksheet:write_number(0, 0, 123456)
     worksheet:write_number("A2", 2.3451)
 
-The numeric types supported are ``float``, ``int``, ``long``,
-:class:`decimal.Decimal` and :class:`fractions.Fraction` or anything that can
-be converted via ``float()``.
-
-When written to an Excel file numbers are converted to IEEE-754 64-bit
-double-precision floating point. This means that, in most cases, the maximum
-number of digits that can be stored in Excel without losing precision is 15.
-
-.. note::
-   NAN and INF are not supported and will raise a TypeError exception.
+Like Lua, Excel stores numbers as IEEE-754 64-bit double-precision floating points. This means that, in most cases, the maximum number of digits that can be stored in Excel without losing precision is 15.
 
 Both row-column and A1 style notation are supported. See :ref:`cell_notation`
 for more details.
@@ -238,7 +212,7 @@ The ``format`` parameter is used to apply formatting to the cell. This
 parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
-XlsxWriter doesn't calculate the value of a formula and instead stores the
+Xlsxwriter.lua doesn't calculate the value of a formula and instead stores the
 value 0 as the formula result. It then sets a global flag in the XLSX file to
 say that all formulas and functions should be recalculated when the file is
 opened. This is the method recommended in the Excel documentation and in
@@ -255,7 +229,7 @@ formula. The calculated ``value`` is added at the end of the argument list::
 
 Excel stores formulas in US style formatting regardless of the Locale or
 Language of the Excel version. Therefore all formula names written using
-XlsxWriter must be in English (use the following
+xlsxwriter.lua must be in English (use the following
 `formula translator <http://fr.excel-translator.de>`_ if necessary). Also,
 formulas must be written with the US style separator/range operator which is a
 comma (not semi-colon). Therefore a formula with multiple values should be
@@ -343,12 +317,12 @@ worksheet:write_blank()
 
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
-   :param blank:       None or empty string. The value is ignored.
+   :param blank:       nil or empty string. The value is ignored.
    :param format:      Optional Format object. :ref:`Format <format>`
 
 Write a blank cell specified by ``row`` and ``column``::
 
-    worksheet:write_blank(0, 0, None, format)
+    worksheet:write_blank(0, 0, nil, format)
 
 This method is used to add formatting to a cell which doesn't contain a string
 or number value.
@@ -360,14 +334,15 @@ but ignores "Empty" cells.
 
 As such, if you write an empty cell without formatting it is ignored::
 
-    worksheet:write("A1", None, format) -- write_blank()
-    worksheet:write("A2", None)         -- Ignored
+    worksheet:write("A1", nil, format) -- write_blank()
+    worksheet:write("A2", nil)         -- Ignored
 
-This seemingly uninteresting fact means that you can write arrays of data
-without special treatment for ``None`` or empty string values.
+This seemingly uninteresting fact means that you can write tables of data
+without special treatment for ``nil`` or empty string values.
 
 As shown above, both row-column and A1 style notation are supported. See
 :ref:`cell_notation` for more details.
+
 
 worksheet:write_boolean()
 -------------------------
@@ -395,43 +370,94 @@ parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
 
-worksheet:write_datetime()
---------------------------
+worksheet:write_date_time()
+---------------------------
 
-.. function:: write_datetime(row, col, datetime [, format])
+.. function:: write_date_time(row, col, date_time [, format])
 
    Write a date or time to a worksheet cell.
 
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
-   :param datetime:    A datetime.datetime, .date or .time object.
+   :param date_time:   A ``os.time()`` style table of date values.
    :param format:      Optional Format object. :ref:`Format <format>`
 
-The ``write_datetime()`` method can be used to write a date or time to the cell
+The ``write_date_time()`` method can be used to write a date or time to the cell
 specified by ``row`` and ``column``::
 
-    worksheet:write_datetime(0, 0, datetime, date_format)
+    worksheet:write_date_time(0, 0, date_time, date_format)
 
-The datetime should be a :class:`datetime.datetime`, :class:`datetime.date` or
-:class:`datetime.time` object. The :mod:`datetime` class is part of the
-standard Python libraries.
+The date_time should be a table of values like those used for `os.time() <http://www.lua.org/manual/5.2/manual.html#pdf-os.time>`_:
 
-There are many way to create datetime objects, for example the
-:meth:`datetime.datetime.strptime` method::
++--------+------------+
+| Key    | Value      |
++========+============+
+| year   | Full year  |
++--------+------------+
+| month  | 1 - 12     |
++--------+------------+
+| day    | 1 - 31     |
++--------+------------+
+| hour   | 0 - 23     |
++--------+------------+
+| min    | 0 - 59     |
++--------+------------+
+| sec    | 0 - 59.999 |
++--------+------------+
 
-    date_time = datetime.datetime.strptime("2013-01-23", "%Y-%m-%d")
+A date/time should have a ``format`` of type :ref:`Format <format>`,
+otherwise it will appear as a number::
 
-See the :mod:`datetime` documentation for other date/time creation methods.
+    date_format = workbook:add_format({num_format = "d mmmm yyyy"})
+    date_time   = {year = 2014, month = 3, day = 17}
+
+    worksheet:write_date_time("A1", date_time, date_format)
+
+If required, a default date format string can be set using the :ref:`Workbook:new() <constructor>` constructor ``default_date_format`` option.
+
+See :ref:`working_with_dates_and_time` for more details.
+
+
+worksheet:write_date_string()
+-----------------------------
+
+.. function:: write_date_string(row, col, date_string [, format])
+
+   Write a date or time to a worksheet cell.
+
+   :param row:         The cell row (zero indexed).
+   :param col:         The cell column (zero indexed).
+   :param date_string:   A ``os.time()`` style table of date values.
+   :param format:      Optional Format object. :ref:`Format <format>`
+
+The ``write_date_string()`` method can be used to write a date or time to the cell specified by ``row`` and ``column``::
+
+    worksheet:write_date_string(0, 0, date_string, date_format)
+
+The ``date_string`` should be in the following format::
+
+    yyyy-mm-ddThh:mm:ss.sss
+
+This conforms to an ISO8601 date but it should be noted that the full range of ISO8601 formats are not supported.
+
+The following variations on the $date_string parameter are permitted::
+
+    yyyy-mm-ddThh:mm:ss.sss         -- Standard format.
+    yyyy-mm-ddThh:mm:ss.sssZ        -- Additional Z (but not time zones).
+    yyyy-mm-dd                      -- Date only, no time.
+               hh:mm:ss.sss         -- Time only, no date.
+               hh:mm:ss             -- No fractional seconds.
+
+Note that the T is required for cases with both date and time and seconds are required for all times.
 
 A date/time should have a ``format`` of type :ref:`Format <format>`,
 otherwise it will appear as a number::
 
     date_format = workbook:add_format({num_format = "d mmmm yyyy"})
 
-    worksheet:write_datetime("A1", date_time, date_format)
+    worksheet:write_date_string("A1", "2014-03-17", date_format)
 
-If required, a default date format string can be set using the :func:`Workbook`
-constructor ``default_date_format`` option.
+If required, a default date format string can be set using the :ref:`Workbook:new() <constructor>` constructor ``default_date_format`` option.
 
 See :ref:`working_with_dates_and_time` for more details.
 
@@ -443,10 +469,10 @@ worksheet:set_row()
 
    Set properties for a row of cells.
 
-   :param int row:      The worksheet row (zero indexed).
-   :param float height: The row height.
-   :param format:       Optional Format object. :ref:`Format <format>`
-   :param dict options: Optional row parameters: hidden, level, collapsed.
+   :param row:     The worksheet row (zero indexed).
+   :param height:  The row height.
+   :param format:  Optional Format object. :ref:`Format <format>`
+   :param options: Optional row parameters: hidden, level, collapsed.
 
 The ``set_row()`` method is used to change the default properties of a row. The
 most common use for this method is to change the height of a row::
@@ -461,21 +487,21 @@ all cells in the row::
     worksheet:set_row(0, 20, format)
 
 If you wish to set the format of a row without changing the height you can pass
-``None`` as the height parameter or use the default row height of 15::
+``nil`` as the height parameter or use the default row height of 15::
 
-    worksheet:set_row(1, None, format)
-    worksheet:set_row(1, 15,   format) -- Same as above.
+    worksheet:set_row(1, nil, format)
+    worksheet:set_row(1, 15,  format) -- Same as above.
 
 The ``format`` parameter will be applied to any cells in the row that
 don't have a format. As with Excel it is overridden by an explicit cell
 format. For example::
 
-    worksheet:set_row(0, None, format1)     -- Row 1 has format1.
+    worksheet:set_row(0, nil, format1)     -- Row 1 has format1.
 
     worksheet:write("A1", "Hello")          -- Cell A1 defaults to format1.
     worksheet:write("B1", "Hello", format2) -- Cell B1 keeps format2.
 
-The ``options`` parameter is a dictionary with the following possible keys:
+The ``options`` parameter is a table with the following possible keys:
 
 * ``"hidden"``
 * ``"level"``
@@ -486,22 +512,20 @@ Options can be set as follows::
     worksheet:set_row(0, 20, format, {hidden = true})
 
     -- Or use defaults for other properties and set the options only.
-    worksheet:set_row(0, None, None, {hidden = true})
+    worksheet:set_row(0, nil, nil, {hidden = true})
 
 The ``"hidden"`` option is used to hide a row. This can be used, for example,
 to hide intermediary steps in a complicated calculation::
 
     worksheet:set_row(0, 20, format, {hidden = true})
 
-The ``"level"`` parameter is used to set the outline level of the row. Outlines
-are described in :ref:`outlines`. Adjacent rows with the same outline level
-are grouped together into a single outline.
+The ``"level"`` parameter is used to set the outline level of the row. Adjacent rows with the same outline level are grouped together into a single outline.
 
 The following example sets an outline level of 1 for some rows::
 
-    worksheet:set_row(0, None, None, {level = 1})
-    worksheet:set_row(1, None, None, {level = 1})
-    worksheet:set_row(2, None, None, {level = 1})
+    worksheet:set_row(0, nil, nil, {level = 1})
+    worksheet:set_row(1, nil, nil, {level = 1})
+    worksheet:set_row(2, nil, nil, {level = 1})
 
 Excel allows up to 7 outline levels. The ``"level"`` parameter should be in the
 range ``0 <= level <= 7``.
@@ -509,13 +533,13 @@ range ``0 <= level <= 7``.
 The ``"hidden"`` parameter can also be used to hide collapsed outlined rows
 when used in conjunction with the ``"level"`` parameter::
 
-    worksheet:set_row(1, None, None, {hidden = 1, level = 1})
-    worksheet:set_row(2, None, None, {hidden = 1, level = 1})
+    worksheet:set_row(1, nil, nil, {hidden = 1, level = 1})
+    worksheet:set_row(2, nil, nil, {hidden = 1, level = 1})
 
 The ``"collapsed"`` parameter is used in collapsed outlines to indicate which
 row has the collapsed ``'+'`` symbol::
 
-    worksheet:set_row(3, None, None, {collapsed = 1})
+    worksheet:set_row(3, nil, nil, {collapsed = 1})
 
 
 worksheet:set_column()
@@ -525,11 +549,11 @@ worksheet:set_column()
 
    Set properties for one or more columns of cells.
 
-   :param int first_col: First column (zero-indexed).
-   :param int last_col:  Last column (zero-indexed). Can be same as firstcol.
-   :param float width:   The width of the column(s).
-   :param format:        Optional Format object. :ref:`Format <format>`
-   :param dict options:  Optional parameters: hidden, level, collapsed.
+   :param first_col: First column (zero-indexed).
+   :param last_col:  Last column (zero-indexed). Can be same as firstcol.
+   :param width:     The width of the column(s).
+   :param format:    Optional Format object. :ref:`Format <format>`
+   :param options:   Optional parameters: hidden, level, collapsed.
 
 The ``set_column()``  method can be used to change the default properties of a
 single column or a range of columns::
@@ -547,8 +571,8 @@ details.
 
 Examples::
 
-    worksheet:set_column(0, 0, 20)  -- Column  A   width set to 20.
-    worksheet:set_column(1, 3, 30)  -- Columns B-D width set to 30.
+    worksheet:set_column(0, 0,  20) -- Column  A   width set to 20.
+    worksheet:set_column(1, 3,  30) -- Columns B-D width set to 30.
     worksheet:set_column("E:E", 20) -- Column  E   width set to 20.
     worksheet:set_column("F:H", 30) -- Columns F-H width set to 30.
 
@@ -560,25 +584,25 @@ within Excel. It is possible to simulate "AutoFit" by tracking the width of
 the data in the column as your write it.
 
 As usual the ``format`` :ref:`Format <format>`  parameter is optional. If
-you wish to set the format without changing the width you can pass ``None`` as
+you wish to set the format without changing the width you can pass ``nil`` as
 the width parameter::
 
     format = workbook:add_format({bold = true})
 
-    worksheet:set_column(0, 0, None, format)
+    worksheet:set_column(0, 0, nil, format)
 
 The ``format`` parameter will be applied to any cells in the column that
 don't have a format. For example::
 
-    worksheet:set_column("A:A", None, format1) -- Col 1 has format1.
+    worksheet:set_column("A:A", nil, format1) -- Col 1 has format1.
 
     worksheet:write("A1", "Hello")             -- Cell A1 defaults to format1.
     worksheet:write("A2", "Hello", format2)    -- Cell A2 keeps format2.
 
 A  row format takes precedence over a default column format::
 
-    worksheet:set_row(0, None, format1)        -- Set format for row 1.
-    worksheet:set_column("A:A", None, format2) -- Set format for col 1.
+    worksheet:set_row(0, nil, format1)        -- Set format for row 1.
+    worksheet:set_column("A:A", nil, format2) -- Set format for col 1.
 
     worksheet:write("A1", "Hello")             -- Defaults to format1
     worksheet:write("A2", "Hello")             -- Defaults to format2
@@ -594,8 +618,7 @@ worksheet:get_name()
 The ``get_name()`` method is used to retrieve the name of a worksheet: This is
 something useful for debugging or logging::
 
-    for worksheet in workbook:worksheets():
-        print worksheet:get_name()
+    print(worksheet:get_name())
 
 There is no ``set_name()`` method. The only safe way to set the worksheet name
 is via the ``add_worksheet()`` method.
@@ -684,8 +707,9 @@ However, if there are a large number of worksheets the selected worksheet may
 not appear on the screen. To avoid this you can select which is the leftmost
 visible worksheet tab using ``set_first_sheet()``::
 
-    for in range(1, 21):
-        workbook:add_worksheet
+    for i = 1, 20 do
+      workbook:add_worksheet
+    end
 
     worksheet19.set_first_sheet() -- First visible worksheet tab.
     worksheet20.activate()        -- First visible worksheet:
@@ -700,7 +724,7 @@ worksheet:set_zoom()
 
    Set the worksheet zoom factor.
 
-   :param int zoom: Worksheet zoom factor.
+   :param zoom: Worksheet zoom factor.
 
 Set the worksheet zoom factor in the range ``10 <= zoom <= 400``::
 
@@ -753,7 +777,7 @@ worksheet:set_tab_color()
 
    Set the colour of the worksheet tab.
 
-   :param string color: The tab color.
+   :param color: The tab color.
 
 The ``set_tab_color()`` method is used to change the colour of the worksheet
 tab::
@@ -765,5 +789,3 @@ The colour can be a Html style ``#RRGGBB`` string or a limited number named
 colours, see :ref:`colors`.
 
 See :ref:`ex_tab_colors` for more details.
-
-

@@ -1,16 +1,16 @@
-.. _colors:
-
 .. highlight:: lua
+
+.. _colors:
 
 Working with Colors
 ===================
 
-Throughout xlsxwriter colors are specified using a Html sytle ``#RRGGBB``
+Throughout xlsxwriter.lua colors are specified using a Html sytle ``#RRGGBB``
 value. For example with a :ref:`Format <format>` object::
 
     format:set_font_color('#FF0000')
 
-For backward compatibility a limited number of color names are supported::
+For convenience a limited number of color names are supported::
 
     format:set_font_color('red')
 

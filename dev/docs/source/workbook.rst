@@ -1,22 +1,25 @@
-.. _workbook:
-
 .. highlight:: lua
+
+.. _workbook:
 
 The Workbook Class
 ==================
 
-The Workbook class is the main class exposed by the xlsxwriter module and it is
+The Workbook class is the main class exposed by the xlsxwriter.lua module and it is
 the only class that you will need to instantiate directly.
 
 The Workbook class represents the entire spreadsheet as you see it in Excel and
 internally it represents the Excel file as it is written on disk.
+
+
+.. _constructor:
 
 Constructor
 -----------
 
 .. function:: Workbook:new(filename[,options])
 
-   Create a new xlsxwriter Workbook object.
+   Create a new xlsxwriter.lua Workbook object.
 
    :param filename: The name of the new Excel file to create.
    :param options:  Optional workbook parameters. See below.
@@ -53,7 +56,7 @@ The constructor options are:
 
 * **strings_to_numbers**: Enable the
   :ref:`worksheet: <Worksheet>`:func:`write()` method to convert strings to
-  numbers, where possible, using :func:`float()` in order to avoid an Excel
+  numbers, where possible, using ``tonumber()`` in order to avoid an Excel
   warning about "Numbers Stored as Text". The default is ``false``::
 
       workbook = Workbook:new(filename, {strings_to_numbers = true})
@@ -74,7 +77,7 @@ The constructor options are:
 
 * **date_1904**: Excel for Windows uses a default epoch of 1900 and Excel for
   Mac uses an epoch of 1904. However, Excel on either platform will convert
-  automatically between one system and the other. xlsxwriter stores dates in
+  automatically between one system and the other. xlsxwriter.lua stores dates in
   the 1900 format by default. If you wish to change this you can use the
   ``date_1904`` workbook option. This option is mainly for enhanced
   compatibility with Excel and in general isn't required very often::
@@ -95,11 +98,11 @@ workbook:add_worksheet()
    :param sheetname: Optional worksheet name, defaults to Sheet1, etc.
    :rtype: A :ref:`worksheet <Worksheet>` object.
 
-The ``add_worksheet()`` method adds a new worksheet to a workbook:
+The ``add_worksheet()`` method adds a new worksheet to a workbook.
 
-At least one worksheet should be added to a new workbook: The
+At least one worksheet should be added to a new workbook. The
 :ref:`Worksheet <worksheet>` object is used to write data and configure a
-worksheet in the workbook:
+worksheet in the workbook.
 
 The ``sheetname`` parameter is optional. If it is not specified the default
 Excel convention will be followed, i.e. Sheet1, Sheet2, etc.::
@@ -112,11 +115,11 @@ Excel convention will be followed, i.e. Sheet1, Sheet2, etc.::
 .. image:: _images/workbook02.png
 
 The worksheet name must be a valid Excel worksheet name, i.e. it cannot contain
-any of the characters ``' [ ] : * ? / \'`` and it must be less than 32 
+any of the characters ``[ ] : * ? / \`` and it must be less than 32
 characters.
 
 In addition, you cannot use the same, case insensitive, ``sheetname`` for more
-than one worksheet:
+than one worksheet.
 
 workbook:add_format()
 ---------------------
@@ -126,7 +129,7 @@ workbook:add_format()
    Create a new Format object to formats cells in worksheets.
 
    :paramionary properties: An optional table of format properties.
-   :rtype: A :ref:`format <Format>` object.
+   :rtype: A :ref:`Format <Format>` object.
 
 The ``add_format()`` method can be used to create new :ref:`Format <Format>`
 objects which are used to apply formatting to a cell. You can either define

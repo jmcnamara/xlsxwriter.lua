@@ -203,7 +203,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'xlsxwriter.tex', u'Creating Excel files with xlsxwriter and Lua',
+  ('index', 'xlsxwriter_lua.tex', u'Creating Excel files with xlsxwriter.lua',
    u'John McNamara', 'manual'),
 ]
 
@@ -233,7 +233,7 @@ latex_logo = '_images/logo.png'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'xlsxwriter', u'xlsxwriter.lua Documentation',
+    ('index', 'xlsxwriter.lua', u'xlsxwriter.lua Documentation',
      [u'John McNamara'], 1)
 ]
 
@@ -247,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'xlsxwriter', u'xlsxwriter.lua Documentation',
-   u'John McNamara', 'xlsxwriter', 'One line description of project.',
+  ('index', 'xlsxwriter.lua', u'xlsxwriter.lua Documentation',
+   u'John McNamara', 'xlsxwriter.lua', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -265,7 +265,7 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'xlsxwriter'
+epub_title = u'xlsxwriter.lua'
 epub_author = u'John McNamara'
 epub_publisher = u'John McNamara'
 epub_copyright = u'2013-2014, John McNamara'

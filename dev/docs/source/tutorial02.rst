@@ -1,12 +1,12 @@
+.. highlight:: lua
+
 .. _tutorial2:
 
 Tutorial 2: Adding formatting to the XLSX File
 ==============================================
 
-.. highlight:: lua
-
 In the previous section we created a simple spreadsheet using Lua and the
-xlsxwriter module.
+xlsxwriter.lua module.
 
 This converted the required data into an Excel file but it looked a little
 bare. In order to make the information clearer we would like to add some
