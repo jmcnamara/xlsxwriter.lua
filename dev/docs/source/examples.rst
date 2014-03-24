@@ -2,7 +2,7 @@ Examples
 ========
 
 The following are some of the examples included in the
-`examples <https://github.com/jmcnamara/xlsxwriter/lua/tree/master/examples>`_
+`examples <https://github.com/jmcnamara/xlsxwriter.lua/tree/master/examples>`_
 directory of the xlsxwriter.lua distribution.
 
 .. toctree::
@@ -12,3 +12,4 @@ directory of the xlsxwriter.lua distribution.
    example_demo.rst
    example_array_formula.rst
    example_tab_colors.rst
+   example_hide_sheet.rst

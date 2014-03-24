@@ -10,4 +10,3 @@ This program is an example of setting worksheet tab colours. See the
 
 .. literalinclude:: ../../../examples/tab_colors.lua
    :language: lua
-
