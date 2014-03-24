@@ -47,7 +47,7 @@ function Worksheet:new()
     selections             = {},
     hidden                 = false,
     active                 = false,
-    tab_color              = 0,
+    tab_color              = false,
     panes                  = {},
     active_pane            = 3,
     selected               = false,
@@ -180,7 +180,7 @@ function Worksheet:_assemble_xml_file()
   self:_write_worksheet()
 
   -- Write the worksheet properties.
-  -- self:_write_sheet_pr()
+  self:_write_sheet_pr()
 
   -- Write the worksheet dimensions.
   self:_write_dimension()
@@ -1162,6 +1162,50 @@ function Worksheet:_write_worksheet()
 end
 
 ----
+-- Write the <sheetPr> element for Sheet level properties.
+--
+function Worksheet:_write_sheet_pr()
+
+  local attributes = {}
+
+  if not self.fit_page and not self.filter_on and not self.tab_color
+  and not self.outline_changed and not self.vba_codename then
+    return
+  end
+
+  if self.vba_codename then
+     table.insert(attributes, {["codeName"] = self.vba_codename})
+  end
+
+  if self.filter_on then
+     table.insert(attributes, {["filterMode"] = "1"})
+  end
+
+
+  if self.fit_page or self.tab_color or self.outline_changed then
+    self:_xml_start_tag("sheetPr", attributes)
+    self:_write_tab_color()
+    self:_write_outline_pr()
+    self:_write_page_set_up_pr()
+    self:_xml_end_tag("sheetPr")
+  else
+    self:_xml_empty_tag("sheetPr", attributes)
+  end
+end
+
+----
+-- Write the <pageSetUpPr> element.
+--
+function Worksheet:_write_page_set_up_pr()
+
+  if not self.fit_page then return end
+
+  local attributes = {{["fitToPage"] = "1"}}
+
+  self:_xml_empty_tag("pageSetUpPr", attributes)
+end
+
+----
 -- Write the <dimension> element. This specifies the range of cells in the
 -- Worksheet. As a special case, empty spreadsheets use "A1" as a range.
 --
@@ -1799,5 +1843,46 @@ function Worksheet:_write_col_info(colinfo)
   self:_xml_empty_tag("col", attributes)
 end
 
+----
+-- Write the <tabColor> element.
+--
+function Worksheet:_write_tab_color()
+
+  local color_index = self.tab_color
+
+  if not color_index then return end
+
+  local rgb        = Utility.excel_color(color_index)
+  local attributes = {{["rgb"] = rgb}}
+
+  self:_xml_empty_tag("tabColor", attributes)
+end
+
+----
+-- Write the <outlinePr> element.
+--
+function Worksheet:_write_outline_pr()
+
+  local attributes = {}
+  if not self.outline_changed then return end
+
+  if self.outline_style > 0 then
+     table.insert(attributes, {["applyStyles"] = "1"})
+  end
+
+  if not self.outline_below then
+     table.insert(attributes, {["summaryBelow"] = "0"})
+  end
+
+  if not self.outline_right then
+     table.insert(attributes, {["summaryRight"] = "0"})
+  end
+
+  if not self.outline_on then
+     table.insert(attributes, {["showOutlineSymbols"] = "0"})
+  end
+
+  self:_xml_empty_tag("outlinePr", attributes)
+end
 
 return Worksheet
