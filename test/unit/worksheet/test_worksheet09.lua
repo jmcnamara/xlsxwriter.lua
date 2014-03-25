@@ -50,9 +50,9 @@ worksheet:_set_filehandle(io.tmpfile())
 local cell_format = Format:new({xf_index = 1})
 
 -- No format. Should be ignored.
-worksheet:write_blank('A1', nil)
+worksheet:write_blank(0, 0, nil)
 
-worksheet:write_blank('C2', nil, cell_format)
+worksheet:write_blank(1, 2, nil, cell_format)
 
 worksheet:select()
 worksheet:_assemble_xml_file()
