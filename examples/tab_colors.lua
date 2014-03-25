@@ -16,11 +16,9 @@ local worksheet2 = workbook:add_worksheet()
 local worksheet3 = workbook:add_worksheet()
 local worksheet4 = workbook:add_worksheet()
 
--- Set tab colours
+-- Set tab colours, worksheet4 will have the default colour.
 worksheet1:set_tab_color("red")
 worksheet2:set_tab_color("green")
-worksheet3:set_tab_color("#FF9900") -- Orange
--- worksheet4 will have the default colour.
-
+worksheet3:set_tab_color("#FF9900")
 
 workbook:close()
