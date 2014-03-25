@@ -389,21 +389,21 @@ specified by ``row`` and ``column``::
 
 The date_time should be a table of values like those used for `os.time() <http://www.lua.org/manual/5.2/manual.html#pdf-os.time>`_:
 
-+--------+------------+
-| Key    | Value      |
-+========+============+
-| year   | Full year  |
-+--------+------------+
-| month  | 1 - 12     |
-+--------+------------+
-| day    | 1 - 31     |
-+--------+------------+
-| hour   | 0 - 23     |
-+--------+------------+
-| min    | 0 - 59     |
-+--------+------------+
-| sec    | 0 - 59.999 |
-+--------+------------+
++--------+--------------+
+| Key    | Value        |
++========+==============+
+| year   | 4 digit year |
++--------+--------------+
+| month  | 1 - 12       |
++--------+--------------+
+| day    | 1 - 31       |
++--------+--------------+
+| hour   | 0 - 23       |
++--------+--------------+
+| min    | 0 - 59       |
++--------+--------------+
+| sec    | 0 - 59.999   |
++--------+--------------+
 
 A date/time should have a ``format`` of type :ref:`Format <format>`,
 otherwise it will appear as a number::
