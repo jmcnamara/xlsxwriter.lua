@@ -11,5 +11,7 @@ directory of the xlsxwriter.lua distribution.
    example_hello_world.rst
    example_demo.rst
    example_array_formula.rst
+   example_utf8.rst
+   example_utf8_polish.rst
    example_tab_colors.rst
    example_hide_sheet.rst

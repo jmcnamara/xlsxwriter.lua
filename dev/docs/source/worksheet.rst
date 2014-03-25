@@ -131,8 +131,9 @@ The ``format`` parameter is used to apply formatting to the cell. This
 parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
-Unicode strings in Excel must be UTF-8 encoded. This generally requires that
-your source file in UTF-8 encoded::
+Unicode strings in Excel must be UTF-8 encoded. With xlsxwriter.lua all that
+is required is that the source file is UTF-8 encoded and Lua will handle the
+UTF-8 strings like any other strings::
 
     worksheet:write("A1", "Some UTF-8 text")
 
