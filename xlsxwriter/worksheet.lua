@@ -1021,8 +1021,8 @@ function Worksheet:_write_array_formula(first_row, first_col,
   value = value or 0
 
   -- Write previous row if this is a new row, in optimization mode.
-  if self.optimization and row > self.previous_row then
-    self:_write_single_row(row)
+  if self.optimization and first_row > self.previous_row then
+    self:_write_single_row(first_row)
   end
 
   if not self.data_table[first_row] then
