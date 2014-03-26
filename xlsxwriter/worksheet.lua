@@ -166,6 +166,12 @@ function Worksheet:_initialize(init_data)
   self.default_date_format = init_data['default_date_format']
   self.default_url_format  = init_data['default_url_format']
 
+  -- Open a temp filehandle to store row data in optimization mode.
+  if self.optimization then
+    self.row_data_fh = io.tmpfile()
+    -- Set as the worksheet filehandle until the file is assembled.
+    self.fh = self.row_data_fh
+  end
 end
 
 
@@ -196,7 +202,7 @@ function Worksheet:_assemble_xml_file()
 
   -- Write the worksheet data such as rows columns and cells.
   if self.optimization then
-    -- self:_write_optimized_sheet_data()
+    self:_write_optimized_sheet_data()
   else
     self:_write_sheet_data()
   end
@@ -883,11 +889,19 @@ function Worksheet:_write_string(row, col, str, format)
     return -1
   end
 
+  -- Write a shared string if not in optimisation mode.
+  if not self.optimization then
+    str = self.str_table:_get_string_index(str)
+  end
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
+  end
+
   if not self.data_table[row] then
     self.data_table[row] = {}
   end
-
-  str = self.str_table:_get_string_index(str)
 
   self.data_table[row][col] = {'s', str, format}
 
@@ -902,6 +916,11 @@ function Worksheet:_write_number(row, col, num, format)
 
   if not self:_check_dimensions(row, col) then
     return -1
+  end
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
   end
 
   if not self.data_table[row] then
@@ -923,6 +942,11 @@ function Worksheet:_write_blank(row, col, num, format)
 
   if not self:_check_dimensions(row, col) then
     return -1
+  end
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
   end
 
   if not self.data_table[row] then
@@ -950,6 +974,11 @@ function Worksheet:_write_formula(row, col, formula, format, value)
 
   -- Strip the formula = sign, if it exists.
   if formula:match('^=') then formula = formula:sub(2) end
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
+  end
 
   if not self.data_table[row] then
     self.data_table[row] = {}
@@ -990,6 +1019,11 @@ function Worksheet:_write_array_formula(first_row, first_col,
 
   -- Set a default formula value.
   value = value or 0
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
+  end
 
   if not self.data_table[first_row] then
     self.data_table[first_row] = {}
@@ -1393,7 +1427,31 @@ function Worksheet:_write_sheet_data()
   end
 end
 
+----
+-- Write the <sheetData> element when the memory optimisation is on. In which
+-- case we read the data stored in the temp file and rewrite it to the XML
+-- sheet file.
+--
+function Worksheet:_write_optimized_sheet_data()
 
+  if not self.dim_rowmin then
+    -- If the dimensions aren't defined then there is no data to write.
+    self:_xml_empty_tag("sheetData")
+  else
+    self:_xml_start_tag("sheetData")
+
+    -- Rewind the temp file with the row data.
+    self.row_data_fh:seek('set', 0)
+    local buffer = self.row_data_fh:read(4096)
+
+    while buffer do
+      self.fh:write(buffer)
+      buffer = self.row_data_fh:read(4096)
+    end
+
+    self:_xml_end_tag("sheetData")
+  end
+end
 
 ----
 -- Write out the worksheet data as a series of rows and cells.

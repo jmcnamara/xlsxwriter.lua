@@ -8,9 +8,7 @@
 
 local Workbook = require "xlsxwriter.workbook"
 
-local workbook  = Workbook:new("test_date_1904_04.xlsx")
-workbook.date_1904 = true
-
+local workbook  = Workbook:new("test_date_1904_04.xlsx", {date_1904 = true})
 local worksheet = workbook:add_worksheet()
 local format    = workbook:add_format{num_format = 14}
 

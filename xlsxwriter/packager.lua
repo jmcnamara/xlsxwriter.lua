@@ -181,6 +181,9 @@ function Packager:_write_worksheet_files()
   local index = 1
   for _, worksheet in ipairs(self.workbook.worksheets) do
     if not worksheet.is_chartsheet then
+      -- Flush the row data in optimisation mode.
+      if worksheet.optimization then worksheet:_write_single_row() end
+
       worksheet:_set_filename("xl/worksheets/sheet" .. index .. '.xml')
       self:_add_to_zip(worksheet)
       index = index + 1

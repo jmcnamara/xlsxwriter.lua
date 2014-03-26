@@ -21,14 +21,21 @@ local SharedStrings = require "xlsxwriter.sharedstrings"
 local Workbook = {}
 setmetatable(Workbook,{__index = Xmlwriter})
 
-function Workbook:new(filename)
+function Workbook:new(filename, options)
 
   assert(filename, "Filename required by Workbook:new()")
+  options = options or {}
 
   local instance = {
 
-    worksheet_meta     = {activesheet = 0, firstsheet = 0},
-    filename           = filename,
+    worksheet_meta      = {activesheet = 0, firstsheet = 0},
+    filename            = filename,
+    date_1904           = options["date_1904"],
+    strings_to_numbers  = options["strings_to_numbers"],
+    strings_to_formulas = options["strings_to_formulas"] or true,
+    strings_to_urls     = options["strings_to_urls"] or true,
+    default_date_format = options["default_date_format"],
+    optimization        = options["constant_memory"],
     fileclosed         = false,
     filehandle         = false,
     internal_fh        = false,
