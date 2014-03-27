@@ -65,7 +65,7 @@ format:set_font_size()
 
 Set the font size of the cell format::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_font_size(30)
 
 Excel adjusts the height of a row to accommodate the largest font size in the
@@ -85,11 +85,11 @@ format:set_font_color()
 
 Set the font colour::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
 
     format:set_font_color("red")
 
-    worksheet.write(0, 0, "wheelbarrow", format)
+    worksheet:write(0, 0, "wheelbarrow", format)
 
 The color can be a Html style ``#RRGGBB`` string or a limited number of named
 colors, see :ref:`colors`.
@@ -180,8 +180,8 @@ a date, a currency value or some other user defined format:
 The numerical format of a cell can be specified by using a format string or an
 index to one of Excel's built-in formats::
 
-    format1 = workbook.add_format()
-    format2 = workbook.add_format()
+    format1 = workbook:add_format()
+    format2 = workbook:add_format()
 
     format1:set_num_format("d mmm yyyy")  -- Format string.
     format2:set_num_format(0x0F)          -- Format index.
@@ -189,41 +189,41 @@ index to one of Excel's built-in formats::
 Format strings can control any aspect of number formatting allowed by Excel::
 
     format01:set_num_format("0.000")
-    worksheet.write(1, 0, 3.1415926, format01)       --> 3.142
+    worksheet:write(1, 0, 3.1415926, format01)       --> 3.142
 
     format02:set_num_format("#,##0")
-    worksheet.write(2, 0, 1234.56, format02)         --> 1,235
+    worksheet:write(2, 0, 1234.56, format02)         --> 1,235
 
     format03:set_num_format("#,##0.00")
-    worksheet.write(3, 0, 1234.56, format03)         --> 1,234.56
+    worksheet:write(3, 0, 1234.56, format03)         --> 1,234.56
 
     format04:set_num_format("0.00")
-    worksheet.write(4, 0, 49.99, format04)           --> 49.99
+    worksheet:write(4, 0, 49.99, format04)           --> 49.99
 
     format05:set_num_format("mm/dd/yy")
-    worksheet.write(5, 0, 36892.521, format05)       --> 01/01/01
+    worksheet:write(5, 0, 36892.521, format05)       --> 01/01/01
 
     format06:set_num_format("mmm d yyyy")
-    worksheet.write(6, 0, 36892.521, format06)       --> Jan 1 2001
+    worksheet:write(6, 0, 36892.521, format06)       --> Jan 1 2001
 
     format07:set_num_format("d mmmm yyyy")
-    worksheet.write(7, 0, 36892.521, format07)       --> 1 January 2001
+    worksheet:write(7, 0, 36892.521, format07)       --> 1 January 2001
 
     format08:set_num_format("dd/mm/yyyy hh:mm AM/PM")
-    worksheet.write(8, 0, 36892.521, format08)       --> 01/01/2001 12:30 AM
+    worksheet:write(8, 0, 36892.521, format08)       --> 01/01/2001 12:30 AM
 
     format09:set_num_format('0 "dollar and" .00 "cents"')
-    worksheet.write(9, 0, 1.87, format09)            --> 1 dollar and .87 cents
+    worksheet:write(9, 0, 1.87, format09)            --> 1 dollar and .87 cents
 
     -- Conditional numerical formatting.
     format10:set_num_format("[Green]General;[Red]-General;General")
-    worksheet.write(10, 0, 123, format10)  -- > 0 Green
-    worksheet.write(11, 0, -45, format10)  -- < 0 Red
-    worksheet.write(12, 0,   0, format10)  -- = 0 Default colour
+    worksheet:write(10, 0, 123, format10)  -- > 0 Green
+    worksheet:write(11, 0, -45, format10)  -- < 0 Red
+    worksheet:write(12, 0,   0, format10)  -- = 0 Default colour
 
     -- Zip code.
     format11:set_num_format("00000")
-    worksheet.write(13, 0, 1209, format11)
+    worksheet:write(13, 0, 1209, format11)
 
 .. image:: _images/formats_num_str.png
 
@@ -343,20 +343,20 @@ Following Excel's convention, cell locking is turned on by default. However,
 it only has an effect if the worksheet has been protected using the worksheet
 :func:`protect()` method::
 
-    locked = workbook.add_format()
+    locked = workbook:add_format()
     locked:set_locked(true)
 
-    unlocked = workbook.add_format()
+    unlocked = workbook:add_format()
     locked:set_locked(false)
 
     -- Enable worksheet protection
-    worksheet.protect()
+    worksheet:protect()
 
     -- This cell cannot be edited.
-    worksheet.write("A1", "=1+2", locked)
+    worksheet:write("A1", "=1+2", locked)
 
     -- This cell can be edited.
-    worksheet.write("A2", "=1+2", unlocked)
+    worksheet:write("A2", "=1+2", unlocked)
 
 
 format:set_hidden()
@@ -372,14 +372,14 @@ is generally used to hide complex calculations from end users who are only
 interested in the result. It only has an effect if the worksheet has been
 protected using the worksheet :func:`protect()` method::
 
-    hidden = workbook.add_format()
+    hidden = workbook:add_format()
     hidden:set_hidden()
 
     -- Enable worksheet protection
-    worksheet.protect()
+    worksheet:protect()
 
     -- The formula in this cell isn't visible
-    worksheet.write("A1", "=1+2", hidden)
+    worksheet:write("A1", "=1+2", hidden)
 
 
 format:set_align()
@@ -425,13 +425,13 @@ The following are the available vertical alignments:
 
 As in Excel, vertical and horizontal alignments can be combined::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
 
     format:set_align("center")
     format:set_align("vcenter")
 
     worksheet:set_row(0, 30)
-    worksheet.write(0, 0, "Some Text", format)
+    worksheet:write(0, 0, "Some Text", format)
 
 Text can be aligned across two or more adjacent cells using the
 ``"center_across"`` property. However, for genuine merged cells it is better
@@ -456,11 +456,11 @@ Text can be aligned across two or more adjacent cells using the
 
 Only one cell should contain the text, the other cells should be blank::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_center_across()
 
-    worksheet.write(1, 1, "Center across selection", format)
-    worksheet.write_blank(1, 2, format)
+    worksheet:write(1, 1, "Center across selection", format)
+    worksheet:write_blank(1, 2, format)
 
 For actual merged cells it is better to use the ``merge_range()`` worksheet
 method.
@@ -475,18 +475,18 @@ format:set_text_wrap()
 
 Turn text wrapping on for text in a cell::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_text_wrap()
 
-    worksheet.write(0, 0, "Some long text to wrap in a cell", format)
+    worksheet:write(0, 0, "Some long text to wrap in a cell", format)
 
 If you wish to control where the text is wrapped you can add newline characters
 to the string::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_text_wrap()
 
-    worksheet.write(0, 0, "It's\na bum\nwrap", format)
+    worksheet:write(0, 0, "It's\na bum\nwrap", format)
 
 Excel will adjust the height of the row to accommodate the wrapped text. A
 similar effect can be obtained without newlines using the
@@ -505,10 +505,10 @@ format:set_rotation()
 Set the rotation of the text in a cell. The rotation can be any angle in the
 range -90 to 90 degrees::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_rotation(30)
 
-    worksheet.write(0, 0, "This text is rotated", format)
+    worksheet:write(0, 0, "This text is rotated", format)
 
 The angle 270 is also supported. This indicates text where the letters run from
 top to bottom.
@@ -526,14 +526,14 @@ format:set_indent()
 This method can be used to indent text in a cell. The argument, which should be
 an integer, is taken as the level of indentation::
 
-    format1 = workbook.add_format()
-    format2 = workbook.add_format()
+    format1 = workbook:add_format()
+    format2 = workbook:add_format()
 
     format1:set_indent(1)
     format2:set_indent(2)
 
-    worksheet.write("A1", "This text is indented 1 level", format1)
-    worksheet.write("A2", "This text is indented 2 levels", format2)
+    worksheet:write("A1", "This text is indented 1 level", format1)
+    worksheet:write("A2", "This text is indented 2 levels", format2)
 
 .. image:: _images/text_indent.png
 
@@ -551,10 +551,10 @@ format:set_shrink()
 
 This method can be used to shrink text so that it fits in a cell::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
     format:set_shrink()
 
-    worksheet.write(0, 0, "Honey, I shrunk the text!", format)
+    worksheet:write(0, 0, "Honey, I shrunk the text!", format)
 
 
 format:set_text_justlast()
@@ -594,12 +594,12 @@ hasn't been defined then a solid fill pattern is used as the default.
 
 Here is an example of how to set up a solid fill in a cell::
 
-    format = workbook.add_format()
+    format = workbook:add_format()
 
     format:set_pattern(1)  -- This is optional when using a solid fill.
     format:set_bg_color("green")
 
-    worksheet.write("A1", "Ray", format)
+    worksheet:write("A1", "Ray", format)
 
 .. image:: _images/formats_set_bg_color.png
 

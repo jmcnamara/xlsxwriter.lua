@@ -1,7 +1,12 @@
 
 .PHONY: docs test
 
-all: test
+all:
+	@echo "\tTo install run: sudo make install"
+	@echo "\tRequires luarocks."
+
+install:
+	@luarocks make
 
 docs:
 	@make -C dev/docs html
@@ -16,10 +21,10 @@ cleandocs:
 
 alldocs: cleandocs docs pdf
 	@cp -r dev/docs/build/html docs
-	@cp -r dev/docs/build/latex/XlsxWriter.pdf docs
+	@cp -r dev/docs/build/latex/xlsxwriter_lua.pdf docs
 
 pdf_release: pdf
-	@cp -r dev/docs/build/latex/XlsxWriter.pdf docs
+	@cp -r dev/docs/build/latex/xlsxwriter_lua.pdf docs
 
 
 test:

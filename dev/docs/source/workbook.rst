@@ -54,27 +54,6 @@ The constructor options are:
 
   See :ref:`memory_perf` for more details.
 
-* **strings_to_numbers**: Enable the
-  :ref:`worksheet: <Worksheet>`:func:`write()` method to convert strings to
-  numbers, where possible, using ``tonumber()`` in order to avoid an Excel
-  warning about "Numbers Stored as Text". The default is ``false``::
-
-      workbook = Workbook:new(filename, {strings_to_numbers = true})
-
-* **strings_to_formulas**: Enable the
-  :ref:`worksheet: <Worksheet>`:func:`write()` method to convert strings to
-  formulas. The default is ``true``::
-
-      workbook = Workbook:new(filename, {strings_to_formulas = false})
-
-* **default_date_format**: This option is used to specify a default date
-  format string for use with the
-  :ref:`worksheet: <Worksheet>`:func:`write_datetime()` method when an
-  explicit format isn't given. See :ref:`working_with_dates_and_time` for more
-  details::
-
-      Workbook:new(filename, {default_date_format = "dd/mm/yy"})
-
 * **date_1904**: Excel for Windows uses a default epoch of 1900 and Excel for
   Mac uses an epoch of 1904. However, Excel on either platform will convert
   automatically between one system and the other. xlsxwriter.lua stores dates in

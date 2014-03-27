@@ -18,7 +18,7 @@ local SharedStrings = require "xlsxwriter.sharedstrings"
 ------------------------------------------------------------------------------
 
 -- The constructor inherits from xmlwriter.lua.
-local Workbook = {}
+local Workbook = {version = '0.0.1'}
 setmetatable(Workbook,{__index = Xmlwriter})
 
 function Workbook:new(filename, options)

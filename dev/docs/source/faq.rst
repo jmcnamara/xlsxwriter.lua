@@ -1,5 +1,7 @@
 :tocdepth: 1
 
+.. highlight:: lua
+
 .. _faq:
 
 Frequently Asked Questions
@@ -12,7 +14,7 @@ Q. Can XlsxWriter use an existing Excel file as a template?
 
 No.
 
-XlsxWriter is designed only as a file *writer*. It cannot read or modify an
+Xlsxwriter.lua is designed only as a file *writer*. It cannot read or modify an
 existing Excel file.
 
 
@@ -20,7 +22,7 @@ Q. Why do my formulas show a zero result in some, non-Excel applications?
 -------------------------------------------------------------------------
 
 Due to wide range of possible formulas and interdependencies between them
-XlsxWriter doesn't, and realistically cannot, calculate the result of a
+xlsxwriter.lua doesn't, and realistically cannot, calculate the result of a
 formula when it is written to an XLSX file. Instead, it stores the value 0 as
 the formula result. It then sets a global flag in the XLSX file to say that
 all formulas and functions should be recalculated when the file is opened.
@@ -33,7 +35,7 @@ applications, will only display the 0 results.
 If required, it is also possible to specify the calculated result of the
 formula using the optional ``value`` parameter in :func:`write_formula()`::
 
-    worksheet.write_formula('A1', '=2+2', num_format, 4)
+    worksheet:write_formula('A1', '=2+2', num_format, 4)
 
 
 Q. Can I apply a format to a range of cells in one go?
@@ -46,7 +48,7 @@ to be written separately.
 Q. Is feature X supported or will it be supported?
 --------------------------------------------------
 
-All supported features are documented.
+All supported features are documented. In time the feature set should expand to be the same as the `Python XlsxWriter <http://xlsxwriter.readthedocs.org>`_ module.
 
 
 Q. Is there an "AutoFit" option for columns?

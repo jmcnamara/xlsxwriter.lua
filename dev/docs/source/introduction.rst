@@ -23,6 +23,6 @@ However:
 
    * It can only create **new files**. It cannot read or modify existing files.
 
-XLsxwriter.lua is a port of the Perl `Excel::Writer::XLSX <http://search.cpan.org/~jmcnamara/Excel-Writer-XLSX/>`_ and the Python `XlsxWriter <http://xlsxwriter.readthedocs.org>`_ modules and is licensed under an MIT :ref:`License`.
+XLsxwriter.lua is a port of the Perl `Excel::Writer::XLSX <http://search.cpan.org/~jmcnamara/Excel-Writer-XLSX/>`_ and the Python `XlsxWriter <http://xlsxwriter.readthedocs.org>`_ modules and is licensed under an MIT/X11 :ref:`License`.
 
 To try out the module see the next section on :ref:`getting_started`.

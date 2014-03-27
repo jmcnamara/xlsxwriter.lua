@@ -17,7 +17,7 @@ object::
     worksheet1 = workbook:add_worksheet()
     worksheet2 = workbook:add_worksheet()
 
-    worksheet1.write("A1", 123)
+    worksheet1:write("A1", 123)
 
 .. image:: _images/worksheet00.png
 
@@ -54,12 +54,7 @@ The rules for handling data in ``write()`` are as follows:
 Strings are then handled as follows:
 
 * Strings that start with ``"="`` are taken to match a formula and are written
-  using :func:`write_formula()`. This can be overridden, see below.
-
-* When the :ref:`Workbook:new() <constructor>` constructor ``strings_to_numbers`` option is
-  ``true`` strings that convert to numbers using ``tonumber()`` are written
-  using :func:`write_number()` in order to avoid Excel warnings about "Numbers
-  Stored as Text". See the note below.
+  using :func:`write_formula()`.
 
 * Strings that don't match any of the above criteria are written using
   :func:`write_string()`.
@@ -79,15 +74,6 @@ This creates a worksheet like the following:
 
 .. image:: _images/worksheet01.png
 
-.. note::
-
-   The :ref:`Workbook:new() <constructor>` constructor option takes three optional arguments
-   that can be used to override string handling in the ``write()`` function.
-   These options are shown below with their default values::
-
-       Workbook:new(filename, {strings_to_numbers  = false,
-                               strings_to_formulas = true,
-                               strings_to_urls     = true})
 
 The ``write()`` method supports two forms of notation to designate the position
 of cells: **Row-column** notation and **A1** notation::
@@ -414,8 +400,6 @@ otherwise it will appear as a number::
 
     worksheet:write_date_time("A1", date_time, date_format)
 
-If required, a default date format string can be set using the :ref:`Workbook:new() <constructor>` constructor ``default_date_format`` option.
-
 See :ref:`working_with_dates_and_time` for more details.
 
 
@@ -457,8 +441,6 @@ otherwise it will appear as a number::
     date_format = workbook:add_format({num_format = "d mmmm yyyy"})
 
     worksheet:write_date_string("A1", "2014-03-17", date_format)
-
-If required, a default date format string can be set using the :ref:`Workbook:new() <constructor>` constructor ``default_date_format`` option.
 
 See :ref:`working_with_dates_and_time` for more details.
 
@@ -639,7 +621,7 @@ visible in a multi-sheet workbook::
     worksheet2 = workbook:add_worksheet()
     worksheet3 = workbook:add_worksheet()
 
-    worksheet3.activate()
+    worksheet3:activate()
 
 .. image:: _images/worksheet_activate.png
 
@@ -659,9 +641,9 @@ worksheet:select()
 The ``select()`` method is used to indicate that a worksheet is selected in a
 multi-sheet workbook::
 
-    worksheet1.activate()
-    worksheet2.select()
-    worksheet3.select()
+    worksheet1:activate()
+    worksheet2:select()
+    worksheet3:select()
 
 A selected worksheet has its tab highlighted. Selecting worksheets is a way of
 grouping them together so that, for example, several worksheets could be
@@ -678,7 +660,7 @@ worksheet:hide()
 
 The ``hide()`` method is used to hide a worksheet::
 
-    worksheet2.hide()
+    worksheet2:hide()
 
 You may wish to hide a worksheet in order to avoid confusing a user with
 intermediate data or calculations.
@@ -691,8 +673,8 @@ addition, since the first worksheet will default to being the active
 worksheet, you cannot hide the first worksheet without activating another
 sheet::
 
-    worksheet2.activate()
-    worksheet1.hide()
+    worksheet2:activate()
+    worksheet1:hide()
 
 See :ref:`ex_hide_sheet` for more details.
 
@@ -712,8 +694,8 @@ visible worksheet tab using ``set_first_sheet()``::
       workbook:add_worksheet
     end
 
-    worksheet19.set_first_sheet() -- First visible worksheet tab.
-    worksheet20.activate()        -- First visible worksheet:
+    worksheet19:set_first_sheet() -- First visible worksheet tab.
+    worksheet20:activate()        -- First visible worksheet:
 
 This method is not required very often. The default value is the first
 worksheet:
@@ -729,10 +711,10 @@ worksheet:set_zoom()
 
 Set the worksheet zoom factor in the range ``10 <= zoom <= 400``::
 
-    worksheet1.set_zoom(50)
-    worksheet2.set_zoom(75)
-    worksheet3.set_zoom(300)
-    worksheet4.set_zoom(400)
+    worksheet1:set_zoom(50)
+    worksheet2:set_zoom(75)
+    worksheet3:set_zoom(300)
+    worksheet4:set_zoom(400)
 
 The default zoom factor is 100. It isn't possible to set the zoom to
 "Selection" because it is calculated by Excel at run-time.
@@ -783,8 +765,8 @@ worksheet:set_tab_color()
 The ``set_tab_color()`` method is used to change the colour of the worksheet
 tab::
 
-    worksheet1.set_tab_color("red")
-    worksheet2.set_tab_color("#FF9900") -- Orange
+    worksheet1:set_tab_color("red")
+    worksheet2:set_tab_color("#FF9900") -- Orange
 
 The colour can be a Html style ``#RRGGBB`` string or a limited number named
 colours, see :ref:`colors`.

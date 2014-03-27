@@ -134,8 +134,8 @@ Format Colors
 Format property colors are specified using a Html sytle ``#RRGGBB`` value or a
 imited number of named colors::
 
-    format1.set_font_color("#FF0000")
-    format2.set_font_color("red")
+    format1:set_font_color("#FF0000")
+    format2:set_font_color("red")
 
 See :ref:`colors` for more details.
 
@@ -150,7 +150,7 @@ for example::
 
     format = workbook:add_format()
 
-    format.set_bold()  -- Turns bold on.
+    format:set_bold()  -- Turns bold on.
 
 
 Modifying Formats

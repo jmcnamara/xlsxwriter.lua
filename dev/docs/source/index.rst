@@ -21,10 +21,6 @@ features such as:
 
 It supports Lua 5.1 and Lua 5.2.
 
-**Note: this module isn't fully functional yet and these are preliminary
-docs. Check back at the end of March.**
-
-
 .. only:: html
 
    This document explains how to use the xlsxwriter module. See the
