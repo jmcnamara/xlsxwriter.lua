@@ -1,0 +1,12 @@
+name = "xlsxwriter"
+version = "0.0.1"
+desc = "A lua module for creating Excel XLSX files."
+author = "John McNamara"
+license = "MIT/X11"
+url = "https://github.com/jmcnamara/xlsxwriter.lua"
+maintainer = "John McNamara"
+
+depends = {
+  "lua >= 5.1",
+  "ZipWriter",
+}
