@@ -44,3 +44,7 @@ test5.2:
 testluajit:
 	@luajit -v
 	@prove --exec=luajit --ext=lua -r test/unit
+
+readthedocs:
+	@curl -X POST http://readthedocs.org/build/xlsxwriterlua
+

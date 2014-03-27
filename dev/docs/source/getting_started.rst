@@ -94,7 +94,7 @@ Documentation
 The latest version of this document is hosted on
 `Read The Docs <http://xlsxwriterlua.readthedocs.org>`_. It is also
 available as a
-`PDF <https://github.com/jmcnamara/XlsxWriter/raw/master/docs/xlsxwriter_lua.pdf>`_.
+`PDF <http://github.com/jmcnamara/xlsxwriter.lua/blob/master/docs/xlsxwriter_lua.pdf>`_.
 
 Once you are happy that the module is installed and operational you can have a
 look at the rest of the Xlsxwriter.lua documentation. :ref:`tutorial1` is a good
