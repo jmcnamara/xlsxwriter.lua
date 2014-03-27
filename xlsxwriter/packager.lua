@@ -72,7 +72,8 @@ function Packager:new(filename)
       istext   = true,
       isfile   = true,
       isdir    = false,
-      exattrib = 0x81800020},
+      exattrib = 0x81800020,
+      platform = 'unix'},
   }
 
   setmetatable(instance, self)
