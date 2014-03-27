@@ -47,4 +47,3 @@ testluajit:
 
 readthedocs:
 	@curl -X POST http://readthedocs.org/build/xlsxwriterlua
-

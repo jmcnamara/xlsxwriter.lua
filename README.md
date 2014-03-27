@@ -1,6 +1,6 @@
 # xlsxwriter.lua
 
-A lua module for creating Excel XLSX files.
+A Lua module for creating Excel XLSX files.
 
 ## Work in progress
 

@@ -1,4 +1,4 @@
-Creating Excel files with LUA and Xlsxwriter
+Creating Excel files with Lua and Xlsxwriter
 ============================================
 
 Xlsxwriter is a Lua module for creating Excel XLSX files.
