@@ -281,13 +281,21 @@ function Worksheet:write(...)
   local row, col, token, format = self:_convert_cell_args(...)
 
   if type(token) == "string" then
-    if string.match(token, "^=") then
+    if token == "" then
+      return self:_write_blank(row, col,token, format)
+    elseif string.match(token, "^=") then
       return self:_write_formula(row, col, token, format)
     else
       return self:_write_string(row, col, token, format)
     end
-  else
+  elseif type(token) == "number" then
     return self:_write_number(row, col, token, format)
+  elseif type(token) == "boolean" then
+    return self:_write_boolean(row, col,token, format)
+  elseif type(token) == "nil" then
+    return self:_write_blank(row, col, "", format)
+  else
+    return self:_write_string(row, col, tostring(token), format)
   end
 end
 
@@ -419,6 +427,24 @@ end
 function Worksheet:write_date_string(...)
   return self:_write_date_string(self:_convert_cell_args(...))
 end
+
+----
+-- Write a boolean value to a worksheet cell.
+--
+-- Args:
+--     row:         The cell row (zero indexed).
+--     col:         The cell column (zero indexed).
+--     boolean:     Cell data. bool type.
+--     format:      An optional cell Format object.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--
+function Worksheet:write_boolean(...)
+  return self:_write_boolean(self:_convert_cell_args(...))
+end
+
 
 ----
 -- Set this worksheet as the active worksheet, i.e. the worksheet that is
@@ -1063,6 +1089,32 @@ function Worksheet:_write_date_string(row, col, date_string, format)
 
   return self:_write_number(row, col, date, format)
 end
+
+----
+-- Write a boolean to a Worksheet cell.
+--
+function Worksheet:_write_boolean(row, col, bool, format)
+
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  -- Write previous row if this is a new row, in optimization mode.
+  if self.optimization and row > self.previous_row then
+    self:_write_single_row(row)
+  end
+
+  if not self.data_table[row] then
+    self.data_table[row] = {}
+  end
+
+  bool = bool and 1 or 0
+
+  self.data_table[row][col] = {'l', bool, format}
+
+  return 0
+end
+
 
 ----
 -- Check that row and col are valid and store max and min values for use in
@@ -1777,8 +1829,18 @@ function Worksheet:_write_cell(row, col, cell)
     self:_xml_end_tag("c")
 
   elseif cell_type == "b" then
+
     -- Write a empty cell.
     self:_xml_empty_tag("c", attributes)
+
+  elseif cell_type == "l" then
+
+    -- Write a boolean value.
+      attributes[#attributes + 1] = {["t"] = "b"}
+    self:_xml_start_tag("c", attributes)
+    self:_write_cell_value(token)
+    self:_xml_end_tag("c")
+
   end
 end
 

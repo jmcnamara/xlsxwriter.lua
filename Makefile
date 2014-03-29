@@ -2,8 +2,7 @@
 .PHONY: docs test
 
 all:
-	@echo "\tTo install run: sudo make install"
-	@echo "\tRequires luarocks."
+	@echo "\tTo install (requires luarocks): sudo make install"
 
 install:
 	@luarocks make
@@ -31,7 +30,14 @@ test:
 	@lua -v
 	@prove --exec=lua --ext=lua -r test/unit
 
-testall: test5.1 test5.2 testluajit
+test_unit:
+	@lua -v
+	@prove --exec=lua --ext=lua -r test/unit
+
+test_comparison:
+	@py.test test/comparison/test*.py -v
+
+testall: test_unit test_comparison
 
 test5.1:
 	@lua5.1 -v
