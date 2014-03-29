@@ -1,14 +1,8 @@
-# xlsxwriter.lua
+# Xlsxwriter for Lua
 
 A Lua module for creating Excel XLSX files.
 
-## Work in progress
-
-The code is working and the documentation is almost complete. However, it is still a few days away from release so treat this as a beta.
-
-
 ## The xlsxwriter module
-
 
 Xlsxwriter is a Lua  module that can be used to write text, numbers and formulas
 to multiple worksheets in an Excel 2007+ XLSX file. It supports
@@ -18,7 +12,7 @@ features such as:
 * Full formatting.
 * Memory optimisation mode for writing large files.
 
-It supports Lua 5.1 and Lua 5.2.
+It works with Lua 5.1 and Lua 5.2.
 
 
 Here is an example:
@@ -26,7 +20,7 @@ Here is an example:
 
 ```lua
 --
--- A simple example of some of the features of the xlsxwriter.lua module.
+-- A simple example of some of the features of the xlsxwriter module.
 --
 
 local Workbook = require "xlsxwriter.workbook"

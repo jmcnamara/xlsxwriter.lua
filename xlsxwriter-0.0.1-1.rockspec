@@ -10,7 +10,7 @@ description = {
       XlsxWriter
 
       Xlsxwriter is a Lua module that can be used to write text, numbers
-        and formulas to multiple worksheets in an Excel 2007+ XLSX file.
+      and formulas to multiple worksheets in an Excel 2007+ XLSX file.
 
       It supports features such as:
 
@@ -19,10 +19,6 @@ description = {
         * Memory optimisation mode for writing large files.
 
       It works with Lua 5.1 and Lua 5.2.
-
-      This is an example for the LuaRocks tutorial.
-      Here we would put a detailed, typically
-      paragraph-long description.
   ]],
   homepage = "http://xlsxwriterlua.readthedocs.org/",
   license = "MIT/X11"

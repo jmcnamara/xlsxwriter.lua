@@ -3,7 +3,7 @@
 Example: Simple Feature Demonstration
 =====================================
 
-This program is an example of writing some of the features of the xlsxwriter.lua
+This program is an example of writing some of the features of the ``xlsxwriter``
 module.
 
 .. image:: _images/demo.png

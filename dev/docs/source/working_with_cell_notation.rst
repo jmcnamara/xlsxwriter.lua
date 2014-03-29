@@ -21,7 +21,7 @@ notation uses the standard Excel alphanumeric sequence of column letter and
 
 Row-column notation is useful if you are referring to cells programmatically::
 
-    for row = 0 , 5 do
+    for row = 0, 5 do
         worksheet:write(row, 0, "Hello")
     end
 
@@ -31,17 +31,17 @@ formulas::
     worksheet:write("H1", 200)
     worksheet:write("H2", "=H1+1")
 
-In general when using the Xlsxwriter.lua module you can use A1 notation anywhere
+In general when using the ``xlsxwriter`` module you can use A1 notation anywhere
 you can use row-column notation.
 
 .. note::
    In Excel it is also possible to use R1C1 notation. This is not
-   supported by Xlsxwriter.lua.
+   supported by ``xlsxwriter``.
 
 .. _abs_reference:
 
 Relative and Absolute cell references
-=====================================
+-------------------------------------
 
 When dealing with Excel cell references it is important to distinguish between
 relative and absolute cell references in Excel.
@@ -64,13 +64,15 @@ See the Microsoft Office documentation for
 Cell Utility Functions
 ======================
 
-The Xlsxwriter.lua ``utility`` module contains several helper functions for
-dealing with A1 notation as shown below. These functions can be imported and
+The ``xlsxwriter.utility`` module contains several helper functions for
+dealing with A1 notation. These functions can be imported and
 used as follows::
 
     local Utility = require "xlsxwriter.utility"
 
     cell = Utilty.rowcol_to_cell(1, 2) --> C2
+
+The available functions are shown below.
 
 
 rowcol_to_cell()
@@ -88,9 +90,9 @@ rowcol_to_cell()
 The ``rowcol_to_cell()`` function converts a zero indexed row and column
 cell values to an ``A1`` style string::
 
-    cell = Utilty.rowcol_to_cell(0, 0)  --> A1
-    cell = Utilty.rowcol_to_cell(0, 1)  --> B1
-    cell = Utilty.rowcol_to_cell(1, 0)  --> A2
+    cell = Utilty.rowcol_to_cell(0, 0) --> A1
+    cell = Utilty.rowcol_to_cell(0, 1) --> B1
+    cell = Utilty.rowcol_to_cell(1, 0) --> A2
 
 
 rowcol_to_cell_abs()
@@ -129,7 +131,7 @@ cell_to_rowcol()
 
 The ``cell_to_rowcol()`` function converts an Excel cell reference in ``A1``
 notation to a zero based row and column. The function will also handle Excel"s
-absolute, ``$``, cell notation::
+absolute cell notation::
 
     row, col = Utilty.cell_to_rowcol("A1")   --> (0, 0)
     row, col = Utilty.cell_to_rowcol("B1")   --> (0, 1)

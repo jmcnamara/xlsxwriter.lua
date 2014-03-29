@@ -5,7 +5,7 @@ Examples
 
 The following are some of the examples included in the
 `examples <https://github.com/jmcnamara/xlsxwriter.lua/tree/master/examples>`_
-directory of the xlsxwriter.lua distribution.
+directory of the ``xlsxwriter`` distribution.
 
 .. toctree::
    :maxdepth: 1

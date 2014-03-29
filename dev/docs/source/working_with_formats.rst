@@ -128,6 +128,12 @@ The object method interface is mainly provided for backward compatibility. The
 key/value interface has proved to be more flexible in real world programs and
 is the recommended method for setting format properties.
 
+It is also possible, as with any Lua function that takes a table as its only
+parameter to use the following shorthand syntax:
+
+    format = workbook:add_format{bold = true, font_color = "red"}
+
+
 Format Colors
 -------------
 
@@ -156,7 +162,7 @@ for example::
 Modifying Formats
 -----------------
 
-Each unique cell format in an xlsxwriter.lua spreadsheet must have a corresponding
+Each unique cell format in an ``xlsxwriter`` spreadsheet must have a corresponding
 Format object. It isn't possible to use a Format with a ``write()`` method and
 then redefine it for use at a later stage. This is because a Format is applied
 to a cell not in its current state but in its final state. Consider the

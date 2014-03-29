@@ -11,7 +11,7 @@ submit bug reports.
 Content is Unreadable. Open and Repair
 --------------------------------------
 
-Very, very occasionally you may see an Excel warning when opening an xlsxwriter.lua file like:
+Very, very occasionally you may see an Excel warning when opening an ``xlsxwriter`` file like:
 
    Excel could not open file.xlsx because some content is unreadable. Do you
    want to open and repair this workbook.
@@ -44,7 +44,7 @@ Formula results displaying as zero in non-Excel applications
 ------------------------------------------------------------
 
 Due to wide range of possible formulas and interdependencies between them,
-xlsxwriter.lua doesn't, and realistically cannot, calculate the result of a
+``xlsxwriter`` doesn't, and realistically cannot, calculate the result of a
 formula when it is written to an XLSX file. Instead, it stores the value 0 as
 the formula result. It then sets a global flag in the XLSX file to say that
 all formulas and functions should be recalculated when the file is opened.
@@ -63,7 +63,7 @@ formula using the optional ``value`` parameter in :func:`write_formula()`::
 Strings aren't displayed in Apple Numbers in 'constant_memory' mode
 -------------------------------------------------------------------
 
-In :func:`Workbook` ``'constant_memory'`` mode xlsxwriter.lua uses an optimisation where cell strings aren't stored in an Excel structure call "shared strings"
+In :func:`Workbook` ``'constant_memory'`` mode ``xlsxwriter`` uses an optimisation where cell strings aren't stored in an Excel structure call "shared strings"
 and instead are written "in-line".
 
 This is a documented Excel feature that is supported by most spreadsheet
@@ -78,21 +78,21 @@ Images inserted into worksheets via :func:`insert_image` may not display
 correctly in Excel 2011 for Mac and non-Excel applications such as OpenOffice
 and LibreOffice. Specifically the images may looked stretched or squashed.
 
-This is not specifically an xlsxwriter.lua issue. It also occurs with files created in Excel 2007 and Excel 2010.
+This is not specifically an ``xlsxwriter`` issue. It also occurs with files created in Excel 2007 and Excel 2010.
 
 
 
 Reporting Bugs
 ==============
 
-Here are some tips on reporting bugs in xlsxwriter.lua.
+Here are some tips on reporting bugs in ``xlsxwriter``.
 
 
 Upgrade to the latest version of the module
 -------------------------------------------
 
 The bug you are reporting may already be fixed in the latest version of the
-module. You can check which version of xlsxwriter.lua that you are using as
+module. You can check which version of ``xlsxwriter`` that you are using as
 follows::
 
     lua -e 'W = require "xlsxwriter.workbook"; print(W.version)'
@@ -103,7 +103,7 @@ Check the :ref:`changes` section to see what has changed in the latest versions.
 Read the documentation
 ----------------------
 
-Read or search the xlsxwriter.lua documentation to see if the issue you are
+Read or search the ``xlsxwriter`` documentation to see if the issue you are
 encountering is already explained.
 
 Look at the example programs
@@ -112,10 +112,10 @@ Look at the example programs
 There are many :ref:`example_programs` in the distribution. Try to identify an example
 program that corresponds to your query and adapt it to use as a bug report.
 
-Use the xlsxwriter.lua Issue tracker on GitHub
--------------------------------------------------------
+Use the xlsxwriter Issue tracker on GitHub
+------------------------------------------
 
-The `xlsxwriter.lua issue tracker <https://github.com/jmcnamara/xlsxwriter.lua/issues>`_ is on GitHub.
+The `xlsxwriter issue tracker <https://github.com/jmcnamara/xlsxwriter.lua/issues>`_ is on GitHub.
 
 
 Pointers for submitting a bug report
@@ -129,7 +129,7 @@ Pointers for submitting a bug report
 #. The sample program should be as small as possible to demonstrate the
    problem. Don't copy and paste large non-relevant sections of your program.
 
-A sample bug report is shown below. This format helps to analyse and respond to
+A sample bug report is shown below. This format helps analyse and respond to
 the bug report more quickly.
 
    **Issue with SOMETHING**

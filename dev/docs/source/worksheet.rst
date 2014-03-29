@@ -34,7 +34,7 @@ worksheet:write()
    :param args:        The additional args that are passed to the sub methods
                        such as number, string or format.
 
-Excel makes a distinction between data types such as strings, numbers, blanks and formulas. To simplify the process of writing data using xlsxwriter.lua the
+Excel makes a distinction between data types such as strings, numbers, blanks and formulas. To simplify the process of writing data using ``xlsxwriter`` the
 ``write()`` method acts as a general alias for several more specific methods:
 
 * :func:`write_string()`
@@ -58,7 +58,6 @@ Strings are then handled as follows:
 
 * Strings that don't match any of the above criteria are written using
   :func:`write_string()`.
-
 
 Here are some examples::
 
@@ -102,7 +101,7 @@ worksheet:write_string()
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param string:      String to write to cell.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
 The ``write_string()`` method writes a string to the cell specified by ``row``
 and ``column``::
@@ -117,7 +116,7 @@ The ``format`` parameter is used to apply formatting to the cell. This
 parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
-Unicode strings in Excel must be UTF-8 encoded. With xlsxwriter.lua all that
+Unicode strings in Excel must be UTF-8 encoded. With ``xlsxwriter`` all that
 is required is that the source file is UTF-8 encoded and Lua will handle the
 UTF-8 strings like any other strings::
 
@@ -125,10 +124,11 @@ UTF-8 strings like any other strings::
 
 .. image:: _images/worksheet02.png
 
-There are some sample UTF-8 sample programs in the ``examples`` directory of the xlsxwriter.lua source tree.
+There are some sample UTF-8 sample programs in the ``examples`` directory of the
+``xlsxwriter`` repository.
 
 The maximum string size supported by Excel is 32,767 characters. Strings longer
-than this will be ignored ``write_string()``.
+than this will be ignored by ``write_string()``.
 
 .. note::
 
@@ -147,7 +147,7 @@ worksheet:write_number()
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param number:      Number to write to cell.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
 The ``write_number()`` method writes Lua number type variable to the cell specified by ``row`` and ``column``::
 
@@ -174,7 +174,7 @@ worksheet:write_formula()
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param formula:     Formula to write to cell.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
 The ``write_formula()`` method writes a formula or function to the cell
 specified by ``row`` and ``column``::
@@ -199,7 +199,7 @@ The ``format`` parameter is used to apply formatting to the cell. This
 parameter is optional but when present is should be a valid
 :ref:`Format <format>` object.
 
-Xlsxwriter.lua doesn't calculate the value of a formula and instead stores the
+Xlsxwriter doesn't calculate the value of a formula and instead stores the
 value 0 as the formula result. It then sets a global flag in the XLSX file to
 say that all formulas and functions should be recalculated when the file is
 opened. This is the method recommended in the Excel documentation and in
@@ -208,7 +208,7 @@ that don't have a facility to calculate formulas, such as Excel Viewer, or
 some mobile applications will only display the 0 results.
 
 If required, it is also possible to specify the calculated result of the
-formula using the options ``value`` parameter. This is occasionally necessary
+formula using the optional ``value`` parameter. This is occasionally necessary
 when working with non-Excel applications that don't calculate the value of the
 formula. The calculated ``value`` is added at the end of the argument list::
 
@@ -216,7 +216,7 @@ formula. The calculated ``value`` is added at the end of the argument list::
 
 Excel stores formulas in US style formatting regardless of the Locale or
 Language of the Excel version. Therefore all formula names written using
-xlsxwriter.lua must be in English (use the following
+``xlsxwriter`` must be in English (use the following
 `formula translator <http://fr.excel-translator.de>`_ if necessary). Also,
 formulas must be written with the US style separator/range operator which is a
 comma (not semi-colon). Therefore a formula with multiple values should be
@@ -251,7 +251,7 @@ worksheet:write_array_formula()
    :param last_row:    The last row of the range.
    :param last_col:    The last col of the range.
    :param formula:     Array formula to write to cell.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
 The ``write_array_formula()`` method write an array formula to a cell range. In
 Excel an array formula is a formula that performs a calculation on a set of
@@ -304,8 +304,8 @@ worksheet:write_blank()
 
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
-   :param blank:       nil or empty string. The value is ignored.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param blank:       ``nil`` or empty string. The value is ignored.
+   :param format:      Optional :ref:`Format <format>` object.
 
 Write a blank cell specified by ``row`` and ``column``::
 
@@ -321,8 +321,8 @@ but ignores "Empty" cells.
 
 As such, if you write an empty cell without formatting it is ignored::
 
-    worksheet:write("A1", nil, format) -- write_blank()
-    worksheet:write("A2", nil)         -- Ignored
+    worksheet:write(0, 0, nil, format) -- write_blank()
+    worksheet:write(0, 1, nil)         -- Ignored
 
 This seemingly uninteresting fact means that you can write tables of data
 without special treatment for ``nil`` or empty string values.
@@ -341,7 +341,7 @@ worksheet:write_boolean()
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param boolean:     Boolean value to write to cell.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
 The ``write_boolean()`` method writes a boolean value to the cell specified by
 ``row`` and ``column``::
@@ -367,10 +367,10 @@ worksheet:write_date_time()
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
    :param date_time:   A ``os.time()`` style table of date values.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param format:      Optional :ref:`Format <format>` object.
 
-The ``write_date_time()`` method can be used to write a date or time to the cell
-specified by ``row`` and ``column``::
+The ``write_date_time()`` method can be used to write a date or time in ``os.time()``
+style format to the cell specified by ``row`` and ``column``::
 
     worksheet:write_date_time(0, 0, date_time, date_format)
 
@@ -412,10 +412,10 @@ worksheet:write_date_string()
 
    :param row:         The cell row (zero indexed).
    :param col:         The cell column (zero indexed).
-   :param date_string:   A ``os.time()`` style table of date values.
-   :param format:      Optional Format object. :ref:`Format <format>`
+   :param date_string: A ``os.time()`` style table of date values.
+   :param format:      Optional :ref:`Format <format>` object.
 
-The ``write_date_string()`` method can be used to write a date or time to the cell specified by ``row`` and ``column``::
+The ``write_date_string()`` method can be used to write a date or time string to the cell specified by ``row`` and ``column``::
 
     worksheet:write_date_string(0, 0, date_string, date_format)
 
@@ -425,13 +425,13 @@ The ``date_string`` should be in the following format::
 
 This conforms to an ISO8601 date but it should be noted that the full range of ISO8601 formats are not supported.
 
-The following variations on the $date_string parameter are permitted::
+The following variations on the ``date_string`` parameter are permitted::
 
-    yyyy-mm-ddThh:mm:ss.sss         -- Standard format.
-    yyyy-mm-ddThh:mm:ss.sssZ        -- Additional Z (but not time zones).
-    yyyy-mm-dd                      -- Date only, no time.
-               hh:mm:ss.sss         -- Time only, no date.
-               hh:mm:ss             -- No fractional seconds.
+    yyyy-mm-ddThh:mm:ss.sss  -- Standard format.
+    yyyy-mm-ddThh:mm:ss.sssZ -- Additional Z (but not time zones).
+    yyyy-mm-dd               -- Date only, no time.
+               hh:mm:ss.sss  -- Time only, no date.
+               hh:mm:ss      -- No fractional seconds.
 
 Note that the T is required for cases with both date and time and seconds are required for all times.
 
@@ -454,7 +454,7 @@ worksheet:set_row()
 
    :param row:     The worksheet row (zero indexed).
    :param height:  The row height.
-   :param format:  Optional Format object. :ref:`Format <format>`
+   :param format:  Optional :ref:`Format <format>` object.
    :param options: Optional row parameters: hidden, level, collapsed.
 
 The ``set_row()`` method is used to change the default properties of a row. The
@@ -500,7 +500,7 @@ Options can be set as follows::
 The ``"hidden"`` option is used to hide a row. This can be used, for example,
 to hide intermediary steps in a complicated calculation::
 
-    worksheet:set_row(0, 20, format, {hidden = true})
+    worksheet:set_row(0, nil, nil, {hidden = true})
 
 The ``"level"`` parameter is used to set the outline level of the row. Adjacent rows with the same outline level are grouped together into a single outline.
 
@@ -516,13 +516,13 @@ range ``0 <= level <= 7``.
 The ``"hidden"`` parameter can also be used to hide collapsed outlined rows
 when used in conjunction with the ``"level"`` parameter::
 
-    worksheet:set_row(1, nil, nil, {hidden = 1, level = 1})
-    worksheet:set_row(2, nil, nil, {hidden = 1, level = 1})
+    worksheet:set_row(1, nil, nil, {hidden = true, level = 1})
+    worksheet:set_row(2, nil, nil, {hidden = true, level = 1})
 
 The ``"collapsed"`` parameter is used in collapsed outlines to indicate which
 row has the collapsed ``'+'`` symbol::
 
-    worksheet:set_row(3, nil, nil, {collapsed = 1})
+    worksheet:set_row(3, nil, nil, {collapsed = true})
 
 
 worksheet:set_column()
@@ -535,7 +535,7 @@ worksheet:set_column()
    :param first_col: First column (zero-indexed).
    :param last_col:  Last column (zero-indexed). Can be same as firstcol.
    :param width:     The width of the column(s).
-   :param format:    Optional Format object. :ref:`Format <format>`
+   :param format:    Optional :ref:`Format <format>` object.
    :param options:   Optional parameters: hidden, level, collapsed.
 
 The ``set_column()``  method can be used to change the default properties of a
@@ -590,6 +590,7 @@ A  row format takes precedence over a default column format::
     worksheet:write("A1", "Hello")             -- Defaults to format1
     worksheet:write("A2", "Hello")             -- Defaults to format2
 
+The ``options`` parameters are the same as shown in ``set_row()`` above.
 
 worksheet:get_name()
 --------------------
@@ -599,12 +600,13 @@ worksheet:get_name()
    Retrieve the worksheet name.
 
 The ``get_name()`` method is used to retrieve the name of a worksheet: This is
-something useful for debugging or logging::
+sometimes useful for debugging or logging::
 
     print(worksheet:get_name())
 
-There is no ``set_name()`` method. The only safe way to set the worksheet name
-is via the ``add_worksheet()`` method.
+There is no ``set_name()`` method since the name needs to set when the worksheet
+object is created. The only safe way to set the worksheet nameis via the
+``add_worksheet()`` method.
 
 
 worksheet:activate()
@@ -695,7 +697,7 @@ visible worksheet tab using ``set_first_sheet()``::
     end
 
     worksheet19:set_first_sheet() -- First visible worksheet tab.
-    worksheet20:activate()        -- First visible worksheet:
+    worksheet20:activate()        -- First visible worksheet.
 
 This method is not required very often. The default value is the first
 worksheet:
@@ -769,6 +771,4 @@ tab::
     worksheet2:set_tab_color("#FF9900") -- Orange
 
 The colour can be a Html style ``#RRGGBB`` string or a limited number named
-colours, see :ref:`colors`.
-
-See :ref:`ex_tab_colors` for more details.
+colours, see :ref:`colors` and :ref:`ex_tab_colors` for more details.

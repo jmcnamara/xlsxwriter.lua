@@ -5,7 +5,7 @@
 The Workbook Class
 ==================
 
-The Workbook class is the main class exposed by the xlsxwriter.lua module and it is
+The Workbook class is the main class exposed by the ``xlsxwriter`` module and it is
 the only class that you will need to instantiate directly.
 
 The Workbook class represents the entire spreadsheet as you see it in Excel and
@@ -19,7 +19,7 @@ Constructor
 
 .. function:: Workbook:new(filename[,options])
 
-   Create a new xlsxwriter.lua Workbook object.
+   Create a new ``xlsxwriter`` Workbook object.
 
    :param filename: The name of the new Excel file to create.
    :param options:  Optional workbook parameters. See below.
@@ -53,15 +53,6 @@ The constructor options are:
   row order.
 
   See :ref:`memory_perf` for more details.
-
-* **date_1904**: Excel for Windows uses a default epoch of 1900 and Excel for
-  Mac uses an epoch of 1904. However, Excel on either platform will convert
-  automatically between one system and the other. xlsxwriter.lua stores dates in
-  the 1900 format by default. If you wish to change this you can use the
-  ``date_1904`` workbook option. This option is mainly for enhanced
-  compatibility with Excel and in general isn't required very often::
-
-      workbook = Workbook:new(filename, {date_1904 = true})
 
 When specifying a filename it is recommended that you use an ``.xlsx``
 extension or Excel will generate a warning when opening the file.
@@ -133,4 +124,4 @@ This should be done for every file.
 
     workbook:close()
 
-Currently, there is no implicit close().
+Currently, there is no implicit ``close()``.

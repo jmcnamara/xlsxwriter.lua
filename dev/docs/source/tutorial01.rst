@@ -5,7 +5,7 @@
 Tutorial 1: Create a simple XLSX file
 =====================================
 
-Let's start by creating a simple spreadsheet using Lua and the xlsxwriter.lua
+Let's start by creating a simple spreadsheet using Lua and the ``xlsxwriter``
 module.
 
 Say that we have some data on monthly outgoings that we want to convert into an
@@ -91,7 +91,7 @@ method::
     worksheet:write(row, col, some_data)
 
 .. Note::
-   Throughout the xlsxwriter.lua API *rows* and *columns* are zero indexed. Thus,
+   Throughout the ``xlsxwriter`` API *rows* and *columns* are zero indexed. Thus,
    the first cell in a worksheet, ``A1``, is ``(0, 0)``.
 
 So in our example we iterate over our data and write it out as follows::
@@ -115,5 +115,5 @@ Finally, we close the Excel file via the :func:`close` method::
 And that's it. We now have a file that can be read by Excel and other
 spreadsheet applications.
 
-In the next sections we will see how we can use the xlsxwriter.lua module to add
+In the next sections we will see how we can use the ``xlsxwriter`` module to add
 formatting and other Excel features.

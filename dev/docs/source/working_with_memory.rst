@@ -5,13 +5,13 @@
 Working with Memory and Performance
 ===================================
 
-By default xlsxwriter.lua holds all cell data in memory. This is to allow future
+By default ``xlsxwriter`` holds all cell data in memory. This is to allow future
 features where formatting is applied separately from the data.
 
-The effect of this is that xlsxwriter can consume a lot of memory and it is
-possible to run out of memory when creating large files.
+The effect of this is that for large files ``xlsxwriter`` can consume a lot of memory and it is
+even possible to run out of memory.
 
-Fortunately, this memory usage can be reduced almost completely by using the
+Fortunately, this memory usage can be reduced almost completely by setting the
 :ref:`Workbook:new() <constructor>` ``'constant_memory'`` property::
 
     workbook = Workbook:new(filename, {constant_memory = true})
@@ -60,7 +60,7 @@ worksheets of size ``N`` rows x 50 columns with a 50/50 mixture of strings and
 numbers. The figures are taken from an arbitrary, mid-range, machine. Specific
 figures will vary from machine to machine but the trends should be the same.
 
-Xlsxwriter.lua in normal operation mode: the execution time and memory usage
+Xlsxwriter in normal operation mode: the execution time and memory usage
 increase more of less linearly with the number of rows:
 
 +-------+---------+----------+----------------+
@@ -81,7 +81,7 @@ increase more of less linearly with the number of rows:
 | 12800 | 50      | 16.54    | 133254811      |
 +-------+---------+----------+----------------+
 
-Xlsxwriter.lua in ``constant_memory`` mode: the execution time still increases
+Xlsxwriter in ``constant_memory`` mode: the execution time still increases
 linearly with the number of rows but the memory usage remains small and
 mainly constant:
 
@@ -103,7 +103,6 @@ mainly constant:
 | 12800 | 50      | 11.29    | 24735          |
 +-------+---------+----------+----------------+
 
-In the ``constant_memory`` mode the performance is also a little better.
 These figures were generated using  the ``perf_tester.lua`` program in the
 ``examples`` directory of the xlsxwriter repo.
 

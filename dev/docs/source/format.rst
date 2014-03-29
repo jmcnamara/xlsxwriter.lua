@@ -325,7 +325,7 @@ Excel's built-in formats are shown in the following table:
 
 .. note::
 
-   The dollar sign in the above format appears as the defined local currency
+   The dollar sign in the above formats appear as the defined local currency
    symbol.
 
 
@@ -532,7 +532,7 @@ an integer, is taken as the level of indentation::
     format1:set_indent(1)
     format2:set_indent(2)
 
-    worksheet:write("A1", "This text is indented 1 level", format1)
+    worksheet:write("A1", "This text is indented 1 level",  format1)
     worksheet:write("A2", "This text is indented 2 levels", format2)
 
 .. image:: _images/text_indent.png
@@ -562,7 +562,7 @@ format:set_text_justlast()
 
 .. function:: set_text_justlast()
 
-   Turn on the justify last text property.
+   Turn on the "justify last" text property.
 
 Only applies to Far Eastern versions of Excel.
 
@@ -646,7 +646,7 @@ A cell border is comprised of a border on the bottom, top, left and right.
 These can be set to the same value using ``set_border()`` or individually
 using the relevant method calls shown above.
 
-The following shows the border styles sorted by XlsxWriter index number:
+The following shows the border styles sorted by Excel index number:
 
 +-------+---------------+--------+-----------------+
 | Index | Name          | Weight | Style           |

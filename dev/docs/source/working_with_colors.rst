@@ -5,7 +5,7 @@
 Working with Colors
 ===================
 
-Throughout xlsxwriter.lua colors are specified using a Html sytle ``#RRGGBB``
+Throughout ``xlsxwriter`` colors are specified using a Html sytle ``#RRGGBB``
 value. For example with a :ref:`Format <format>` object::
 
     format:set_font_color('#FF0000')

@@ -1,33 +1,41 @@
 .. _getting_started:
 
-Getting Started with XlsxWriter
+Getting Started with xlsxwriter
 ===============================
 
 Here are some easy instructions to get you up and running with the xlsxwriter
 module.
 
 
-Installing Xlsxwriter.lua
--------------------------
+Installing xlsxwriter
+---------------------
 
-The first step is to install the xlsxwriter.lua module. There are several ways to do this.
+Xlsxwriter is a pure Lua module and doesn't need a native compiler to install. However, it has a dependency
+on the `ZipWriter <https://github.com/moteus/ZipWriter>`_ module which does have binary dependencies.
 
-.. Note::
+These dependencies are handled automatically if you use the ``luarocks`` or ``luadist`` methods shown below.
 
-   Xlsxwriter.lua has a dependency on the `ZipWriter <https://github.com/moteus/ZipWriter>`_ module.
 
 Using luarocks
 **************
 
-The easiest way to install xlsxwriter.lua is with the `luarocks <http://luarocks.org>`_ utility::
+The easiest way to install ``xlsxwriter`` is with the `luarocks <http://luarocks.org>`_ utility::
 
     $ sudo luarocks install xlsxwriter
+
+
+Using luadist
+*************
+
+Another easy "packaged" way of installing ``xlsxwriter`` is with the `luadist <http://luadist.org>`_ distribution::
+
+    $ sudo luadist install xlsxwriter
 
 
 Cloning from GitHub
 *******************
 
-The Xlsxwriter.lua source code and bug tracker is in the
+The ``xlsxwriter`` source code and bug tracker is in the
 `xlsxwriter.lua repository <http://github.com/jmcnamara/xlsxwriter.lua>`_ on GitHub.
 You can clone the repository and install from it as follows::
 
@@ -35,25 +43,8 @@ You can clone the repository and install from it as follows::
 
     $ cd xlsxwriter.lua
     $ sudo luarocks make
-
-
-Installing from a tarball
-*************************
-
-If you download a tarball of the latest version of xlsxwriter.lua you can install it as follows (change the version number to suit)::
-
-    $ tar -zxvf xlsxwriter-1.2.3.tar.gz
-
-    $ cd xlsxwriter-1.2.3
-    $ sudo luarocks make
-
-A tarball of the latest code can be downloaded from GitHub as follows::
-
-    $ curl -O -L http://github.com/jmcnamara/xlsxwriter.lua/archive/master.tar.gz
-
-    $ tar zxvf master.tar.gz
-    $ cd xlsxwriter.lua-master
-    $ sudo luarocks make
+    # or
+    $ sudo luadist make
 
 Running a sample program
 ------------------------
@@ -94,8 +85,8 @@ Documentation
 The latest version of this document is hosted on
 `Read The Docs <http://xlsxwriterlua.readthedocs.org>`_. It is also
 available as a
-`PDF <http://github.com/jmcnamara/xlsxwriter.lua/blob/master/docs/xlsxwriter_lua.pdf>`_.
+`PDF <http://github.com/jmcnamara/xlsxwriter.lua/blob/master/docs/xlsxwriter_lua.pdf?raw=true>`_.
 
 Once you are happy that the module is installed and operational you can have a
-look at the rest of the Xlsxwriter.lua documentation. :ref:`tutorial1` is a good
+look at the rest of the ``xlsxwriter`` documentation. :ref:`tutorial1` is a good
 place to start.

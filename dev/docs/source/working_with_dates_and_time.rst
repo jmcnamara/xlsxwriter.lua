@@ -5,11 +5,11 @@
 Working with Dates and Time
 ===========================
 
-Dates and times in Excel are represented by real numbers, for example "Jan 1
-2013 12:00 PM" is represented by the number 41275.5.
+Dates and times in Excel are represented by real numbers. For example a date
+that is displayed in Excel as "Jan 1 2013 12:00 PM" is stored as the number 41275.5.
 
-The integer part of the number stores the number of days since the epoch and
-the fractional part stores the percentage of the day.
+The integer part of the number stores the number of days since the epoch, which is
+generally 1900, and the fractional part stores the percentage of the day.
 
 A date or time in Excel is just like any other number. To display the number as
 a date you must apply an Excel number format to it. Here are some examples:
@@ -21,7 +21,7 @@ a date you must apply an Excel number format to it. Here are some examples:
     local workbook  = Workbook:new("date_examples.xlsx")
     local worksheet = workbook:add_worksheet()
 
-    -- Widen column A for extra visibility.
+    -- Widen the first column or extra visibility.
     worksheet:set_column("A:A", 30)
 
     -- A number to convert to a date.
@@ -53,7 +53,7 @@ a date you must apply an Excel number format to it. Here are some examples:
 
 .. image:: _images/working_with_dates_and_times01.png
 
-To make working with dates and times a little easier the xlsxwriter.lua module
+To make working with dates and times a little easier the ``xlsxwriter`` module
 provides two date handling methods: :func:`write_date_time` and
 :func:`write_date_string`.
 

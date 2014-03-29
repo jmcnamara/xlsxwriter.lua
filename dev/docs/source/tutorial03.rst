@@ -6,7 +6,7 @@ Tutorial 3: Writing different types of data to the XLSX File
 ============================================================
 
 In the previous section we created a simple spreadsheet with formatting using
-Lua and the xlsxwriter.lua module.
+Lua and the ``xlsxwriter`` module.
 
 This time let's extend the data we want to write to include some dates::
 
@@ -91,8 +91,8 @@ for data types.
 
 Excel treats different types of input data, such as strings and numbers,
 differently although it generally does it transparently to the user.
-xlsxwriter.lua tries to emulate this in the
-:ref:`worksheet. <Worksheet>`:func:`write()` method by mapping Lua data
+Xlsxwriter tries to emulate this in the
+:ref:`worksheet: <Worksheet>`:func:`write()` method by mapping Lua data
 types to types that Excel supports.
 
 The ``write()`` method acts as a general alias for several more specific
@@ -119,7 +119,7 @@ The handling of dates is also new to our program.
 
 Dates and times in Excel are floating point numbers that have a number format
 applied to display them in the correct format. Since there is no native Lua
-date or time types xlsxwriter.lua provides the :func:`write_date_string()` and :func:`write_date_time()` methods to convert dates and times into Excel date and time numbers.
+date or time types ``xlsxwriter`` provides the :func:`write_date_string()` and :func:`write_date_time()` methods to convert dates and times into Excel date and time numbers.
 
 In the example above we use :func:`write_date_string()` but we also need to add
 the number format to ensure that Excel displays it as as date::

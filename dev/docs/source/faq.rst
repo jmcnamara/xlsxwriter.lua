@@ -14,7 +14,7 @@ Q. Can XlsxWriter use an existing Excel file as a template?
 
 No.
 
-Xlsxwriter.lua is designed only as a file *writer*. It cannot read or modify an
+Xlsxwriter is designed only as a file *writer*. It cannot read or modify an
 existing Excel file.
 
 
@@ -22,7 +22,7 @@ Q. Why do my formulas show a zero result in some, non-Excel applications?
 -------------------------------------------------------------------------
 
 Due to wide range of possible formulas and interdependencies between them
-xlsxwriter.lua doesn't, and realistically cannot, calculate the result of a
+``xlsxwriter`` doesn't, and realistically cannot, calculate the result of a
 formula when it is written to an XLSX file. Instead, it stores the value 0 as
 the formula result. It then sets a global flag in the XLSX file to say that
 all formulas and functions should be recalculated when the file is opened.
