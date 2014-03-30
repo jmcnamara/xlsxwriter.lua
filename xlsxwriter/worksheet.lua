@@ -53,7 +53,7 @@ function Worksheet:new()
     selected               = false,
     page_setup_changed     = false,
     paper_size             = 0,
-    orientation            = 1,
+    orientation            = true,
     print_options_changed  = false,
     hcenter                = false,
     vcenter                = false,
@@ -232,7 +232,7 @@ function Worksheet:_assemble_xml_file()
   self:_write_page_margins()
 
   -- Write the worksheet page setup.
-  -- self:_write_page_setup()
+  self:_write_page_setup()
 
   -- Write the headerFooter element.
   -- self:_write_header_footer()
@@ -599,13 +599,9 @@ end
 -- Returns:
 --     Nothing.
 --
-function Worksheet:print_across(page_order)
-  if page_order then
-    self.page_order         = true
-    self.page_setup_changed = true
-  else
-    self.page_order = false
-  end
+function Worksheet:print_across()
+  self.page_order         = true
+  self.page_setup_changed = true
 end
 
 ----
@@ -687,7 +683,7 @@ end
 --
 function Worksheet:set_paper(paper_size)
   self.paper_size         = paper_size
-  self.page_setup_changed = 1
+  self.page_setup_changed = true
 end
 
 ----
@@ -1427,6 +1423,70 @@ function Worksheet:_write_page_margins()
   }
 
   self:_xml_empty_tag("pageMargins", attributes)
+end
+
+----
+-- Write the <pageSetup> element.
+--
+-- The following is an example taken from Excel.
+--
+-- <pageSetup
+--     paperSize="9"
+--     scale="110"
+--     fitToWidth="2"
+--     fitToHeight="2"
+--     pageOrder="overThenDown"
+--     orientation="portrait"
+--     blackAndWhite="1"
+--     draft="1"
+--     horizontalDpi="200"
+--     verticalDpi="200"
+--     r:id="rId1"
+-- />
+--
+function Worksheet:_write_page_setup()
+
+  local attributes = {}
+
+  if not self.page_setup_changed then return end
+
+  -- Set paper size.
+  if self.paper_size > 0 then
+    table.insert(attributes, {["paperSize"] = self.paper_size})
+  end
+
+  -- Set the print_scale
+  if self.print_scale ~= 100 then
+    table.insert(attributes, {["scale"] = self.print_scale})
+  end
+
+  -- Set the "Fit to page" properties.
+  if self.fit_page and self.fit_width ~= 1 then
+    table.insert(attributes, {["fitToWidth"] = self.fit_width})
+  end
+
+  if self.fit_page and self.fit_height ~= 1 then
+    table.insert(attributes, {["fitToHeight"] = self.fit_height})
+  end
+
+  -- Set the page print direction.
+  if self.page_order then
+    table.insert(attributes, {["pageOrder"] = "overThenDown"})
+  end
+
+  -- Set page orientation.
+  if self.orientation then
+    table.insert(attributes, {["orientation"] = "portrait"})
+  else
+    table.insert(attributes, {["orientation"] = "landscape"})
+  end
+
+  -- Set start page.
+  if self.page_start ~= 0 then
+    table.insert(attributes, {["useFirstPageNumber"] = self.page_start})
+  end
+
+  self:_xml_empty_tag("pageSetup", attributes)
 end
 
 ----
