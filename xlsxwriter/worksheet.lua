@@ -226,7 +226,7 @@ function Worksheet:_assemble_xml_file()
   -- self:_write_hyperlinks()
 
   -- Write the printOptions element.
-  -- self:_write_print_options()
+  self:_write_print_options()
 
   -- Write the worksheet page_margins.
   self:_write_page_margins()
@@ -728,6 +728,34 @@ function Worksheet:set_footer(footer, margin)
   self.footer                = footer
   self.margin_footer         = margin and margin or 0.3
   self.header_footer_changed = 1
+end
+
+----
+-- Center the page horizontally.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:center_horizontally()
+  self.print_options_changed = true
+  self.hcenter               = true
+end
+
+----
+-- Center the page vertically.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:center_vertically()
+  self.print_options_changed = true
+  self.vcenter               = true
 end
 
 ----
@@ -1487,6 +1515,38 @@ function Worksheet:_write_page_setup()
   end
 
   self:_xml_empty_tag("pageSetup", attributes)
+end
+
+----
+-- Write the <printOptions> element.
+--
+function Worksheet:_write_print_options()
+
+  if not self.print_options_changed then return end
+
+  local attributes = {}
+
+  -- Set horizontal centering.
+  if self.hcenter then
+    table.insert(attributes, {["horizontalCentered"] = "1"})
+  end
+
+  -- Set vertical centering.
+  if self.vcenter then
+    table.insert(attributes, {["verticalCentered"] = "1"})
+  end
+
+  -- Enable row and column headers.
+  if self.print_headers then
+    table.insert(attributes, {["headings"] = "1"})
+  end
+
+  -- Set printed gridlines.
+  if self.print_gridlines then
+    table.insert(attributes, {["gridLines"] = "1"})
+  end
+
+  self:_xml_empty_tag("printOptions", attributes)
 end
 
 ----
