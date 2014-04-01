@@ -44,3 +44,8 @@ class TestCompareXLSXFiles(base_test_class.XLSXBaseTest):
         self.ignore_files    = ignore_files
         self.ignore_elements = ignore_elements
         self.run_lua_test('test_print_options05')
+
+    def test_print_options06(self):
+        self.ignore_files    = ignore_files
+        self.ignore_elements = ignore_elements
+        self.run_lua_test('test_print_options06')

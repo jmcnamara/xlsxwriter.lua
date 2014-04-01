@@ -69,9 +69,9 @@ function Worksheet:new()
     margin_bottom          = 0.75,
     margin_header          = 0.3,
     margin_footer          = 0.3,
-    repeat_rows            = "",
-    repeat_cols            = "",
-    print_area             = "",
+    repeat_row_range       = "",
+    repeat_col_range       = "",
+    print_area_range       = "",
     page_order             = false,
     black_white            = false,
     draft_quality          = false,
@@ -112,7 +112,7 @@ function Worksheet:new()
     comments_visible       = false,
     vml_shape_id           = 1024,
     buttons_array          = {},
-    autofilter             = "",
+    autofilter_area        = "",
     filter_on              = false,
     filter_range           = {},
     filter_cols            = {},
@@ -624,6 +624,36 @@ function Worksheet:set_zoom(scale)
 end
 
 ----
+-- Set the print area in the current worksheet.
+--
+-- Args:
+--     first_row:    The first row of the cell range. (zero indexed).
+--     first_col:    The first column of the cell range.
+--     last_row:     The last row of the cell range. (zero indexed).
+--     last_col:     The last column of the cell range.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--
+
+function Worksheet:print_area(...)
+
+  local row1, col1, row2, col2 = self:_convert_range_args(...)
+
+  -- Ignore max print area since this is the same as no print area for Excel.
+  if  row1 == 0             and col1 == 0
+  and row2 == xl_rowmax - 1 and col2 == xl_colmax - 1 then
+    return
+  end
+
+  -- Build up the print area range "=Sheet2!R1C1:R2C1"
+  local range = self:_convert_name_area(row1, col1, row2, col2)
+
+  self.print_area_range = range
+end
+
+----
 -- Display the worksheet right to left for some versions of Excel.
 --
 -- Args:
@@ -836,6 +866,26 @@ function Worksheet:set_margins(left, right, top, bottom)
   self.margin_bottom = bottom and bottom or 0.75
 end
 
+
+function Worksheet:repeat_rows(row_min, row_max)
+
+  -- Second row is optional.
+  local row_max = row_max or row_min
+
+  -- Convert to 1 based.
+  row_min = row_min + 1
+  row_max = row_max + 1
+
+  local range = "$" .. row_min .. ':' .. '$' .. row_max
+
+  -- Build up the print titles "Sheet1!1:2"
+  local sheetname = self:_quote_sheetname(self.name)
+  range = sheetname .. "!" .. range
+
+  self.repeat_row_range = range
+end
+
+
 ----
 -- Set the width, and other properties of a single column or a
 -- range of columns.
@@ -938,6 +988,19 @@ end
 -- Internal methods.
 --
 ------------------------------------------------------------------------------
+
+----
+-- Sheetnames used in references should be quoted if they contain any spaces,
+-- special characters or if the look like something that isn't a sheet name.
+--
+function Worksheet:_quote_sheetname(sheetname)
+  if sheetname:match("^Sheet%d+$") then
+    return sheetname
+  else
+    return '"' .. sheetname .. '"'
+  end
+end
+
 
 ----
 -- Decorator function to convert "A1" notation in cell method calls
@@ -1305,6 +1368,50 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
       self.col_formats[col] = format
     end
   end
+end
+
+----
+-- Convert zero indexed rows and columns to the format required by worksheet
+-- named ranges, eg, "Sheet1!A1:C13".
+--
+function Worksheet:_convert_name_area(row_num_1, col_num_1, row_num_2, col_num_2)
+  local range1       = ''
+  local range2       = ''
+  local row_col_only = false
+  local area         = ''
+
+  -- Convert to A1 notation.
+  local col_char_1 = Utility.col_to_name_abs(col_num_1, true)
+  local col_char_2 = Utility.col_to_name_abs(col_num_2, true)
+  local row_char_1 = "$" .. (row_num_1 + 1)
+  local row_char_2 = "$" .. (row_num_2 + 1)
+
+  -- We need to handle some special cases that refer to rows or columns only.
+  if row_num_1 == 0 and row_num_2 == xl_rowmax - 1 then
+    range1       = col_char_1
+    range2       = col_char_2
+    row_col_only = true
+  elseif col_num_1 == 0 and col_num_2 == xl_colmax - 1 then
+    range1       = row_char_1
+    range2       = row_char_2
+    row_col_only = true
+  else
+    range1 = col_char_1 .. row_char_1
+    range2 = col_char_2 .. row_char_2
+  end
+
+  -- A repeated range is only written once (if it isn't a special case).
+  if range1 == range2 and not row_col_only then
+    area = range1
+  else
+    area = range1 .. ":" .. range2
+  end
+
+  -- Build up the print area range "Sheet1!A1:C13".
+  local sheetname = self:_quote_sheetname(self.name)
+  area = sheetname .. "!" .. area
+
+  return area
 end
 
 ------------------------------------------------------------------------------

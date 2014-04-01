@@ -314,7 +314,7 @@ function Packager:_write_app_file()
 
   -- Add the Named Range heading pairs.
   local range_count = #self.named_ranges
-  if range_count then
+  if range_count > 0 then
     app:_add_heading_pair("Named Ranges", range_count)
   end
 
