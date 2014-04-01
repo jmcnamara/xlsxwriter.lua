@@ -546,6 +546,65 @@ function Worksheet:hide_gridlines(option)
 end
 
 ----
+-- Set the option to print the row and column headers on the printed page.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:print_row_col_headers()
+  self.print_headers         = true
+  self.print_options_changed = true
+end
+
+----
+-- Fit the printed area to a specific number of pages both vertically and
+-- horizontally.
+--
+-- Args:
+--     width:  Number of pages horizontally.
+--     height: Number of pages vertically.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:fit_to_pages(width, height)
+  self.fit_page           = true
+  self.fit_width          = width  or 1
+  self.fit_height         = height or 1
+  self.page_setup_changed = true
+end
+
+----
+-- Set the horizontal page breaks on a worksheet.
+--
+-- Args:
+--     breaks: List of rows where the page breaks should be added.
+--
+-- Returns:
+--     Nothing.
+--
+
+function Worksheet:set_h_pagebreaks(breaks)
+  self.hbreaks = breaks
+end
+
+----
+-- Set the horizontal page breaks on a worksheet.
+--
+-- Args:
+--     breaks: List of columns where the page breaks should be added.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:set_v_pagebreaks(breaks)
+  self.vbreaks = breaks
+end
+
+----
 -- Set the worksheet zoom factor.
 --
 -- Args:
