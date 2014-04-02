@@ -235,7 +235,7 @@ function Worksheet:_assemble_xml_file()
   self:_write_page_setup()
 
   -- Write the headerFooter element.
-  -- self:_write_header_footer()
+  self:_write_header_footer()
 
   -- Write the rowBreaks element.
   -- self:_write_row_breaks()
@@ -794,7 +794,7 @@ function Worksheet:set_header(header, margin)
 
   self.header                = header
   self.margin_header         = margin and margin or 0.3
-  self.header_footer_changed = 1
+  self.header_footer_changed = true
 end
 
 ----
@@ -816,7 +816,7 @@ function Worksheet:set_footer(footer, margin)
 
   self.footer                = footer
   self.margin_footer         = margin and margin or 0.3
-  self.header_footer_changed = 1
+  self.header_footer_changed = true
 end
 
 ----
@@ -2291,4 +2291,47 @@ function Worksheet:_write_outline_pr()
   self:_xml_empty_tag("outlinePr", attributes)
 end
 
+
+----
+-- Write the <headerFooter> element.
+--
+function Worksheet:_write_header_footer()
+
+  if not self.header_footer_changed then return end
+
+  self:_xml_start_tag("headerFooter")
+
+  if self.header ~= "" then
+     self:_write_odd_header()
+  end
+
+  if self.footer ~= "" then
+     self:_write_odd_footer()
+  end
+
+  self:_xml_end_tag("headerFooter")
+end
+
+----
+-- Write the <oddHeader> element.
+--
+function Worksheet:_write_odd_header()
+  local data = self.header
+
+  self:_xml_data_element("oddHeader", data)
+end
+
+----
+-- Write the <oddFooter> element.
+--
+function Worksheet:_write_odd_footer()
+  local data = self.footer
+
+  self:_xml_data_element("oddFooter", data)
+end
+
+
+
+
 return Worksheet
+
