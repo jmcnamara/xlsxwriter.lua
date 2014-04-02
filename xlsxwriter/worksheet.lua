@@ -624,6 +624,30 @@ function Worksheet:set_zoom(scale)
 end
 
 ----
+-- Set the scale factor for the printed page.
+--
+-- Args:
+--     scale: Print scale. 10 <= scale <= 400.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:set_print_scale(scale)
+
+  -- Confine the scale to Excel's range
+  if scale < 10 or scale > 400 then
+    Utility.warn("Print scale scale outside range: 10 <= zoom <= 400")
+    scale = 100
+  end
+
+  -- Turn off "fit to page" option.
+  self.fit_page = false
+
+  self.print_scale        = math.floor(scale)
+  self.page_setup_changed = true
+end
+
+----
 -- Set the print area in the current worksheet.
 --
 -- Args:
