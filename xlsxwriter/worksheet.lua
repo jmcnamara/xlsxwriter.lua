@@ -238,10 +238,10 @@ function Worksheet:_assemble_xml_file()
   self:_write_header_footer()
 
   -- Write the rowBreaks element.
-  -- self:_write_row_breaks()
+  self:_write_row_breaks()
 
   -- Write the colBreaks element.
-  -- self:_write_col_breaks()
+  self:_write_col_breaks()
 
   -- Write the drawing element.
   -- self:_write_drawings()
@@ -1438,6 +1438,42 @@ function Worksheet:_convert_name_area(row_num_1, col_num_1, row_num_2, col_num_2
   return area
 end
 
+----
+-- Iternal method that is used to filter the pagebreaks tables. It:
+--   1. Removes duplicate entries from the table.
+--   2. Sorts the list.
+--   3. Removes 0 from the table if present.
+--
+function Worksheet:_sort_pagebreaks(breaks)
+
+  if not breaks then return {} end
+
+  table.sort(breaks)
+
+  if breaks[1] == 0 then
+    table.remove(breaks, 1)
+  end
+
+
+  -- The Excel 2007 specification says that the maximum number of page breaks
+  -- is 1026. However, in practice it is actually 1023.
+  local max_num_breaks = 1023
+  if #breaks > max_num_breaks then
+    breaks[max_num_breaks + 1] = nil
+  end
+
+  -- Remove duplicates.
+  local unique_breaks = {}
+
+  for _, row in ipairs(breaks) do
+    if row ~= unique_breaks[#unique_breaks] then
+      table.insert(unique_breaks, row)
+    end
+  end
+
+  return unique_breaks
+end
+
 ------------------------------------------------------------------------------
 --
 -- XML writing methods.
@@ -2354,8 +2390,69 @@ function Worksheet:_write_odd_footer()
   self:_xml_data_element("oddFooter", data)
 end
 
+----
+-- Write the <rowBreaks> element.
+--
+function Worksheet:_write_row_breaks()
+
+  local page_breaks = self:_sort_pagebreaks(self.hbreaks)
+  local count       = #page_breaks
+
+  if count == 0 then return end
+
+  local attributes = {
+    {["count"]            = count},
+    {["manualBreakCount"] = count},
+  }
+
+  self:_xml_start_tag("rowBreaks", attributes)
+
+  for _, row_num in ipairs(page_breaks) do
+    self:_write_brk(row_num, 16383)
+  end
+
+  self:_xml_end_tag("rowBreaks")
+end
+
+----
+-- Write the <colBreaks> element.
+--
+function Worksheet:_write_col_breaks()
+
+  local page_breaks = self:_sort_pagebreaks(self.vbreaks)
+  local count       = #page_breaks
+
+  if count == 0 then return end
+
+  local attributes = {
+    {["count"]            = count},
+    {["manualBreakCount"] = count},
+  }
+
+  self:_xml_start_tag("colBreaks", attributes)
+
+  for _, col_num in ipairs(page_breaks) do
+    self:_write_brk(col_num, 1048575)
+  end
+
+  self:_xml_end_tag("colBreaks")
+end
+
+----
+-- Write the <brk> element.
+--
+function Worksheet:_write_brk(id, max)
+
+  local attributes = {
+    {["id"]  = id},
+    {["max"] = max},
+    {["man"] = "1"},
+  }
+
+  self:_xml_empty_tag("brk", attributes)
+end
+
 
 
 
 return Worksheet
-
