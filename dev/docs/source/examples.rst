@@ -17,3 +17,4 @@ directory of the ``xlsxwriter`` distribution.
    example_utf8_polish.rst
    example_tab_colors.rst
    example_hide_sheet.rst
+   example_headers_footers.rst
