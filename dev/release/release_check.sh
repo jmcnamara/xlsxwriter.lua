@@ -83,7 +83,7 @@ function check_versions {
             exit 1
         else
             echo "    Updating versions...";
-            perl -i dev/release/update_revison.pl dev/docs/source/conf.py xlsxwriter/workbook.lua xlsxwriter-*.rockspec
+            perl -i dev/release/update_revison.pl dev/docs/source/conf.py xlsxwriter/workbook.lua dist.info xlsxwriter-*.rockspec
             check_versions
          fi
     fi
