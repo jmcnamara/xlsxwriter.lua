@@ -1,6 +1,12 @@
 
 
-Release 0.0.1 - March XX 2014
+Release 0.0.2 - April 2014
+--------------------------
+
+* Added :ref:`page_setup` methods.
+
+
+Release 0.0.1 - March 29 2014
 -----------------------------
 
 * First public release.
