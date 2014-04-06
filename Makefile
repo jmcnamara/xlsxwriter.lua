@@ -51,5 +51,8 @@ testluajit:
 	@luajit -v
 	@prove --exec=luajit --ext=lua -r test/unit
 
+releasecheck:
+	@dev/release/release_check.sh
+
 readthedocs:
 	@curl -X POST http://readthedocs.org/build/xlsxwriterlua

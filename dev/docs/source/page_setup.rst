@@ -16,7 +16,7 @@ They are documented separately for the sake of clarity.
 worksheet:set_landscape()
 -------------------------
 
-.. py:function:: set_landscape()
+.. function:: set_landscape()
 
    Set the page orientation as landscape.
 
@@ -29,7 +29,7 @@ landscape::
 worksheet:set_portrait()
 ------------------------
 
-.. py:function:: set_portrait()
+.. function:: set_portrait()
 
    Set the page orientation as portrait.
 
@@ -43,7 +43,7 @@ generally need to call this method::
 worksheet:set_page_view()
 -------------------------
 
-.. py:function:: set_page_view()
+.. function:: set_page_view()
 
    Set the page view mode.
 
@@ -55,7 +55,7 @@ This method is used to display the worksheet in "Page View/Layout" mode::
 worksheet:set_paper()
 ---------------------
 
-.. py:function:: set_paper(index)
+.. function:: set_paper(index)
 
    Set the paper type.
 
@@ -167,7 +167,7 @@ default paper style.
 worksheet:center_horizontally()
 -------------------------------
 
-.. py:function:: center_horizontally()
+.. function:: center_horizontally()
 
    Center the printed page horizontally.
 
@@ -179,7 +179,7 @@ Center the worksheet data horizontally between the margins on the printed page::
 worksheet:center_vertically()
 -----------------------------
 
-.. py:function:: center_vertically()
+.. function:: center_vertically()
 
    Center the printed page vertically.
 
@@ -190,7 +190,7 @@ Center the worksheet data vertically between the margins on the printed page::
 worksheet:set_margins()
 -----------------------
 
-.. py:function:: set_margins([left=0.7,] right=0.7,] top=0.75,] bottom=0.75]]])
+.. function:: set_margins([left=0.7,] right=0.7,] top=0.75,] bottom=0.75]]])
 
    Set the worksheet margins for the printed page.
 
@@ -208,7 +208,7 @@ default values corresponding to the default Excel values.
 worksheet:set_header()
 ----------------------
 
-.. py:function:: set_header([header="",] margin=0.3]])
+.. function:: set_header([header="",] margin=0.3]])
 
    Set the printed page header caption and optional margin.
 
@@ -376,7 +376,7 @@ See also :ref:`ex_headers_footers`.
 worksheet:set_footer()
 ----------------------
 
-.. py:function:: set_footer([footer="",] margin=0.3]])
+.. function:: set_footer([footer="",] margin=0.3]])
 
    Set the printed page footer caption and optional margin.
 
@@ -389,7 +389,7 @@ The syntax of the ``set_footer()`` method is the same as :func:`set_header`.
 worksheet:repeat_rows()
 -----------------------
 
-.. py:function:: repeat_rows(first_row[, last_row])
+.. function:: repeat_rows(first_row[, last_row])
 
    Set the number of rows to repeat at the top of each printed page.
 
@@ -410,7 +410,7 @@ optional if you only wish to specify one row::
 worksheet:repeat_columns()
 --------------------------
 
-.. py:function:: repeat_columns(first_col[, last_col])
+.. function:: repeat_columns(first_col[, last_col])
 
    Set the columns to repeat at the left hand side of each printed page.
 
@@ -435,7 +435,7 @@ more details.::
 worksheet:hide_gridlines()
 --------------------------
 
-.. py:function:: hide_gridlines([option=1])
+.. function:: hide_gridlines([option=1])
 
    Set the option to hide gridlines on the screen and the printed page.
 
@@ -463,7 +463,7 @@ gridlines are hidden.
 worksheet:print_row_col_headers()
 ---------------------------------
 
-.. py:function:: print_row_col_headers()
+.. function:: print_row_col_headers()
 
    Set the option to print the row and column headers on the printed page.
 
@@ -479,7 +479,7 @@ headers::
 worksheet:print_area()
 ----------------------
 
-.. py:function:: print_area(first_row, first_col, last_row, last_col)
+.. function:: print_area(first_row, first_col, last_row, last_col)
 
    Set the print area in the current worksheet.
 
@@ -501,7 +501,7 @@ All four parameters must be specified. You can also use A1 notation, see
 worksheet:print_across()
 ------------------------
 
-.. py:function:: print_across()
+.. function:: print_across()
 
    Set the order in which pages are printed.
 
@@ -525,7 +525,7 @@ to "across then down"::
 worksheet:fit_to_pages()
 ------------------------
 
-.. py:function:: fit_to_pages(width, height)
+.. function:: fit_to_pages(width, height)
 
    Fit the printed area to a specific number of pages both vertically and
    horizontally.
@@ -571,7 +571,7 @@ zero::
 worksheet:set_start_page()
 --------------------------
 
-.. py:function:: set_start_page()
+.. function:: set_start_page()
 
    Set the start page number when printing.
 
@@ -586,7 +586,7 @@ when the worksheet is printed out::
 worksheet:set_print_scale()
 ---------------------------
 
-.. py:function:: set_print_scale()
+.. function:: set_print_scale()
 
    Set the scale factor for the printed page.
 
@@ -613,7 +613,7 @@ option.
 worksheet:set_h_pagebreaks()
 ----------------------------
 
-.. py:function:: set_h_pagebreaks(breaks)
+.. function:: set_h_pagebreaks(breaks)
 
    Set the horizontal page breaks on a worksheet.
 
@@ -645,7 +645,7 @@ line with an Excel internal limitation.
 worksheet:set_v_pagebreaks()
 ----------------------------
 
-.. py:function:: set_v_pagebreaks(breaks)
+.. function:: set_v_pagebreaks(breaks)
 
    Set the vertical page breaks on a worksheet.
 
