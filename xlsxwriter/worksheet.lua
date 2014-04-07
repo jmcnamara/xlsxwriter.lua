@@ -1006,6 +1006,57 @@ function Worksheet:get_name()
   return self.name
 end
 
+----
+-- Merge a range of cells.
+--
+-- Args:
+--     first_row:    The first row of the cell range. (zero indexed).
+--     first_col:    The first column of the cell range.
+--     last_row:     The last row of the cell range. (zero indexed).
+--     last_col:     The last column of the cell range.
+--     data:         Cell data.
+--     format:       Cell Format object.
+--
+-- Returns:
+--      0:    Success.
+--     -1:    Row or column is out of worksheet bounds.
+--     other: Return value of write().
+--
+function Worksheet:merge_range(...)
+
+  local first_row, first_col, last_row, last_col, data, format
+    = self:_convert_range_args(...)
+
+
+  -- Excel doesn't allow a single cell to be merged.
+  if first_row == last_row and first_col == last_col then
+    Utility.warn( "Can't merge single cell\n")
+  end
+
+  -- Swap last row/col with first row/col as necessary.
+  if first_row > last_row then first_row, last_row = last_row, first_row end
+  if first_col > last_col then first_col, last_col = last_col, first_col end
+
+  -- Check that column number is valid and store the max value
+  if self:_check_dimensions(last_row, last_col) then
+    return
+  end
+
+  -- Store the merge range.
+  table.insert(self.merge, {first_row, first_col, last_row, last_col})
+
+  -- Write the first cell.
+  self:write(first_row, first_col, data, format)
+
+  -- Pad out the rest of the area with formatted blank cells.
+  for row = first_row, last_row do
+    for col = first_col, last_col do
+      if row ~= first_row and col ~= first_col then
+        self:write_blank(row, col, format)
+      end
+    end
+  end
+end
 
 ------------------------------------------------------------------------------
 --
