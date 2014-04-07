@@ -53,7 +53,7 @@ function Worksheet:new()
     selected               = false,
     page_setup_changed     = false,
     paper_size             = 0,
-    orientation            = 1,
+    orientation            = true,
     print_options_changed  = false,
     hcenter                = false,
     vcenter                = false,
@@ -69,9 +69,9 @@ function Worksheet:new()
     margin_bottom          = 0.75,
     margin_header          = 0.3,
     margin_footer          = 0.3,
-    repeat_rows            = "",
-    repeat_cols            = "",
-    print_area             = "",
+    repeat_row_range       = "",
+    repeat_col_range       = "",
+    print_area_range       = "",
     page_order             = false,
     black_white            = false,
     draft_quality          = false,
@@ -112,7 +112,7 @@ function Worksheet:new()
     comments_visible       = false,
     vml_shape_id           = 1024,
     buttons_array          = {},
-    autofilter             = "",
+    autofilter_area        = "",
     filter_on              = false,
     filter_range           = {},
     filter_cols            = {},
@@ -226,22 +226,22 @@ function Worksheet:_assemble_xml_file()
   -- self:_write_hyperlinks()
 
   -- Write the printOptions element.
-  -- self:_write_print_options()
+  self:_write_print_options()
 
   -- Write the worksheet page_margins.
   self:_write_page_margins()
 
   -- Write the worksheet page setup.
-  -- self:_write_page_setup()
+  self:_write_page_setup()
 
   -- Write the headerFooter element.
-  -- self:_write_header_footer()
+  self:_write_header_footer()
 
   -- Write the rowBreaks element.
-  -- self:_write_row_breaks()
+  self:_write_row_breaks()
 
   -- Write the colBreaks element.
-  -- self:_write_col_breaks()
+  self:_write_col_breaks()
 
   -- Write the drawing element.
   -- self:_write_drawings()
@@ -546,6 +546,65 @@ function Worksheet:hide_gridlines(option)
 end
 
 ----
+-- Set the option to print the row and column headers on the printed page.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:print_row_col_headers()
+  self.print_headers         = true
+  self.print_options_changed = true
+end
+
+----
+-- Fit the printed area to a specific number of pages both vertically and
+-- horizontally.
+--
+-- Args:
+--     width:  Number of pages horizontally.
+--     height: Number of pages vertically.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:fit_to_pages(width, height)
+  self.fit_page           = true
+  self.fit_width          = width  or 1
+  self.fit_height         = height or 1
+  self.page_setup_changed = true
+end
+
+----
+-- Set the horizontal page breaks on a worksheet.
+--
+-- Args:
+--     breaks: List of rows where the page breaks should be added.
+--
+-- Returns:
+--     Nothing.
+--
+
+function Worksheet:set_h_pagebreaks(breaks)
+  self.hbreaks = breaks
+end
+
+----
+-- Set the horizontal page breaks on a worksheet.
+--
+-- Args:
+--     breaks: List of columns where the page breaks should be added.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:set_v_pagebreaks(breaks)
+  self.vbreaks = breaks
+end
+
+----
 -- Set the worksheet zoom factor.
 --
 -- Args:
@@ -562,6 +621,60 @@ function Worksheet:set_zoom(scale)
   end
 
   self.zoom = math.floor(scale)
+end
+
+----
+-- Set the scale factor for the printed page.
+--
+-- Args:
+--     scale: Print scale. 10 <= scale <= 400.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:set_print_scale(scale)
+
+  -- Confine the scale to Excel's range
+  if scale < 10 or scale > 400 then
+    Utility.warn("Print scale scale outside range: 10 <= zoom <= 400")
+    scale = 100
+  end
+
+  -- Turn off "fit to page" option.
+  self.fit_page = false
+
+  self.print_scale        = math.floor(scale)
+  self.page_setup_changed = true
+end
+
+----
+-- Set the print area in the current worksheet.
+--
+-- Args:
+--     first_row:    The first row of the cell range. (zero indexed).
+--     first_col:    The first column of the cell range.
+--     last_row:     The last row of the cell range. (zero indexed).
+--     last_col:     The last column of the cell range.
+--
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--
+
+function Worksheet:print_area(...)
+
+  local row1, col1, row2, col2 = self:_convert_range_args(...)
+
+  -- Ignore max print area since this is the same as no print area for Excel.
+  if  row1 == 0             and col1 == 0
+  and row2 == xl_rowmax - 1 and col2 == xl_colmax - 1 then
+    return
+  end
+
+  -- Build up the print area range "=Sheet2!R1C1:R2C1"
+  local range = self:_convert_name_area(row1, col1, row2, col2)
+
+  self.print_area_range = range
 end
 
 ----
@@ -599,13 +712,9 @@ end
 -- Returns:
 --     Nothing.
 --
-function Worksheet:print_across(page_order)
-  if page_order then
-    self.page_order         = true
-    self.page_setup_changed = true
-  else
-    self.page_order = false
-  end
+function Worksheet:print_across()
+  self.page_order         = true
+  self.page_setup_changed = true
 end
 
 ----
@@ -687,7 +796,7 @@ end
 --
 function Worksheet:set_paper(paper_size)
   self.paper_size         = paper_size
-  self.page_setup_changed = 1
+  self.page_setup_changed = true
 end
 
 ----
@@ -709,7 +818,7 @@ function Worksheet:set_header(header, margin)
 
   self.header                = header
   self.margin_header         = margin and margin or 0.3
-  self.header_footer_changed = 1
+  self.header_footer_changed = true
 end
 
 ----
@@ -731,7 +840,35 @@ function Worksheet:set_footer(footer, margin)
 
   self.footer                = footer
   self.margin_footer         = margin and margin or 0.3
-  self.header_footer_changed = 1
+  self.header_footer_changed = true
+end
+
+----
+-- Center the page horizontally.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:center_horizontally()
+  self.print_options_changed = true
+  self.hcenter               = true
+end
+
+----
+-- Center the page vertically.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:center_vertically()
+  self.print_options_changed = true
+  self.vcenter               = true
 end
 
 ----
@@ -752,6 +889,26 @@ function Worksheet:set_margins(left, right, top, bottom)
   self.margin_top    = top    and top    or 0.75
   self.margin_bottom = bottom and bottom or 0.75
 end
+
+
+function Worksheet:repeat_rows(row_min, row_max)
+
+  -- Second row is optional.
+  local row_max = row_max or row_min
+
+  -- Convert to 1 based.
+  row_min = row_min + 1
+  row_max = row_max + 1
+
+  local range = "$" .. row_min .. ':' .. '$' .. row_max
+
+  -- Build up the print titles "Sheet1!1:2"
+  local sheetname = self:_quote_sheetname(self.name)
+  range = sheetname .. "!" .. range
+
+  self.repeat_row_range = range
+end
+
 
 ----
 -- Set the width, and other properties of a single column or a
@@ -855,6 +1012,19 @@ end
 -- Internal methods.
 --
 ------------------------------------------------------------------------------
+
+----
+-- Sheetnames used in references should be quoted if they contain any spaces,
+-- special characters or if the look like something that isn't a sheet name.
+--
+function Worksheet:_quote_sheetname(sheetname)
+  if sheetname:match("^Sheet%d+$") then
+    return sheetname
+  else
+    return '"' .. sheetname .. '"'
+  end
+end
+
 
 ----
 -- Decorator function to convert "A1" notation in cell method calls
@@ -1224,6 +1394,86 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
   end
 end
 
+----
+-- Convert zero indexed rows and columns to the format required by worksheet
+-- named ranges, eg, "Sheet1!A1:C13".
+--
+function Worksheet:_convert_name_area(row_num_1, col_num_1, row_num_2, col_num_2)
+  local range1       = ''
+  local range2       = ''
+  local row_col_only = false
+  local area         = ''
+
+  -- Convert to A1 notation.
+  local col_char_1 = Utility.col_to_name_abs(col_num_1, true)
+  local col_char_2 = Utility.col_to_name_abs(col_num_2, true)
+  local row_char_1 = "$" .. (row_num_1 + 1)
+  local row_char_2 = "$" .. (row_num_2 + 1)
+
+  -- We need to handle some special cases that refer to rows or columns only.
+  if row_num_1 == 0 and row_num_2 == xl_rowmax - 1 then
+    range1       = col_char_1
+    range2       = col_char_2
+    row_col_only = true
+  elseif col_num_1 == 0 and col_num_2 == xl_colmax - 1 then
+    range1       = row_char_1
+    range2       = row_char_2
+    row_col_only = true
+  else
+    range1 = col_char_1 .. row_char_1
+    range2 = col_char_2 .. row_char_2
+  end
+
+  -- A repeated range is only written once (if it isn't a special case).
+  if range1 == range2 and not row_col_only then
+    area = range1
+  else
+    area = range1 .. ":" .. range2
+  end
+
+  -- Build up the print area range "Sheet1!A1:C13".
+  local sheetname = self:_quote_sheetname(self.name)
+  area = sheetname .. "!" .. area
+
+  return area
+end
+
+----
+-- Iternal method that is used to filter the pagebreaks tables. It:
+--   1. Removes duplicate entries from the table.
+--   2. Sorts the list.
+--   3. Removes 0 from the table if present.
+--
+function Worksheet:_sort_pagebreaks(breaks)
+
+  if not breaks then return {} end
+
+  table.sort(breaks)
+
+  if breaks[1] == 0 then
+    table.remove(breaks, 1)
+  end
+
+
+  -- The Excel 2007 specification says that the maximum number of page breaks
+  -- is 1026. However, in practice it is actually 1023.
+  local max_num_breaks = 1023
+  if #breaks > max_num_breaks then
+    breaks[max_num_breaks + 1] = nil
+  end
+
+  -- Remove duplicates.
+  local unique_breaks = {}
+
+  for _, row in ipairs(breaks) do
+    if row ~= unique_breaks[#unique_breaks] then
+      table.insert(unique_breaks, row)
+    end
+  end
+
+  return unique_breaks
+end
+
 ------------------------------------------------------------------------------
 --
 -- XML writing methods.
@@ -1427,6 +1677,102 @@ function Worksheet:_write_page_margins()
   }
 
   self:_xml_empty_tag("pageMargins", attributes)
+end
+
+----
+-- Write the <pageSetup> element.
+--
+-- The following is an example taken from Excel.
+--
+-- <pageSetup
+--     paperSize="9"
+--     scale="110"
+--     fitToWidth="2"
+--     fitToHeight="2"
+--     pageOrder="overThenDown"
+--     orientation="portrait"
+--     blackAndWhite="1"
+--     draft="1"
+--     horizontalDpi="200"
+--     verticalDpi="200"
+--     r:id="rId1"
+-- />
+--
+function Worksheet:_write_page_setup()
+
+  local attributes = {}
+
+  if not self.page_setup_changed then return end
+
+  -- Set paper size.
+  if self.paper_size > 0 then
+    table.insert(attributes, {["paperSize"] = self.paper_size})
+  end
+
+  -- Set the print_scale
+  if self.print_scale ~= 100 then
+    table.insert(attributes, {["scale"] = self.print_scale})
+  end
+
+  -- Set the "Fit to page" properties.
+  if self.fit_page and self.fit_width ~= 1 then
+    table.insert(attributes, {["fitToWidth"] = self.fit_width})
+  end
+
+  if self.fit_page and self.fit_height ~= 1 then
+    table.insert(attributes, {["fitToHeight"] = self.fit_height})
+  end
+
+  -- Set the page print direction.
+  if self.page_order then
+    table.insert(attributes, {["pageOrder"] = "overThenDown"})
+  end
+
+  -- Set page orientation.
+  if self.orientation then
+    table.insert(attributes, {["orientation"] = "portrait"})
+  else
+    table.insert(attributes, {["orientation"] = "landscape"})
+  end
+
+  -- Set start page.
+  if self.page_start ~= 0 then
+    table.insert(attributes, {["useFirstPageNumber"] = self.page_start})
+  end
+
+  self:_xml_empty_tag("pageSetup", attributes)
+end
+
+----
+-- Write the <printOptions> element.
+--
+function Worksheet:_write_print_options()
+
+  if not self.print_options_changed then return end
+
+  local attributes = {}
+
+  -- Set horizontal centering.
+  if self.hcenter then
+    table.insert(attributes, {["horizontalCentered"] = "1"})
+  end
+
+  -- Set vertical centering.
+  if self.vcenter then
+    table.insert(attributes, {["verticalCentered"] = "1"})
+  end
+
+  -- Enable row and column headers.
+  if self.print_headers then
+    table.insert(attributes, {["headings"] = "1"})
+  end
+
+  -- Set printed gridlines.
+  if self.print_gridlines then
+    table.insert(attributes, {["gridLines"] = "1"})
+  end
+
+  self:_xml_empty_tag("printOptions", attributes)
 end
 
 ----
@@ -2004,5 +2350,109 @@ function Worksheet:_write_outline_pr()
 
   self:_xml_empty_tag("outlinePr", attributes)
 end
+
+
+----
+-- Write the <headerFooter> element.
+--
+function Worksheet:_write_header_footer()
+
+  if not self.header_footer_changed then return end
+
+  self:_xml_start_tag("headerFooter")
+
+  if self.header ~= "" then
+     self:_write_odd_header()
+  end
+
+  if self.footer ~= "" then
+     self:_write_odd_footer()
+  end
+
+  self:_xml_end_tag("headerFooter")
+end
+
+----
+-- Write the <oddHeader> element.
+--
+function Worksheet:_write_odd_header()
+  local data = self.header
+
+  self:_xml_data_element("oddHeader", data)
+end
+
+----
+-- Write the <oddFooter> element.
+--
+function Worksheet:_write_odd_footer()
+  local data = self.footer
+
+  self:_xml_data_element("oddFooter", data)
+end
+
+----
+-- Write the <rowBreaks> element.
+--
+function Worksheet:_write_row_breaks()
+
+  local page_breaks = self:_sort_pagebreaks(self.hbreaks)
+  local count       = #page_breaks
+
+  if count == 0 then return end
+
+  local attributes = {
+    {["count"]            = count},
+    {["manualBreakCount"] = count},
+  }
+
+  self:_xml_start_tag("rowBreaks", attributes)
+
+  for _, row_num in ipairs(page_breaks) do
+    self:_write_brk(row_num, 16383)
+  end
+
+  self:_xml_end_tag("rowBreaks")
+end
+
+----
+-- Write the <colBreaks> element.
+--
+function Worksheet:_write_col_breaks()
+
+  local page_breaks = self:_sort_pagebreaks(self.vbreaks)
+  local count       = #page_breaks
+
+  if count == 0 then return end
+
+  local attributes = {
+    {["count"]            = count},
+    {["manualBreakCount"] = count},
+  }
+
+  self:_xml_start_tag("colBreaks", attributes)
+
+  for _, col_num in ipairs(page_breaks) do
+    self:_write_brk(col_num, 1048575)
+  end
+
+  self:_xml_end_tag("colBreaks")
+end
+
+----
+-- Write the <brk> element.
+--
+function Worksheet:_write_brk(id, max)
+
+  local attributes = {
+    {["id"]  = id},
+    {["max"] = max},
+    {["man"] = "1"},
+  }
+
+  self:_xml_empty_tag("brk", attributes)
+end
+
+
+
 
 return Worksheet

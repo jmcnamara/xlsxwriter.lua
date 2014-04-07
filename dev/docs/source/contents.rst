@@ -11,6 +11,7 @@ Contents
    tutorial03.rst
    workbook.rst
    worksheet.rst
+   page_setup.rst
    format.rst
    working_with_formats.rst
    working_with_cell_notation.rst

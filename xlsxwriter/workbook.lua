@@ -18,7 +18,7 @@ local SharedStrings = require "xlsxwriter.sharedstrings"
 ------------------------------------------------------------------------------
 
 -- The constructor inherits from xmlwriter.lua.
-local Workbook = {version = '0.0.1'}
+local Workbook = {version = '0.0.2'}
 setmetatable(Workbook,{__index = Xmlwriter})
 
 function Workbook:new(filename, options)
@@ -261,7 +261,7 @@ function Workbook:_store_workbook()
   --self:_prepare_vml_objects()
 
   -- Set the defined names for the worksheets such as Print Titles.
-  --self:_prepare_defined_names()
+  self:_prepare_defined_names()
 
   -- Prepare the drawings, charts and images.
   --self:_prepare_drawings()
@@ -558,6 +558,91 @@ function Workbook:_prepare_fills()
 
   self.fill_count = index
 end
+
+----
+-- Iterate through the worksheets and store any defined names in addition to
+-- any user defined names. Stores the defined names for the Workbook.xml and
+-- the named ranges for App.xml.
+--
+function Workbook:_prepare_defined_names()
+
+  local defined_names = self.defined_names
+
+  for _, sheet in ipairs(self.worksheets) do
+    -- Check for Print Area settings.
+    if sheet.autofilter_area ~= ""  then
+      local range  = sheet.autofilter_area
+      local hidden = true
+
+      -- Store the defined names.
+      table.insert(defined_names, {"_xlnm._FilterDatabase", sheet.index, range, hidden})
+    end
+
+    -- Check for Print Area settings.
+    if sheet.print_area_range ~= "" then
+      local range = sheet.print_area_range
+
+      -- Store the defined names.
+      table.insert(defined_names, {"_xlnm.Print_Area", sheet.index, range})
+    end
+
+    -- Check for repeat rows/cols. aka, Print Titles.
+    if sheet.repeat_col_range ~= "" or sheet.repeat_row_range ~= "" then
+      local range = ''
+
+      if sheet.repeat_col_range ~= "" and sheet.repeat_row_range ~= "" then
+        range = sheet.repeat_col_range .. "," .. sheet.repeat_row_range
+      else
+        range = sheet.repeat_col_range .. sheet.repeat_row_range
+      end
+
+      -- Store the defined names.
+      table.insert(defined_names, {"_xlnm.Print_Titles", sheet.index, range})
+    end
+
+  end
+
+  --defined_names          = _sort_defined_names(defined_names)
+  self.defined_names = defined_names
+  self.named_ranges  = self:_extract_named_ranges(defined_names)
+end
+
+
+----
+-- Extract the named ranges from the sorted list of defined names. These are
+-- used in the App.xml file.
+--
+function Workbook:_extract_named_ranges(defined_names)
+  local named_ranges = {}
+
+  for _, defined_name in ipairs(defined_names) do
+
+    local name  = defined_name[1]
+    local index = defined_name[2]
+    local range = defined_name[3]
+
+    -- Skip autoFilter ranges.
+    if name ~= "_xlnm._FilterDatabase" then
+
+      -- We are only interested in defined names with ranges.
+      local sheet_name = range:match("([^!]+)!")
+      if sheet_name then
+        -- Match Print_Area and Print_Titles xlnm types.
+        local xlnm_type = name:match("^_xlnm.(.*)")
+        if xlnm_type then
+          name = sheet_name .. "!" .. xlnm_type
+        elseif index ~= -1 then
+          name = sheet_name .. "!" .. name
+        end
+
+        table.insert(named_ranges, name)
+      end
+    end
+  end
+
+  return named_ranges
+end
+
 
 
 ------------------------------------------------------------------------------

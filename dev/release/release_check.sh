@@ -14,7 +14,7 @@ echo
 function check_test_status {
 
     echo
-    echo -n "Are all tests passing for all Pythons? [y/N]: "
+    echo -n "Are all tests passing? [y/N]: "
     read RESPONSE
 
     if [ "$RESPONSE" != "y" ]; then
@@ -24,11 +24,11 @@ function check_test_status {
 
         if [ "$RESPONSE" != "y" ]; then
             echo
-            echo -e "Please run: make testpythonsall\n";
+            echo -e "Please run: make testall\n";
             exit 1
         else
             echo "    Running tests...";
-            make testpythonsall
+            make testall
             check_test_status
          fi
     fi
@@ -67,7 +67,7 @@ function check_versions {
     echo
     echo "Latest file versions: "
 
-    grep -He "[0-9]\.[0-9]\.[0-9]" setup.py dev/docs/source/conf.py xlsxwriter/__init__.py | sed 's/:/ : /g' | sed 's/=/ = /' | awk '{printf "    | %-24s %s\n", $1, $5}'
+    grep -He "[0-9]\.[0-9]\.[0-9]" dev/docs/source/conf.py xlsxwriter/workbook.lua dist.info xlsxwriter-*.rockspec | sed 's/:/ : /g' | sed 's/=/ = /' | sed 's/}//' | awk '{printf "    | %-24s %s\n", $1, $NF}'
 
     echo
     echo -n "Are the versions up to date?   [y/N]: "
@@ -83,7 +83,7 @@ function check_versions {
             exit 1
         else
             echo "    Updating versions...";
-            perl -i dev/release/update_revison.pl setup.py dev/docs/source/conf.py xlsxwriter/__init__.py
+            perl -i dev/release/update_revison.pl dev/docs/source/conf.py xlsxwriter/workbook.lua dist.info xlsxwriter-*.rockspec
             check_versions
          fi
     fi
@@ -106,7 +106,7 @@ function check_pdf_doc {
 
         if [ "$RESPONSE" == "y" ]; then
             make -C dev/docs latexpdf
-            cp -r dev/docs/build/latex/XlsxWriter.pdf docs
+            cp -r dev/docs/build/latex/xlsxwriter_lua.pdf docs
         fi
     fi
 }
@@ -135,7 +135,7 @@ function check_git_status {
         echo
         echo -e "Please fix git status.\n";
 
-        git tag -l -n1 | tail -1 | perl -lane 'printf "git commit -m \"Prep for relase %s\"\ngit tag \"%s\"\n\n", $F[4], $F[0]' | perl dev/release/update_revison.pl
+        git tag -l -n1 | tail -1 | perl -lane 'printf "git commit -m \"Prep for release %s\"\ngit tag \"%s\"\n\n", $F[4], $F[0]' | perl dev/release/update_revison.pl
         exit 1
     fi
 }

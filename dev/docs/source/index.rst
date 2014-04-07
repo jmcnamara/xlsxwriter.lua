@@ -49,6 +49,7 @@ It works with Lua 5.1 and Lua 5.2.
 
    workbook.rst
    worksheet.rst
+   page_setup.rst
    format.rst
 
 .. toctree::
