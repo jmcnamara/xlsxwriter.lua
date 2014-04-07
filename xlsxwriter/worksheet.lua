@@ -214,7 +214,7 @@ function Worksheet:_assemble_xml_file()
   -- self:_write_auto_filter()
 
   -- Write the mergeCells element.
-  -- self:_write_merge_cells()
+  self:_write_merge_cells()
 
   -- Write the conditional formats.
   -- self:_write_conditional_formats()
@@ -1038,7 +1038,7 @@ function Worksheet:merge_range(...)
   if first_col > last_col then first_col, last_col = last_col, first_col end
 
   -- Check that column number is valid and store the max value
-  if self:_check_dimensions(last_row, last_col) then
+  if not self:_check_dimensions(last_row, last_col) then
     return
   end
 
@@ -1051,8 +1051,8 @@ function Worksheet:merge_range(...)
   -- Pad out the rest of the area with formatted blank cells.
   for row = first_row, last_row do
     for col = first_col, last_col do
-      if row ~= first_row and col ~= first_col then
-        self:write_blank(row, col, format)
+      if row ~= first_row or col ~= first_col then
+        self:write_blank(row, col, "", format)
       end
     end
   end
@@ -2503,7 +2503,43 @@ function Worksheet:_write_brk(id, max)
   self:_xml_empty_tag("brk", attributes)
 end
 
+----
+-- Write the <mergeCells> element.
+--
+function Worksheet:_write_merge_cells()
 
+  local merged_cells = self.merge
+  local count        = #merged_cells
 
+  if count == 0 then return end
+
+  local attributes = {{["count"] = count}}
+
+  self:_xml_start_tag("mergeCells", attributes)
+
+  for _, merged_range in ipairs(merged_cells) do
+    -- Write the mergeCell element.
+    self:_write_merge_cell(merged_range)
+  end
+
+  self:_xml_end_tag("mergeCells")
+end
+
+----
+-- Write the <mergeCell> element.
+--
+function Worksheet:_write_merge_cell(merged_range)
+
+  local row_min, col_min, row_max, col_max = unpack(merged_range)
+
+  -- Convert the merge dimensions to a cell range.
+  local cell_1 = Utility.rowcol_to_cell(row_min, col_min)
+  local cell_2 = Utility.rowcol_to_cell(row_max, col_max)
+  local ref    = cell_1 .. ":" .. cell_2
+
+  local attributes = {{["ref"] = ref}}
+
+  self:_xml_empty_tag("mergeCell", attributes)
+end
 
 return Worksheet
