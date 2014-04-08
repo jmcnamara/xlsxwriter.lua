@@ -702,6 +702,57 @@ visible worksheet tab using ``set_first_sheet()``::
 This method is not required very often. The default value is the first
 worksheet:
 
+
+worksheet:merge_range()
+-----------------------
+
+.. function:: merge_range(first_row, first_col, \
+                             last_row, last_col, format)
+
+   Merge a range of cells.
+
+   :param first_row:   The first row of the range. (All zero indexed.)
+   :param first_col:   The first column of the range.
+   :param last_row:    The last row of the range.
+   :param last_col:    The last col of the range.
+   :param data:        Cell data to write.
+   :param format:      Optional :ref:`Format <format>` object.
+
+
+The ``merge_range()`` method allows cells to be merged together so that they
+act as a single area.
+
+Excel generally merges and centers cells at same time. to get similar behaviour
+with xlsxwriter you need to apply a :ref:`Format <format>`::
+
+    merge_format = workbook:add_format({align = "center"})
+
+    worksheet:merge_range("B3:D4", "Merged Cells", merge_format)
+
+It is possible to apply other formatting to the merged cells as well::
+
+    merge_format = workbook:add_format({
+        bold     = true,
+        border   = 6,
+        align    = "center",
+        valign   = "vcenter",
+        fg_color = "#D7E4BC",
+    })
+
+    worksheet:merge_range("B3:D4", "Merged Cells", merge_format)
+
+.. image:: _images/merge_range.png
+
+See :ref:`ex_merge1` for more details.
+
+The ``merge_range()`` method writes its ``data`` argument using
+:func:`write()`. Therefore it will handle numbers, strings and formulas as
+usual. If this doesn't handle your data correctly then you can overwrite the
+first cell with a call to one of the other
+``write_*()`` methods using the same :ref:`Format
+<format>` as in the merged cells.
+
+
 worksheet:set_zoom()
 --------------------
 
