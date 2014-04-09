@@ -25,7 +25,6 @@ alldocs: cleandocs docs pdf
 pdf_release: pdf
 	@cp -r dev/docs/build/latex/xlsxwriter_lua.pdf docs
 
-
 test:
 	@lua -v
 	@prove --exec=lua --ext=lua -r test/unit
@@ -51,8 +50,13 @@ testluajit:
 	@luajit -v
 	@prove --exec=luajit --ext=lua -r test/unit
 
+readthedocs:
+	@curl -X POST http://readthedocs.org/build/xlsxwriterlua
+
 releasecheck:
 	@dev/release/release_check.sh
 
-readthedocs:
+release: releasecheck
+	@git push origin master
+	@git push --tags
 	@curl -X POST http://readthedocs.org/build/xlsxwriterlua
