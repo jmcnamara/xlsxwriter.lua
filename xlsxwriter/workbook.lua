@@ -10,6 +10,7 @@ local Worksheet     = require "xlsxwriter.worksheet"
 local Format        = require "xlsxwriter.format"
 local Packager      = require "xlsxwriter.packager"
 local SharedStrings = require "xlsxwriter.sharedstrings"
+local Utility       = require "xlsxwriter.utility"
 
 ------------------------------------------------------------------------------
 --
@@ -186,6 +187,67 @@ function Workbook:close()
     self.fileclosed = true
     self:_store_workbook()
   end
+end
+
+----
+-- Create a defined name in the workbook.
+--
+-- Args:
+--     name:    The defined name.
+--     formula: The cell or range that the defined name refers to.
+--
+-- Returns:
+--     Nothing.
+--
+function Workbook:define_name(name, formula)
+
+  local sheet_index
+  local sheet_name   = ''
+  local full_name   = name
+
+  -- Strip the formula = sign, if it exists.
+  if formula:match('^=') then formula = formula:sub(2) end
+
+  -- Local defined names are formatted like "Sheet1!name".
+  local sheet_name, defined_name = name:match("([^!]+)!(.*)")
+
+
+  if sheet_name and defined_name then
+    name        = defined_name
+    sheet_index = self:_get_sheet_index(sheet_name)
+  else
+    -- Use -1 to indicate global names.
+    sheet_index = -1
+  end
+
+  -- Warn if the sheet index wasn't found.
+  if not sheet_index then
+    Utility.warn("Unknown sheet name '%s' in defined_name()\n", sheet_name)
+    return -1
+  end
+
+  -- Warn if the name contains invalid chars as defined by Excel help.
+  if not name:match("^[a-zA-Z_\\][%w._]*") then
+    Utility.warn("Invalid characters in name '%s' used in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  -- Warn if the name looks like a cell name.
+  if name:match("^[a-zA-Z][a-zA-Z]?[a-dA-D]?[0-9]+$") then
+    Utility.warn("Invalid name '%s' looks like a cell name in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  -- Warn if the name looks like a R1C1.
+  if name:match("^[rcRC]$") or name:match("^[rcRC]%d+[rcRC]%d+$") then
+    Utility.warn("Invalid name '%s' like a RC cell ref in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  table.insert(self.defined_names, {name, sheet_index, formula})
 end
 
 ------------------------------------------------------------------------------
@@ -643,7 +705,23 @@ function Workbook:_extract_named_ranges(defined_names)
   return named_ranges
 end
 
+----
+-- Convert a sheet name to its index. Return undef otherwise.
+--
+function Workbook:_get_sheet_index(sheetname)
 
+  local sheet_count = #self.sheetnames
+  local sheet_index
+
+  if sheetname:match("^'") then sheetname = sheetname:sub(2)     end
+  if sheetname:match("'$") then sheetname = sheetname:sub(0, -2) end
+
+  for i = 0, sheet_count - 1 do
+    if sheetname == self.sheetnames[i] then sheet_index = i end
+  end
+
+  return sheet_index
+end
 
 ------------------------------------------------------------------------------
 --
