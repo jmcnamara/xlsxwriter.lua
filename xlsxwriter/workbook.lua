@@ -211,7 +211,6 @@ function Workbook:define_name(name, formula)
   -- Local defined names are formatted like "Sheet1!name".
   local sheet_name, defined_name = name:match("([^!]+)!(.*)")
 
-
   if sheet_name and defined_name then
     name        = defined_name
     sheet_index = self:_get_sheet_index(sheet_name)
@@ -222,7 +221,7 @@ function Workbook:define_name(name, formula)
 
   -- Warn if the sheet index wasn't found.
   if not sheet_index then
-    Utility.warn("Unknown sheet name '%s' in defined_name()\n", sheet_name)
+    Utility.warn("Unknown sheet name \"%s\" in defined_name()\n", sheet_name)
     return -1
   end
 
@@ -637,7 +636,8 @@ function Workbook:_prepare_defined_names()
       local hidden = true
 
       -- Store the defined names.
-      table.insert(defined_names, {"_xlnm._FilterDatabase", sheet.index, range, hidden})
+      table.insert(defined_names, {"_xlnm._FilterDatabase",
+                                   sheet.index, range, hidden})
     end
 
     -- Check for Print Area settings.
@@ -664,11 +664,41 @@ function Workbook:_prepare_defined_names()
 
   end
 
-  --defined_names          = _sort_defined_names(defined_names)
+  defined_names      = self:_sort_defined_names(defined_names)
   self.defined_names = defined_names
   self.named_ranges  = self:_extract_named_ranges(defined_names)
 end
 
+
+----
+-- Sort internal and user defined names in the same order as used by Excel
+-- to aid comparison.
+function Workbook:_sort_defined_names(names)
+
+  table.sort(
+    names,
+    function (a, b)
+      return self._normalise_name(a[1], a[3]) < self._normalise_name(b[1], b[3])
+    end)
+
+  return names
+end
+
+----
+-- Used in the above sort routine to normalise the defined names. Removes any
+-- leading '_xmln.' from internal names, remove leading quotes from sheet
+-- name  and lowercases the strings.
+function Workbook._normalise_name(defined_name, sheet_name)
+
+  if defined_name:match("^_xlnm.") then defined_name = defined_name:sub(7) end
+  defined_name = defined_name:lower()
+
+  sheet_name = tostring(sheet_name)
+  if sheet_name:match("^'") then sheet_name = sheet_name:sub(2) end
+  sheet_name = sheet_name:lower()
+
+  return defined_name .. "::" .. sheet_name
+end
 
 ----
 -- Extract the named ranges from the sorted list of defined names. These are
@@ -716,8 +746,8 @@ function Workbook:_get_sheet_index(sheetname)
   if sheetname:match("^'") then sheetname = sheetname:sub(2)     end
   if sheetname:match("'$") then sheetname = sheetname:sub(0, -2) end
 
-  for i = 0, sheet_count - 1 do
-    if sheetname == self.sheetnames[i] then sheet_index = i end
+  for i = 1, sheet_count do
+    if sheetname == self.sheetnames[i] then sheet_index = i -1 end
   end
 
   return sheet_index
