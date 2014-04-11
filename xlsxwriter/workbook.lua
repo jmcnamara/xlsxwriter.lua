@@ -226,7 +226,9 @@ function Workbook:define_name(name, formula)
   end
 
   -- Warn if the name contains invalid chars as defined by Excel help.
-  if not name:match("^[a-zA-Z_\\][%w._]*") then
+  -- As a workaround for valid UTF-8 chars we strip them all out first.
+  local clean_name = name:gsub(".[\128-\191]", "")
+  if not clean_name:match("^[a-zA-Z_\\][%w._]*$") then
     Utility.warn("Invalid characters in name '%s' used in defined_name()\n",
                  name)
     return -1
