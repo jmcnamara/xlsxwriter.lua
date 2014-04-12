@@ -102,7 +102,7 @@ function Packager:_add_workbook(workbook)
   self.num_comment_files = workbook.num_comment_files
   self.named_ranges      = workbook.named_ranges
 
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.is_chartsheet then
       self.chartsheet_count = self.chartsheet_count + 1
     else
@@ -180,7 +180,7 @@ end
 function Packager:_write_worksheet_files()
 
   local index = 1
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if not worksheet.is_chartsheet then
       -- Flush the row data in optimisation mode.
       if worksheet.optimization then worksheet:_write_single_row() end
@@ -198,7 +198,7 @@ end
 function Packager:_write_chartsheet_files()
 
   local index = 1
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.is_chartsheet then
       worksheet:_set_filename("xl/chartsheets/sheet" .. index .. '.xml')
       self:_add_to_zip(worksheet)
@@ -243,7 +243,7 @@ end
 function Packager:_write_vml_files()
 
   local index = 1
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.has_vml then
       -- local vml = Vml:new()
 
@@ -263,7 +263,7 @@ end
 function Packager:_write_comment_files()
 
   local index = 1
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if not worksheet.has_comments then
       -- local comment = Comments:new()
 
@@ -299,14 +299,14 @@ function Packager:_write_app_file()
   app:_add_heading_pair("Charts", self.chartsheet_count)
 
   -- Add the Worksheet parts.
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if not worksheet.is_chartsheet then
       app:_add_part_name(worksheet:get_name())
     end
   end
 
   -- Add the Chartsheet parts.
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.is_chartsheet then
       app:_add_part_name(worksheet:get_name())
     end
@@ -353,7 +353,7 @@ function Packager:_write_content_types_file()
 
   local worksheet_index  = 1
   local chartsheet_index = 1
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.is_chartsheet then
       content:_add_chartsheet_name("sheet" .. chartsheet_index)
       chartsheet_index = chartsheet_index
@@ -436,7 +436,7 @@ function Packager:_write_table_files()
 
   local index = 1
 
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     local table_props = worksheet.tables
 
     if table_props then
@@ -477,7 +477,7 @@ function Packager:_write_workbook_rels_file()
   local worksheet_index  = 1
   local chartsheet_index = 1
 
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
     if worksheet.is_chartsheet then
       rels:_add_document_relationship("/chartsheet", 
                                       'chartsheets/sheet' .. chartsheet_index .. '.xml')
@@ -513,7 +513,7 @@ end
 function Packager:_write_worksheet_rels_files()
 
   local index = 0
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
 
     if worksheet.is_chartsheet then
       index = index + 1
@@ -545,7 +545,7 @@ end
 function Packager:_write_chartsheet_rels_files()
 
   local index = 0
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
 
     if not worksheet.is_chartsheet then
       index = index + 1
@@ -573,7 +573,7 @@ end
 function Packager:_write_drawing_rels_files()
 
   local index = 0
-  for _, worksheet in ipairs(self.workbook.worksheets) do
+  for _, worksheet in ipairs(self.workbook:worksheets()) do
 
     if worksheet.drawing_links or worksheet.has_shapes then
       index = index + 1

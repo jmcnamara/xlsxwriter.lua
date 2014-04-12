@@ -46,7 +46,7 @@ function Workbook:new(filename, options)
     worksheet_count    = 0,
     sheetname_count    = 0,
     chartname_count    = 0,
-    worksheets         = {},
+    worksheet_objs     = {},
     charts             = {},
     drawings           = {},
     sheetnames         = {},
@@ -251,6 +251,19 @@ function Workbook:define_name(name, formula)
   table.insert(self.defined_names, {name, sheet_index, formula})
 end
 
+----
+-- Return a tabke of the worksheet objects in the workbook.
+-- 
+-- Args:
+--     None.
+-- 
+-- Returns:
+--     A table of worksheet objects.
+-- 
+function Workbook:worksheets()
+    return self.worksheet_objs
+end
+
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -291,7 +304,7 @@ function Workbook:_add_sheet(name, is_chartsheet)
   worksheet:_initialize(init_data)
 
   self.worksheet_count = self.worksheet_count + 1
-  self.worksheets[self.worksheet_count] = worksheet
+  self.worksheet_objs[self.worksheet_count] = worksheet
   self.sheetnames[self.worksheet_count] = name
 
   return worksheet
@@ -303,18 +316,18 @@ end
 function Workbook:_store_workbook()
 
   -- Add a default worksheet if non have been added.
-  if #self.worksheets == 0 then
+  if #self.worksheet_objs == 0 then
     self:add_worksheet()
   end
 
   -- Ensure that at least one worksheet has been selected.
   if self.worksheet_meta.activesheet == 0 then
-    self.worksheets[1].selected = true
-    self.worksheets[1].hidden   = false
+    self.worksheet_objs[1].selected = true
+    self.worksheet_objs[1].hidden   = false
   end
 
   -- Set the active sheet.
-  for _, sheet in ipairs(self.worksheets) do
+  for _, sheet in ipairs(self:worksheets()) do
     if sheet.index == self.activesheet then
       sheet.active = true
     end
@@ -378,7 +391,7 @@ function Workbook:_check_sheetname(name, is_chartsheet)
 
   -- Check that the worksheet name doesn't already exist since this is a fatal
   -- error in Excel 97+. The check must also exclude case insensitive matches.
-  for _, worksheet in ipairs(self.worksheets) do
+  for _, worksheet in ipairs(self:worksheets()) do
     local name_a = name
     local name_b = worksheet.name
 
@@ -631,7 +644,7 @@ function Workbook:_prepare_defined_names()
 
   local defined_names = self.defined_names
 
-  for _, sheet in ipairs(self.worksheets) do
+  for _, sheet in ipairs(self:worksheets()) do
     -- Check for Print Area settings.
     if sheet.autofilter_area ~= ""  then
       local range  = sheet.autofilter_area
@@ -874,7 +887,7 @@ function Workbook:_write_sheets()
 
   self:_xml_start_tag("sheets")
 
-  for _, worksheet in ipairs(self.worksheets) do
+  for _, worksheet in ipairs(self:worksheets()) do
     self:_write_sheet(worksheet.name, id_num, worksheet.hidden)
     id_num = id_num + 1
   end
