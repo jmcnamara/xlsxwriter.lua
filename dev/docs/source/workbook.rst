@@ -126,6 +126,49 @@ This should be done for every file.
 
 Currently, there is no implicit ``close()``.
 
+workbook:set_properties()
+-------------------------
+
+.. function:: set_properties()
+
+   Set the document properties such as Title, Author etc.
+
+   :param properties: Dictionary of document properties.
+
+The ``set_properties`` method can be used to set the document properties of the
+Excel file created by ``xlsxwriter``. These properties are visible when you
+use the ``Office Button -> Prepare -> Properties`` option in Excel and are
+also available to external applications that read or index windows files.
+
+The properties that can be set are:
+
+* ``title``
+* ``subject``
+* ``author``
+* ``manager``
+* ``company``
+* ``category``
+* ``keywords``
+* ``comments``
+* ``status``
+
+The properties are all optional and should be passed in table format as
+follows::
+
+    workbook:set_properties({
+        title =    'This is an example spreadsheet',
+        subject =  'With document properties',
+        author =   'John McNamara',
+        manager =  'Dr. Heinz Doofenshmirtz',
+        company =  'of Wolves',
+        category = 'Example spreadsheets',
+        keywords = 'Sample, Example, Properties',
+        comments = 'Created with Lua and the xlsxwriter module'})
+
+.. image:: _images/doc_properties.png
+
+See also :ref:`ex_doc_properties`.
+
 workbook:define_name()
 ----------------------
 
