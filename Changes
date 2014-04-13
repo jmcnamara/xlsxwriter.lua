@@ -1,4 +1,16 @@
 
+Release 0.0.4 - April 14 2014
+-----------------------------
+
+* Added the :func:`define_name` method to create defined names and ranges
+  in a workbook or worksheet.
+
+* Added the :func:`set_properties` workbook method for setting document
+  properties.
+
+* Added the :func:`worksheets` method as an accessor for the worksheets in a
+  workbook.
+
 
 Release 0.0.3 - April 9 2014
 ----------------------------
@@ -16,4 +28,3 @@ Release 0.0.1 - March 29 2014
 -----------------------------
 
 * First public release.
-
