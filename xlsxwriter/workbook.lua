@@ -253,16 +253,30 @@ end
 
 ----
 -- Return a tabke of the worksheet objects in the workbook.
--- 
+--
 -- Args:
 --     None.
--- 
+--
 -- Returns:
 --     A table of worksheet objects.
--- 
+--
 function Workbook:worksheets()
     return self.worksheet_objs
 end
+
+----
+-- Set the document properties such as Title, Author etc.
+--
+-- Args:
+--     properties: Dictionary of document properties.
+--
+-- Returns:
+--     Nothing.
+--
+function Workbook:set_properties(properties)
+  self.doc_properties = properties
+end
+
 
 ------------------------------------------------------------------------------
 --
