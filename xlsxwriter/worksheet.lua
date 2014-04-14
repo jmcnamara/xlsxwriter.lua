@@ -2542,4 +2542,123 @@ function Worksheet:_write_merge_cell(merged_range)
   self:_xml_empty_tag("mergeCell", attributes)
 end
 
+----
+-- Process any stored hyperlinks in row/col order and write the <hyperlinks>
+-- element. The attributes are different for internal and external links.
+--
+function Worksheet:_write_hyperlinks()
+
+  local hlink_refs = {}
+
+  -- Sort the hyperlinks into row order.
+  table.sort(self.hyperlinks)
+  local row_nums = self.hyperlinks
+
+  -- Exit if there are no hyperlinks to process.
+  if not #row_nums then return end
+
+  -- Iterate over the rows.
+  for _, row_num in ipairs(row_nums) do
+
+    -- Sort the hyperlinks into column order.
+    table.sort(self.hyperlinks[row_num])
+    local col_nums = self.hyperlinks[row_num]
+
+    -- Iterate over the columns.
+    for _, col_num in ipairs(col_nums) do
+
+      -- Get the link data for this cell.
+      local link      = self.hyperlinks[row_num][col_num]
+      local link_type = link.link_type
+
+      -- If the cell isn't a string then we have to add the url as
+      -- the string to display.
+      local display
+      if self.table and self.table[row_num] and self.table[row_num][col_num] then
+        local cell = self.table[row_num][col_num]
+        if cell[0] ~= "s" then
+          display = link.url
+        end
+      end
+
+      if link_type == 1 then
+        -- External link with rel file relationship.
+        self.rel_count = self.rel_count +1
+        table.insert(hlink_refs, {link_type, row_num, col_num, self.rel_count, link.str, display, link.tip})
+
+        -- Links for use by the packager.
+        table.insert(self.external_hyper_links, {"/hyperlink", link.url, 'External'})
+      else
+        -- Internal link with rel file relationship.
+        table.insert(hlink_refs, {link_type, row_num, col_num, link.url, link.str, link.tip})
+      end
+    end
+  end
+
+  -- Write the hyperlink elements.
+  self:_xml_start_tag("hyperlinks")
+
+  for _, hlink_ref in ipairs(hlink_refs) do
+    local link_type, args = hlink_ref
+
+    if link_type == 1 then
+      self:_write_hyperlink_external(args)
+    elseif link_type == 2 then
+      self:_write_hyperlink_internal(args)
+    end
+  end
+
+  self:_xml_end_tag("hyperlinks")
+end
+
+----
+-- Write the <hyperlink> element for external links.
+--
+function Worksheet:_write_hyperlink_external(row, col, id, location, display, tooltip)
+
+  local ref = Utility.rowcol_to_cell(row, col)
+  local r_id = "rId" .. id
+
+  local attributes = {
+    {["ref"]  = ref},
+    {["r:id"] = r_id},
+  }
+
+  if location then
+    table.insert(attributes, {["location"] = location})
+  end
+
+  if display then
+    table.insert(attributes, {["display"]  = display})
+  end
+
+  if tooltip then
+    table.insert(attributes, {["tooltip"]  = tooltip})
+  end
+
+
+  self:_xml_empty_tag("hyperlink", attributes)
+end
+
+----
+-- Write the <hyperlink> element for internal links.
+--
+function Worksheet:_write_hyperlink_internal(row, col, location, display, tooltip)
+
+
+  local ref = Utility.rowcol_to_cell(row, col)
+
+  local attributes = {
+    {["ref"]      = ref},
+    {["location"] = location},
+  }
+
+  if tooltip then table.insert(attributes, {["tooltip"] = tooltip}) end
+
+  table.insert(attributes, {["display"] = display})
+
+  self:_xml_empty_tag("hyperlink", attributes)
+end
+
+
 return Worksheet
