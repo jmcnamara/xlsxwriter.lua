@@ -10,6 +10,7 @@ local Worksheet     = require "xlsxwriter.worksheet"
 local Format        = require "xlsxwriter.format"
 local Packager      = require "xlsxwriter.packager"
 local SharedStrings = require "xlsxwriter.sharedstrings"
+local Utility       = require "xlsxwriter.utility"
 
 ------------------------------------------------------------------------------
 --
@@ -18,7 +19,7 @@ local SharedStrings = require "xlsxwriter.sharedstrings"
 ------------------------------------------------------------------------------
 
 -- The constructor inherits from xmlwriter.lua.
-local Workbook = {version = '0.0.3'}
+local Workbook = {version = '0.0.4'}
 setmetatable(Workbook,{__index = Xmlwriter})
 
 function Workbook:new(filename, options)
@@ -45,7 +46,7 @@ function Workbook:new(filename, options)
     worksheet_count    = 0,
     sheetname_count    = 0,
     chartname_count    = 0,
-    worksheets         = {},
+    worksheet_objs     = {},
     charts             = {},
     drawings           = {},
     sheetnames         = {},
@@ -188,6 +189,95 @@ function Workbook:close()
   end
 end
 
+----
+-- Create a defined name in the workbook.
+--
+-- Args:
+--     name:    The defined name.
+--     formula: The cell or range that the defined name refers to.
+--
+-- Returns:
+--     Nothing.
+--
+function Workbook:define_name(name, formula)
+
+  local sheet_index
+  local sheet_name   = ''
+  local full_name   = name
+
+  -- Strip the formula = sign, if it exists.
+  if formula:match('^=') then formula = formula:sub(2) end
+
+  -- Local defined names are formatted like "Sheet1!name".
+  local sheet_name, defined_name = name:match("([^!]+)!(.*)")
+
+  if sheet_name and defined_name then
+    name        = defined_name
+    sheet_index = self:_get_sheet_index(sheet_name)
+  else
+    -- Use -1 to indicate global names.
+    sheet_index = -1
+  end
+
+  -- Warn if the sheet index wasn't found.
+  if not sheet_index then
+    Utility.warn("Unknown sheet name \"%s\" in defined_name()\n", sheet_name)
+    return -1
+  end
+
+  -- Warn if the name contains invalid chars as defined by Excel help.
+  -- As a workaround for valid UTF-8 chars we strip them all out first.
+  local clean_name = name:gsub(".[\128-\191]", "")
+  if not clean_name:match("^[a-zA-Z_\\][%w._]*$") then
+    Utility.warn("Invalid characters in name '%s' used in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  -- Warn if the name looks like a cell name.
+  if name:match("^[a-zA-Z][a-zA-Z]?[a-dA-D]?[0-9]+$") then
+    Utility.warn("Invalid name '%s' looks like a cell name in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  -- Warn if the name looks like a R1C1.
+  if name:match("^[rcRC]$") or name:match("^[rcRC]%d+[rcRC]%d+$") then
+    Utility.warn("Invalid name '%s' like a RC cell ref in defined_name()\n",
+                 name)
+    return -1
+  end
+
+  table.insert(self.defined_names, {name, sheet_index, formula})
+end
+
+----
+-- Return a tabke of the worksheet objects in the workbook.
+--
+-- Args:
+--     None.
+--
+-- Returns:
+--     A table of worksheet objects.
+--
+function Workbook:worksheets()
+    return self.worksheet_objs
+end
+
+----
+-- Set the document properties such as Title, Author etc.
+--
+-- Args:
+--     properties: Dictionary of document properties.
+--
+-- Returns:
+--     Nothing.
+--
+function Workbook:set_properties(properties)
+  self.doc_properties = properties
+end
+
+
 ------------------------------------------------------------------------------
 --
 -- Internal methods.
@@ -228,7 +318,7 @@ function Workbook:_add_sheet(name, is_chartsheet)
   worksheet:_initialize(init_data)
 
   self.worksheet_count = self.worksheet_count + 1
-  self.worksheets[self.worksheet_count] = worksheet
+  self.worksheet_objs[self.worksheet_count] = worksheet
   self.sheetnames[self.worksheet_count] = name
 
   return worksheet
@@ -240,18 +330,18 @@ end
 function Workbook:_store_workbook()
 
   -- Add a default worksheet if non have been added.
-  if #self.worksheets == 0 then
+  if #self.worksheet_objs == 0 then
     self:add_worksheet()
   end
 
   -- Ensure that at least one worksheet has been selected.
   if self.worksheet_meta.activesheet == 0 then
-    self.worksheets[1].selected = true
-    self.worksheets[1].hidden   = false
+    self.worksheet_objs[1].selected = true
+    self.worksheet_objs[1].hidden   = false
   end
 
   -- Set the active sheet.
-  for _, sheet in ipairs(self.worksheets) do
+  for _, sheet in ipairs(self:worksheets()) do
     if sheet.index == self.activesheet then
       sheet.active = true
     end
@@ -315,7 +405,7 @@ function Workbook:_check_sheetname(name, is_chartsheet)
 
   -- Check that the worksheet name doesn't already exist since this is a fatal
   -- error in Excel 97+. The check must also exclude case insensitive matches.
-  for _, worksheet in ipairs(self.worksheets) do
+  for _, worksheet in ipairs(self:worksheets()) do
     local name_a = name
     local name_b = worksheet.name
 
@@ -568,14 +658,15 @@ function Workbook:_prepare_defined_names()
 
   local defined_names = self.defined_names
 
-  for _, sheet in ipairs(self.worksheets) do
+  for _, sheet in ipairs(self:worksheets()) do
     -- Check for Print Area settings.
     if sheet.autofilter_area ~= ""  then
       local range  = sheet.autofilter_area
       local hidden = true
 
       -- Store the defined names.
-      table.insert(defined_names, {"_xlnm._FilterDatabase", sheet.index, range, hidden})
+      table.insert(defined_names, {"_xlnm._FilterDatabase",
+                                   sheet.index, range, hidden})
     end
 
     -- Check for Print Area settings.
@@ -602,11 +693,41 @@ function Workbook:_prepare_defined_names()
 
   end
 
-  --defined_names          = _sort_defined_names(defined_names)
+  defined_names      = self:_sort_defined_names(defined_names)
   self.defined_names = defined_names
   self.named_ranges  = self:_extract_named_ranges(defined_names)
 end
 
+
+----
+-- Sort internal and user defined names in the same order as used by Excel
+-- to aid comparison.
+function Workbook:_sort_defined_names(names)
+
+  table.sort(
+    names,
+    function (a, b)
+      return self._normalise_name(a[1], a[3]) < self._normalise_name(b[1], b[3])
+    end)
+
+  return names
+end
+
+----
+-- Used in the above sort routine to normalise the defined names. Removes any
+-- leading '_xmln.' from internal names, remove leading quotes from sheet
+-- name  and lowercases the strings.
+function Workbook._normalise_name(defined_name, sheet_name)
+
+  if defined_name:match("^_xlnm.") then defined_name = defined_name:sub(7) end
+  defined_name = defined_name:lower()
+
+  sheet_name = tostring(sheet_name)
+  if sheet_name:match("^'") then sheet_name = sheet_name:sub(2) end
+  sheet_name = sheet_name:lower()
+
+  return defined_name .. "::" .. sheet_name
+end
 
 ----
 -- Extract the named ranges from the sorted list of defined names. These are
@@ -643,7 +764,23 @@ function Workbook:_extract_named_ranges(defined_names)
   return named_ranges
 end
 
+----
+-- Convert a sheet name to its index. Return undef otherwise.
+--
+function Workbook:_get_sheet_index(sheetname)
 
+  local sheet_count = #self.sheetnames
+  local sheet_index
+
+  if sheetname:match("^'") then sheetname = sheetname:sub(2)     end
+  if sheetname:match("'$") then sheetname = sheetname:sub(0, -2) end
+
+  for i = 1, sheet_count do
+    if sheetname == self.sheetnames[i] then sheet_index = i -1 end
+  end
+
+  return sheet_index
+end
 
 ------------------------------------------------------------------------------
 --
@@ -764,7 +901,7 @@ function Workbook:_write_sheets()
 
   self:_xml_start_tag("sheets")
 
-  for _, worksheet in ipairs(self.worksheets) do
+  for _, worksheet in ipairs(self:worksheets()) do
     self:_write_sheet(worksheet.name, id_num, worksheet.hidden)
     id_num = id_num + 1
   end

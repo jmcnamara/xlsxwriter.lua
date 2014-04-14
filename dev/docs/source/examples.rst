@@ -14,8 +14,10 @@ directory of the ``xlsxwriter`` distribution.
    example_demo.rst
    example_array_formula.rst
    example_merge1.rst
+   example_defined_name.rst
    example_utf8.rst
    example_utf8_polish.rst
+   example_doc_properties.rst
    example_tab_colors.rst
    example_hide_sheet.rst
    example_headers_footers.rst
