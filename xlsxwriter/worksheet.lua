@@ -141,6 +141,7 @@ function Worksheet:new()
     drawing                = false,
     rstring                = "",
     previous_row           = 0,
+    hyperlinks             = {},
   }
 
   setmetatable(instance, self)
@@ -444,6 +445,12 @@ end
 function Worksheet:write_boolean(...)
   return self:_write_boolean(self:_convert_cell_args(...))
 end
+
+function Worksheet:write_url(...)
+  return self:_write_url(self:_convert_cell_args(...))
+end
+
+
 
 
 ----
@@ -1336,6 +1343,120 @@ function Worksheet:_write_boolean(row, col, bool, format)
   return 0
 end
 
+function Worksheet:_write_url(row, col, url, format, str, tip)
+
+  local link_type = 1
+  local matched   = false
+
+  -- Remove the URI scheme from internal links.
+  url, matched = url:gsub("internal:/", "")
+  if matched then link_type = 2 end
+
+  -- Remove the URI scheme from external links.
+  url, matched = url:gsub("external:/", "")
+  if matched then link_type = 3 end
+
+  -- The displayed string defaults to the url string.
+  if not str then str = url end
+
+  -- For external links change the directory separator from Unix to Dos.
+  if link_type == 3 then
+    url = url:gsub("/", "\\")
+    str = str:gsub("/", "\\")
+  end
+
+  -- Strip the mailto header.
+  str = str:gsub("^mailto:", "")
+
+  -- Check that row and col are valid and store max and min values
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  -- Check that the string is < 32767 chars
+  if #str > self.xls_strmax then
+    return -2
+  end
+
+  -- Copy string for use in hyperlink elements.
+  local url_str = str
+
+  -- External links to URLs and to other Excel workbooks have slightly
+  -- different characteristics that we have to account for.
+  if link_type == 1 then
+
+    -- Escape URL unless it looks already escaped.
+    if url:match("%%[0-9a-fA-F]{2}") then
+      -- Escape the URL escape symbol.
+      url = url:gsub("%", "25")
+
+      -- Escape whitespace in URL.
+      url = url:gsub("[%s%x00]", "20")
+
+      -- Escape other special characters in URL.
+      --url =~ s/(["<>[\]`^{}])/sprintf "%%x", ord 1/eg
+    end
+
+    -- Ordinary URL style external links don't have a "location" string.
+    url_str = nil
+
+  elseif link_type == 3 then
+    -- External Workbook links need to be modified into the right format.
+    -- The URL will look something like 'c:\temp\file.xlsx#Sheet!A1'.
+    -- We need the part to the left of the # as the URL and the part to
+    -- the right as the "location" string (if it exists).
+    --url, url_str = split /#/, url
+
+    -- Add the file:/// URI to the url if non-local.
+    -- if (
+    --   url =~ m{[:]}         -- Windows style "C:/" link.
+    --   or url =~ m{^\\\\}    -- Network share.
+    --   )
+    -- {
+    --   url = "file:///" .. url
+    -- end
+
+    -- Convert a ./dir/file.xlsx link to dir/file.xlsx.
+    url = url:gsub("^.\\", "")
+
+    -- Treat as a default external link now that the data has been modified.
+    link_type = 1
+  end
+
+  -- Excel limits escaped URL to 255 characters.
+  if #url > 255 then
+    Utility.warn("Ignoring URL > 255 characters since it "
+                 .. "exceeds Excel's limit for URLS.\n")
+    return -3
+  end
+
+  -- Check the limit of URLS per worksheet.
+  self.hlink_count = self.hlink_count + 1
+
+  if self.hlink_count > 65530 then
+    Utility.warn("Ignoring URL since it exceeds Excel's limit of 65,530 "
+                   .. "URLS per worksheet.\n")
+    return -4
+  end
+
+  -- Write previous row if in in-line string optimization mode.
+  if self.optimization == 1 and row > self.previous_row then
+    self:_write_single_row(row)
+  end
+
+  -- Write the hyperlink string.
+  self:write_string(row, col, str, format)
+
+  -- Store the hyperlink data in a separate structure.
+  if not self.hyperlinks[row] then self.hyperlinks[row] = {} end
+
+  self.hyperlinks[row][col] = {
+    ["_link_type"] = link_type,
+    ["_url"]       = url,
+    ["_str"]       = url_str,
+    ["_tip"]       = tip,
+  }
+end
 
 ----
 -- Check that row and col are valid and store max and min values for use in
