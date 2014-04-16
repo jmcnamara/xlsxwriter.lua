@@ -1399,7 +1399,7 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
   if link_type == 1 then
 
     -- Escape URL unless it looks already escaped.
-    if not url:match("%%[0-9a-fA-F]{2}") then
+    if not url:match("%%%x%x") then
       url = url:gsub("%%", "%%25")
       url = url:gsub('"',  "%%22")
       url = url:gsub(" ",  "%%20")
