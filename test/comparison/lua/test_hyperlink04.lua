@@ -24,4 +24,3 @@ worksheet1:write_url("A18", "internal:Sheet2!A1",       nil, nil,         "Tool 
 worksheet1:write_url("A20", "internal:Sheet2!A1",       nil, "More text", "Tool Tip 2")
 
 workbook:close()
-

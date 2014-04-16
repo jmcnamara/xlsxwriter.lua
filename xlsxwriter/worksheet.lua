@@ -1399,15 +1399,18 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
   if link_type == 1 then
 
     -- Escape URL unless it looks already escaped.
-    if url:match("%%[0-9a-fA-F]{2}") then
-      -- Escape the URL escape symbol.
-      url = url:gsub("%", "25")
-
-      -- Escape whitespace in URL.
-      url = url:gsub("[%s%x00]", "20")
-
-      -- Escape other special characters in URL.
-      --url =~ s/(["<>[\]`^{}])/sprintf "%%x", ord 1/eg
+    if not url:match("%%[0-9a-fA-F]{2}") then
+      url = url:gsub("%%", "%%25")
+      url = url:gsub('"',  "%%22")
+      url = url:gsub(" ",  "%%20")
+      url = url:gsub("<",  "%%3c")
+      url = url:gsub(">",  "%%3e")
+      url = url:gsub("%[", "%%5b")
+      url = url:gsub("%]", "%%5d")
+      url = url:gsub("%^", "%%5e")
+      url = url:gsub("`",  "%%60")
+      url = url:gsub("{",  "%%7b")
+      url = url:gsub("}",  "%%7d")
     end
 
     -- Ordinary URL style external links don't have a "location" string.
@@ -1418,16 +1421,18 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
     -- The URL will look something like 'c:\temp\file.xlsx#Sheet!A1'.
     -- We need the part to the left of the # as the URL and the part to
     -- the right as the "location" string (if it exists).
-    --url, url_str = split /#/, url
+    if url:match("#") then
+      url, url_str = url:match("([^#]+)#(.*)")
+    else
+      url_str = nil
+    end
 
-    -- Add the file:/// URI to the url if non-local.
-    -- if (
-    --   url =~ m{[:]}         -- Windows style "C:/" link.
-    --   or url =~ m{^\\\\}    -- Network share.
-    --   )
-    -- {
-    --   url = "file:///" .. url
-    -- end
+    -- Add the file:/// URI to the url if non-local. For:
+    --    Windows style "C:/" link.
+    --    Network share.
+    if url:match("^%a:") or url:match("^\\\\") then
+      url = "file:///" .. url
+    end
 
     -- Convert a ./dir/file.xlsx link to dir/file.xlsx.
     url = url:gsub("^.\\", "")
@@ -1466,8 +1471,8 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
   self.hyperlinks[row][col] = {
     ["link_type"] = link_type,
     ["url"]       = url,
-    ["str"]       = url_str,
-    ["tip"]       = tip,
+    ["str"]       = url_str or false,
+    ["tip"]       = tip     or false,
   }
 end
 
@@ -2696,7 +2701,7 @@ function Worksheet:_write_hyperlinks()
 
       -- If the cell isn't a string then we have to add the url as
       -- the string to display.
-      local display
+      local display = false
       if self.data_table[row_num] and self.data_table[row_num][col_num] then
         local cell = self.data_table[row_num][col_num]
         if cell[1] ~= "s" then
