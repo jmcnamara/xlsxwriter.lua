@@ -23,3 +23,6 @@ class TestCompareXLSXFiles(base_test_class.XLSXBaseTest):
 
     def test_hyperlink03(self):
         self.run_lua_test('test_hyperlink03')
+
+    def test_hyperlink04(self):
+        self.run_lua_test('test_hyperlink04')

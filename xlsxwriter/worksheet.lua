@@ -1362,11 +1362,11 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
   local matched   = 0
 
   -- Remove the URI scheme from internal links.
-  url, matched = url:gsub("internal:/", "")
+  url, matched = url:gsub("internal:", "")
   if matched > 0 then link_type = 2 end
 
   -- Remove the URI scheme from external links.
-  url, matched = url:gsub("external:/", "")
+  url, matched = url:gsub("external:", "")
   if matched > 0 then link_type = 3 end
 
   -- The displayed string defaults to the url string.
@@ -2683,9 +2683,7 @@ end
 function Worksheet:_write_hyperlinks()
 
   local hlink_refs = {}
-
-  -- Exit if there are no hyperlinks to process.
-  if not #self.hyperlinks then return end
+  local has_hyperlinks = false
 
   -- Iterate over the rows and cols in sorted order.
   for row_num in Utility.sorted_keys(self.hyperlinks) do
@@ -2721,7 +2719,11 @@ function Worksheet:_write_hyperlinks()
                                   link.str, link.tip})
       end
     end
+    has_hyperlinks = true
   end
+
+
+  if not has_hyperlinks then return end
 
   -- Write the hyperlink elements.
   self:_xml_start_tag("hyperlinks")
