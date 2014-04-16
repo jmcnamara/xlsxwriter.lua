@@ -142,6 +142,22 @@ function Utility.sorted_pairs(sort_table, sort_function)
 end
 
 ----
+-- Generator for returning table keys in sorted order.
+--
+function Utility.sorted_keys(sort_table, sort_function)
+  local array = {}
+  for n in pairs(sort_table) do array[#array + 1] = n end
+
+  table.sort(array, sort_function)
+
+  local i = 0
+  return function ()
+    i = i + 1
+    return array[i]
+  end
+end
+
+----
 -- Print a non-fatal warning at the highest/calling program stack level.
 --
 function Utility.warn(...)

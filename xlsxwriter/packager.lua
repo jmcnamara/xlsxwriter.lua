@@ -515,7 +515,7 @@ function Packager:_write_worksheet_rels_files()
   local index = 0
   for _, worksheet in ipairs(self.workbook:worksheets()) do
 
-    if worksheet.is_chartsheet then
+    if not worksheet.is_chartsheet then
       index = index + 1
 
       local external_links = #worksheet.external_hyper_links 
@@ -527,8 +527,22 @@ function Packager:_write_worksheet_rels_files()
       if external_links > 0 then
         local rels = Relationships:new()
 
-        for _, link_data in ipairs(external_links) do
-          rels:_add_worksheet_relationship(link_data)
+        for _, link_data in ipairs(worksheet.external_hyper_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
+        end
+        for _, link_data in ipairs(worksheet.external_drawing_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
+        end
+        for _, link_data in ipairs(worksheet.external_vml_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
+        end
+
+        for _, link_data in ipairs(worksheet.external_table_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
+        end
+
+        for _, link_data in ipairs(worksheet.external_comment_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
         end
 
         -- Create the .rels file such as /xl/worksheets/_rels/sheet1.xml.rels.
@@ -547,7 +561,7 @@ function Packager:_write_chartsheet_rels_files()
   local index = 0
   for _, worksheet in ipairs(self.workbook:worksheets()) do
 
-    if not worksheet.is_chartsheet then
+    if worksheet.is_chartsheet then
       index = index + 1
 
       local external_links = #worksheet.external_drawing_links
@@ -555,8 +569,8 @@ function Packager:_write_chartsheet_rels_files()
       if external_links > 0 then
         local rels = Relationships:new()
 
-        for _, link_data in ipairs(external_links) do
-          rels:_add_worksheet_relationship(link_data)
+        for _, link_data in ipairs(worksheet.external_drawing_links) do
+          rels:_add_worksheet_relationship(unpack(link_data))
         end
 
         -- Create the .rels file such as /xl/chartsheets/_rels/sheet1.xml.rels.

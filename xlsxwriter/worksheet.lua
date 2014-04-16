@@ -224,7 +224,7 @@ function Worksheet:_assemble_xml_file()
   -- self:_write_data_validations()
 
   -- Write the hyperlink element.
-  -- self:_write_hyperlinks()
+  self:_write_hyperlinks()
 
   -- Write the printOptions element.
   self:_write_print_options()
@@ -446,12 +446,25 @@ function Worksheet:write_boolean(...)
   return self:_write_boolean(self:_convert_cell_args(...))
 end
 
+----
+-- Write a hyperlink to a worksheet cell.
+--
+-- Args:
+--     row:    The cell row (zero indexed).
+--     col:    The cell column (zero indexed).
+--     url:    Hyperlink url.
+--     format: An optional cell Format object.
+--     string: An optional display string for the hyperlink.
+--     tip:    An optional tooltip.
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--     -2: String longer than 32767 characters.
+--     -3: URL longer than Excel limit of 255 characters
+--     -4: Exceeds Excel limit of 65,530 urls per worksheet
 function Worksheet:write_url(...)
   return self:_write_url(self:_convert_cell_args(...))
 end
-
-
-
 
 ----
 -- Set this worksheet as the active worksheet, i.e. the worksheet that is
@@ -1346,15 +1359,15 @@ end
 function Worksheet:_write_url(row, col, url, format, str, tip)
 
   local link_type = 1
-  local matched   = false
+  local matched   = 0
 
   -- Remove the URI scheme from internal links.
   url, matched = url:gsub("internal:/", "")
-  if matched then link_type = 2 end
+  if matched > 0 then link_type = 2 end
 
   -- Remove the URI scheme from external links.
   url, matched = url:gsub("external:/", "")
-  if matched then link_type = 3 end
+  if matched > 0 then link_type = 3 end
 
   -- The displayed string defaults to the url string.
   if not str then str = url end
@@ -1451,10 +1464,10 @@ function Worksheet:_write_url(row, col, url, format, str, tip)
   if not self.hyperlinks[row] then self.hyperlinks[row] = {} end
 
   self.hyperlinks[row][col] = {
-    ["_link_type"] = link_type,
-    ["_url"]       = url,
-    ["_str"]       = url_str,
-    ["_tip"]       = tip,
+    ["link_type"] = link_type,
+    ["url"]       = url,
+    ["str"]       = url_str,
+    ["tip"]       = tip,
   }
 end
 
@@ -2671,22 +2684,13 @@ function Worksheet:_write_hyperlinks()
 
   local hlink_refs = {}
 
-  -- Sort the hyperlinks into row order.
-  table.sort(self.hyperlinks)
-  local row_nums = self.hyperlinks
-
   -- Exit if there are no hyperlinks to process.
-  if not #row_nums then return end
+  if not #self.hyperlinks then return end
 
-  -- Iterate over the rows.
-  for _, row_num in ipairs(row_nums) do
+  -- Iterate over the rows and cols in sorted order.
+  for row_num in Utility.sorted_keys(self.hyperlinks) do
 
-    -- Sort the hyperlinks into column order.
-    table.sort(self.hyperlinks[row_num])
-    local col_nums = self.hyperlinks[row_num]
-
-    -- Iterate over the columns.
-    for _, col_num in ipairs(col_nums) do
+    for col_num in Utility.sorted_keys(self.hyperlinks[row_num]) do
 
       -- Get the link data for this cell.
       local link      = self.hyperlinks[row_num][col_num]
@@ -2695,23 +2699,26 @@ function Worksheet:_write_hyperlinks()
       -- If the cell isn't a string then we have to add the url as
       -- the string to display.
       local display
-      if self.table and self.table[row_num] and self.table[row_num][col_num] then
-        local cell = self.table[row_num][col_num]
-        if cell[0] ~= "s" then
+      if self.data_table[row_num] and self.data_table[row_num][col_num] then
+        local cell = self.data_table[row_num][col_num]
+        if cell[1] ~= "s" then
           display = link.url
         end
       end
 
       if link_type == 1 then
         -- External link with rel file relationship.
-        self.rel_count = self.rel_count +1
-        table.insert(hlink_refs, {link_type, row_num, col_num, self.rel_count, link.str, display, link.tip})
+        self.rel_count = self.rel_count + 1
+        table.insert(hlink_refs, {link_type, row_num, col_num, self.rel_count,
+                                  link.str, display, link.tip})
 
         -- Links for use by the packager.
-        table.insert(self.external_hyper_links, {"/hyperlink", link.url, 'External'})
+        table.insert(self.external_hyper_links,
+                     {"/hyperlink", link.url, 'External'})
       else
         -- Internal link with rel file relationship.
-        table.insert(hlink_refs, {link_type, row_num, col_num, link.url, link.str, link.tip})
+        table.insert(hlink_refs, {link_type, row_num, col_num, link.url,
+                                  link.str, link.tip})
       end
     end
   end
@@ -2719,13 +2726,13 @@ function Worksheet:_write_hyperlinks()
   -- Write the hyperlink elements.
   self:_xml_start_tag("hyperlinks")
 
-  for _, hlink_ref in ipairs(hlink_refs) do
-    local link_type, args = hlink_ref
+  for _, hlink_data in ipairs(hlink_refs) do
+    local link_type = table.remove(hlink_data, 1)
 
     if link_type == 1 then
-      self:_write_hyperlink_external(args)
+      self:_write_hyperlink_external(unpack(hlink_data))
     elseif link_type == 2 then
-      self:_write_hyperlink_internal(args)
+      self:_write_hyperlink_internal(unpack(hlink_data))
     end
   end
 
