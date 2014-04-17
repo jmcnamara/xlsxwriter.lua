@@ -4,8 +4,8 @@ A Lua module for creating Excel XLSX files.
 
 ## The xlsxwriter module
 
-Xlsxwriter is a Lua  module that can be used to write text, numbers and formulas
-to multiple worksheets in an Excel 2007+ XLSX file. It supports
+Xlsxwriter is a Lua  module that can be used to write text, numbers, formulas
+and hyperlinks to multiple worksheets in an Excel 2007+ XLSX file. It supports
 features such as:
 
 * 100% compatible Excel XLSX files.

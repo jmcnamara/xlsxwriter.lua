@@ -11,7 +11,7 @@ Creating Excel files with Lua and Xlsxwriter
 
    **XlsxWriter**
 
-Xlsxwriter can be used to write text, numbers and formulas
+Xlsxwriter can be used to write text, numbers, formulas and hyperlinks
 to multiple worksheets in an Excel 2007+ XLSX file. It supports
 features such as:
 

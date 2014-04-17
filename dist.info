@@ -1,5 +1,5 @@
 name = "xlsxwriter"
-version = "0.0.4"
+version = "0.0.5"
 desc = "A lua module for creating Excel XLSX files."
 author = "John McNamara"
 license = "MIT/X11"
