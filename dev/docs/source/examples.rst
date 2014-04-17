@@ -12,6 +12,7 @@ directory of the ``xlsxwriter`` distribution.
 
    example_hello_world.rst
    example_demo.rst
+   example_hyperlink.rst
    example_array_formula.rst
    example_merge1.rst
    example_defined_name.rst

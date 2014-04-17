@@ -444,6 +444,109 @@ otherwise it will appear as a number::
 
 See :ref:`working_with_dates_and_time` for more details.
 
+worksheet:write_url()
+---------------------
+
+.. function:: write_url(row, col, url[, format[, string[, tip]]])
+
+   Write a hyperlink to a worksheet cell.
+
+   :param row:         The cell row (zero indexed).
+   :param col:         The cell column (zero indexed).
+   :param url:         Hyperlink url.
+   :param format:      Optional :ref:`Format <format>` object.
+   :param string:      An optional display string for the hyperlink.
+   :param tip:         An optional tooltip.
+
+The ``write_url()`` method is used to write a hyperlink in a worksheet cell.
+The url is comprised of two elements: the displayed string and the
+non-displayed link. The displayed string is the same as the link unless an
+alternative string is specified.
+
+Both row-column and A1 style notation are supported. See :ref:`cell_notation`
+for more details.
+
+The ``format`` parameter is used to apply formatting to the cell. This
+parameter is generally required since a hyperlink without a format doesn't look
+like a link the following :ref:`Format <format>` should be used::
+
+    workbook:add_format({color = "blue", underline = 1})
+
+For example::
+
+    link_format = workbook:add_format({color = "blue", underline = 1})
+    worksheet:write_url("A1", "http://www.lua.org/", link_format)
+
+Four web style URI's are supported: ``http://``, ``https://``, ``ftp://`` and
+``mailto:``::
+
+    worksheet:write_url("A1", "ftp://www.lua.org/")
+    worksheet:write_url("A2", "http://www.lua.org/")
+    worksheet:write_url("A3", "https://www.lua.org/")
+    worksheet:write_url("A4", "mailto:jmcnamaracpan.org")
+
+You can display an alternative string using the ``string`` parameter::
+
+    worksheet:write_url("A1", "http://www.lua.org", link_format, "Lua")
+
+.. Note::
+
+  If you wish to have some other cell data such as a number or a formula you
+  can overwrite the cell using another call to ``write_*()``::
+
+    worksheet:write_url("A1", "http://www.lua.org/", link_format)
+
+    -- Overwrite the URL string with a formula. The cell is still a link.
+    worksheet:write_formula("A1", "=1+1", link_format)
+
+There are two local URIs supported: ``internal:`` and ``external:``. These are
+used for hyperlinks to internal worksheet references or external workbook and
+worksheet references::
+
+    worksheet:write_url("A1",  "internal:Sheet2!A1")
+    worksheet:write_url("A2",  "internal:Sheet2!A1")
+    worksheet:write_url("A3",  "internal:Sheet2!A1:B2")
+    worksheet:write_url("A4",  "internal:'Sales Data'!A1")
+    worksheet:write_url("A5", [[external:c:\temp\foo.xlsx]])
+    worksheet:write_url("A6", [[external:c:\foo.xlsx#Sheet2!A1]])
+    worksheet:write_url("A7", [[external:..\foo.xlsx]])
+    worksheet:write_url("A8", [[external:..\foo.xlsx#Sheet2!A1]])
+    worksheet:write_url("A9", [[external:\\NET\share\foo.xlsx]])
+
+Worksheet references are typically of the form ``Sheet1!A1``. You can also link
+to a worksheet range using the standard Excel notation: ``Sheet1!A1:B2``.
+
+In external links the workbook and worksheet name must be separated by the
+``#`` character: ``external:Workbook:xlsx#Sheet1!A1'``.
+
+You can also link to a named range in the target worksheet: For example say you
+have a named range called ``my_name`` in the workbook ``c:\temp\foo.xlsx`` you
+could link to it as follows::
+
+    worksheet:write_url("A14", [[external:c:\temp\foo.xlsx#my_name]])
+
+Excel requires that worksheet names containing spaces or non alphanumeric
+characters are single quoted as follows ``'Sales Data'!A1``.
+
+Links to network files are also supported. Network files normally begin with
+two back slashes as follows ``\\NETWORK\etc``. In order to generate this in a
+single or double quoted string you will have to escape the backslashes,
+``'\\\\NETWORK\\etc'`` or use a block quoted string ``[[\\NETWORK\etc]]``.
+
+Alternatively, you can avoid most of these quoting problems by using forward
+slashes. These are translated internally to backslashes::
+
+    worksheet:write_url("A14", "external:c:/temp/foo.xlsx")
+    worksheet:write_url("A15", "external://NETWORK/share/foo.xlsx")
+
+See also :ref:`ex_hyperlink`.
+
+.. note::
+   XlsxWriter will escape the following characters in URLs as required
+   by Excel: ``\s " < > \ [ ] ` ^ { }`` unless the URL already contains ``%xx``
+   style escapes. In which case it is assumed that the URL was escaped
+   correctly by the user and will by passed directly to Excel.
+
 
 worksheet:set_row()
 -------------------
