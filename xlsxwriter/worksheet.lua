@@ -141,6 +141,7 @@ function Worksheet:new()
     drawing                = false,
     rstring                = "",
     previous_row           = 0,
+    hyperlinks             = {},
   }
 
   setmetatable(instance, self)
@@ -223,7 +224,7 @@ function Worksheet:_assemble_xml_file()
   -- self:_write_data_validations()
 
   -- Write the hyperlink element.
-  -- self:_write_hyperlinks()
+  self:_write_hyperlinks()
 
   -- Write the printOptions element.
   self:_write_print_options()
@@ -445,6 +446,25 @@ function Worksheet:write_boolean(...)
   return self:_write_boolean(self:_convert_cell_args(...))
 end
 
+----
+-- Write a hyperlink to a worksheet cell.
+--
+-- Args:
+--     row:    The cell row (zero indexed).
+--     col:    The cell column (zero indexed).
+--     url:    Hyperlink url.
+--     format: An optional cell Format object.
+--     string: An optional display string for the hyperlink.
+--     tip:    An optional tooltip.
+-- Returns:
+--     0:  Success.
+--     -1: Row or column is out of worksheet bounds.
+--     -2: String longer than 32767 characters.
+--     -3: URL longer than Excel limit of 255 characters
+--     -4: Exceeds Excel limit of 65,530 urls per worksheet
+function Worksheet:write_url(...)
+  return self:_write_url(self:_convert_cell_args(...))
+end
 
 ----
 -- Set this worksheet as the active worksheet, i.e. the worksheet that is
@@ -1336,6 +1356,125 @@ function Worksheet:_write_boolean(row, col, bool, format)
   return 0
 end
 
+function Worksheet:_write_url(row, col, url, format, str, tip)
+
+  local link_type = 1
+  local matched   = 0
+
+  -- Remove the URI scheme from internal links.
+  url, matched = url:gsub("internal:", "")
+  if matched > 0 then link_type = 2 end
+
+  -- Remove the URI scheme from external links.
+  url, matched = url:gsub("external:", "")
+  if matched > 0 then link_type = 3 end
+
+  -- The displayed string defaults to the url string.
+  if not str then str = url end
+
+  -- For external links change the directory separator from Unix to Dos.
+  if link_type == 3 then
+    url = url:gsub("/", "\\")
+    str = str:gsub("/", "\\")
+  end
+
+  -- Strip the mailto header.
+  str = str:gsub("^mailto:", "")
+
+  -- Check that row and col are valid and store max and min values
+  if not self:_check_dimensions(row, col) then
+    return -1
+  end
+
+  -- Check that the string is < 32767 chars
+  if #str > self.xls_strmax then
+    return -2
+  end
+
+  -- Copy string for use in hyperlink elements.
+  local url_str = str
+
+  -- External links to URLs and to other Excel workbooks have slightly
+  -- different characteristics that we have to account for.
+  if link_type == 1 then
+
+    -- Escape URL unless it looks already escaped.
+    if not url:match("%%%x%x") then
+      url = url:gsub("%%", "%%25")
+      url = url:gsub('"',  "%%22")
+      url = url:gsub(" ",  "%%20")
+      url = url:gsub("<",  "%%3c")
+      url = url:gsub(">",  "%%3e")
+      url = url:gsub("%[", "%%5b")
+      url = url:gsub("%]", "%%5d")
+      url = url:gsub("%^", "%%5e")
+      url = url:gsub("`",  "%%60")
+      url = url:gsub("{",  "%%7b")
+      url = url:gsub("}",  "%%7d")
+    end
+
+    -- Ordinary URL style external links don't have a "location" string.
+    url_str = nil
+
+  elseif link_type == 3 then
+    -- External Workbook links need to be modified into the right format.
+    -- The URL will look something like 'c:\temp\file.xlsx#Sheet!A1'.
+    -- We need the part to the left of the # as the URL and the part to
+    -- the right as the "location" string (if it exists).
+    if url:match("#") then
+      url, url_str = url:match("([^#]+)#(.*)")
+    else
+      url_str = nil
+    end
+
+    -- Add the file:/// URI to the url if non-local. For:
+    --    Windows style "C:/" link.
+    --    Network share.
+    if url:match("^%a:") or url:match("^\\\\") then
+      url = "file:///" .. url
+    end
+
+    -- Convert a ./dir/file.xlsx link to dir/file.xlsx.
+    url = url:gsub("^.\\", "")
+
+    -- Treat as a default external link now that the data has been modified.
+    link_type = 1
+  end
+
+  -- Excel limits escaped URL to 255 characters.
+  if #url > 255 then
+    Utility.warn("Ignoring URL > 255 characters since it "
+                 .. "exceeds Excel's limit for URLS.\n")
+    return -3
+  end
+
+  -- Check the limit of URLS per worksheet.
+  self.hlink_count = self.hlink_count + 1
+
+  if self.hlink_count > 65530 then
+    Utility.warn("Ignoring URL since it exceeds Excel's limit of 65,530 "
+                   .. "URLS per worksheet.\n")
+    return -4
+  end
+
+  -- Write previous row if in in-line string optimization mode.
+  if self.optimization == 1 and row > self.previous_row then
+    self:_write_single_row(row)
+  end
+
+  -- Write the hyperlink string.
+  self:write_string(row, col, str, format)
+
+  -- Store the hyperlink data in a separate structure.
+  if not self.hyperlinks[row] then self.hyperlinks[row] = {} end
+
+  self.hyperlinks[row][col] = {
+    ["link_type"] = link_type,
+    ["url"]       = url,
+    ["str"]       = url_str or false,
+    ["tip"]       = tip     or false,
+  }
+end
 
 ----
 -- Check that row and col are valid and store max and min values for use in
@@ -2541,5 +2680,120 @@ function Worksheet:_write_merge_cell(merged_range)
 
   self:_xml_empty_tag("mergeCell", attributes)
 end
+
+----
+-- Process any stored hyperlinks in row/col order and write the <hyperlinks>
+-- element. The attributes are different for internal and external links.
+--
+function Worksheet:_write_hyperlinks()
+
+  local hlink_refs = {}
+  local has_hyperlinks = false
+
+  -- Iterate over the rows and cols in sorted order.
+  for row_num in Utility.sorted_keys(self.hyperlinks) do
+
+    for col_num in Utility.sorted_keys(self.hyperlinks[row_num]) do
+
+      -- Get the link data for this cell.
+      local link      = self.hyperlinks[row_num][col_num]
+      local link_type = link.link_type
+
+      -- If the cell isn't a string then we have to add the url as
+      -- the string to display.
+      local display = false
+      if self.data_table[row_num] and self.data_table[row_num][col_num] then
+        local cell = self.data_table[row_num][col_num]
+        if cell[1] ~= "s" then
+          display = link.url
+        end
+      end
+
+      if link_type == 1 then
+        -- External link with rel file relationship.
+        self.rel_count = self.rel_count + 1
+        table.insert(hlink_refs, {link_type, row_num, col_num, self.rel_count,
+                                  link.str, display, link.tip})
+
+        -- Links for use by the packager.
+        table.insert(self.external_hyper_links,
+                     {"/hyperlink", link.url, 'External'})
+      else
+        -- Internal link with rel file relationship.
+        table.insert(hlink_refs, {link_type, row_num, col_num, link.url,
+                                  link.str, link.tip})
+      end
+    end
+    has_hyperlinks = true
+  end
+
+
+  if not has_hyperlinks then return end
+
+  -- Write the hyperlink elements.
+  self:_xml_start_tag("hyperlinks")
+
+  for _, hlink_data in ipairs(hlink_refs) do
+    local link_type = table.remove(hlink_data, 1)
+
+    if link_type == 1 then
+      self:_write_hyperlink_external(unpack(hlink_data))
+    elseif link_type == 2 then
+      self:_write_hyperlink_internal(unpack(hlink_data))
+    end
+  end
+
+  self:_xml_end_tag("hyperlinks")
+end
+
+----
+-- Write the <hyperlink> element for external links.
+--
+function Worksheet:_write_hyperlink_external(row, col, id, location, display, tooltip)
+
+  local ref = Utility.rowcol_to_cell(row, col)
+  local r_id = "rId" .. id
+
+  local attributes = {
+    {["ref"]  = ref},
+    {["r:id"] = r_id},
+  }
+
+  if location then
+    table.insert(attributes, {["location"] = location})
+  end
+
+  if display then
+    table.insert(attributes, {["display"]  = display})
+  end
+
+  if tooltip then
+    table.insert(attributes, {["tooltip"]  = tooltip})
+  end
+
+
+  self:_xml_empty_tag("hyperlink", attributes)
+end
+
+----
+-- Write the <hyperlink> element for internal links.
+--
+function Worksheet:_write_hyperlink_internal(row, col, location, display, tooltip)
+
+
+  local ref = Utility.rowcol_to_cell(row, col)
+
+  local attributes = {
+    {["ref"]      = ref},
+    {["location"] = location},
+  }
+
+  if tooltip then table.insert(attributes, {["tooltip"] = tooltip}) end
+
+  table.insert(attributes, {["display"] = display})
+
+  self:_xml_empty_tag("hyperlink", attributes)
+end
+
 
 return Worksheet

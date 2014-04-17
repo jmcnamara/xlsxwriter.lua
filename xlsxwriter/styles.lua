@@ -760,36 +760,32 @@ end
 -- Write the <colors> element.
 --
 function Styles:_write_colors()
-  local custom_colors = #self.custom_colors
 
-  if custom_colors == 0 then return end
+  if #self.custom_colors == 0 then return end
 
   self:_xml_start_tag("colors")
-  self:_write_mru_colors(custom_colors)
+  self:_write_mru_colors(self.custom_colors)
   self:_xml_end_tag("colors")
 end
 
 ----
 -- Write the <mruColors> element for the most recently used colours.
 --
-function Styles:_write_mru_colors()
+function Styles:_write_mru_colors(custom_colors)
 
-  -- local custom_colors = _
+  -- Limit the mruColors to the last 10.
+  if #custom_colors > 10 then
+      custom_colors = unpack(custom_colors, 1, 10)
+  end
 
-  -- -- Limit the mruColors to the last 10.
-  -- local count = custom_colors
-  -- if count > 10 then
-  --     splice custom_colors, 0, (count - 10)
-  -- end
+  self:_xml_start_tag("mruColors")
 
-  -- self:_xml_start_tag("mruColors")
+  -- Write the custom colors in reverse order.
+  for i = #custom_colors, 1, -1 do
+    self:_write_color("rgb", custom_colors[i])
+  end
 
-  -- -- Write the custom colors in reverse order.
-  -- for color (reverse custom_colors) {
-  --     self:_write_color(["rgb"] = color)
-  -- end
-
-  -- self:_xml_end_tag("mruColors")
+  self:_xml_end_tag("mruColors")
 end
 
 ----
