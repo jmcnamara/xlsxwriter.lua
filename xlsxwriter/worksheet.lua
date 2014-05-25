@@ -283,7 +283,7 @@ function Worksheet:write(...)
 
   if type(token) == "string" then
     if token == "" then
-      return self:_write_blank(row, col,token, format)
+      return self:_write_blank(row, col, token, format)
     elseif string.match(token, "^=") then
       return self:_write_formula(row, col, token, format)
     else
