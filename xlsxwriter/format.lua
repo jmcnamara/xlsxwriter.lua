@@ -192,7 +192,7 @@ end
 -- Set the locked property.
 --
 function Format:set_locked(value)
-  self.locked = value ~= nil and value or true
+  self.locked = value
 end
 
 ----

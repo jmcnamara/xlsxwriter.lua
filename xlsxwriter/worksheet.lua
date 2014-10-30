@@ -82,7 +82,7 @@ function Worksheet:new()
     fit_height             = 0,
     hbreaks                = {},
     vbreaks                = {},
-    protect                = false,
+    protect_options        = false,
     password               = nil,
     set_cols               = {},
     set_rows               = {},
@@ -209,7 +209,7 @@ function Worksheet:_assemble_xml_file()
   end
 
   -- Write the sheetProtection element.
-  -- self:_write_sheet_protection()
+  self:_write_sheet_protection()
 
   -- Write the autoFilter element.
   -- self:_write_auto_filter()
@@ -520,6 +520,62 @@ function Worksheet:hide()
 end
 
 ----
+-- Set the password and protection options of the worksheet.
+--
+-- Args:
+--     password: An optional password string.
+--     options:  A table of worksheet objects to protect.
+--
+-- Returns:
+--     Nothing.
+--
+function Worksheet:protect(password, options)
+
+  password = password or ''
+  options  = options or {}
+
+  if password ~= '' then
+    -- password = self:_encode_password(password)
+    password = ''
+  end
+
+  -- Default values for objects that can be protected.
+  local defaults = {
+    ["sheet"]                 = true,
+    ["content"]               = false,
+    ["objects"]               = false,
+    ["scenarios"]             = false,
+    ["format_cells"]          = false,
+    ["format_columns"]        = false,
+    ["format_rows"]           = false,
+    ["insert_columns"]        = false,
+    ["insert_rows"]           = false,
+    ["insert_hyperlinks"]     = false,
+    ["delete_columns"]        = false,
+    ["delete_rows"]           = false,
+    ["select_locked_cells"]   = true,
+    ["sort"]                  = false,
+    ["autofilter"]            = false,
+    ["pivot_tables"]          = false,
+    ["select_unlocked_cells"] = true,
+  }
+
+  -- Overwrite the defaults with user specified values.
+  for key, _ in pairs(options) do
+    if defaults[key] ~= nil then
+      defaults[key] = options[key]
+    else
+      Utility.warn("Unknown protection object: " .. key .. "\n")
+    end
+  end
+
+  -- Set the password after the user defined values.
+  defaults[password] = password
+
+  self.protect_options = defaults
+end
+
+----
 -- Set current worksheet as the first visible sheet. This is necessary
 -- when there are a large number of worksheets and the activated
 -- worksheet is not visible on the screen.
@@ -636,7 +692,7 @@ end
 function Worksheet:set_zoom(scale)
   -- Confine the scale to Excel's range
   if scale < 10 or scale > 400 then
-    Utility.warn("Zoom factor scale outside range: 10 <= zoom <= 400")
+    Utility.warn("Zoom factor scale outside range: 10 <= zoom <= 400\n")
     scale = 100
   end
 
@@ -656,7 +712,7 @@ function Worksheet:set_print_scale(scale)
 
   -- Confine the scale to Excel's range
   if scale < 10 or scale > 400 then
-    Utility.warn("Print scale scale outside range: 10 <= zoom <= 400")
+    Utility.warn("Print scale scale outside range: 10 <= zoom <= 400\n")
     scale = 100
   end
 
@@ -832,7 +888,7 @@ end
 function Worksheet:set_header(header, margin)
 
   if #header >= 255 then
-    Utility.warn("Header string must be less than 255 characters")
+    Utility.warn("Header string must be less than 255 characters\n")
     return
   end
 
@@ -854,7 +910,7 @@ end
 function Worksheet:set_footer(footer, margin)
 
   if #footer >= 255 then
-    Utility.warn("Footer string must be less than 255 characters")
+    Utility.warn("Footer string must be less than 255 characters\n")
     return
   end
 
@@ -939,7 +995,7 @@ end
 --     lastcol:     Last column (zero-indexed). Can be same as firstcol.
 --     width:       Column width. (optional).
 --     format:      Column cell_format. (optional).
---     options:     Dict of options such as hidden and level.
+--     options:     Table of options such as hidden and level.
 --
 -- Returns:
 --     0:  Success.
@@ -957,7 +1013,7 @@ end
 --     row:         Row number (zero-indexed).
 --     height:      Row width. (optional).
 --     format:      Row cell_format. (optional).
---     options:     Dict of options such as hidden, level and collapsed.
+--     options:     Table of options such as hidden, level and collapsed.
 --
 -- Returns:
 --     0:  Success.
@@ -1570,7 +1626,7 @@ function Worksheet:_set_column(firstcol, lastcol, width, format, options)
                             ["collapsed"] = collapsed}
 
   -- Store the column change to allow optimisations.
-  self.col_size_changed = 1
+  self.col_size_changed = true
 
   -- Store the col sizes for use when calculating image vertices taking
   -- hidden columns into account. Also store the column formats.
@@ -2408,12 +2464,12 @@ end
 function Worksheet:_write_cols()
 
   -- Return unless some column have been formatted.
-  if next(self.colinfo) == nil then return end
+  if not self.col_size_changed then return end
 
   self:_xml_start_tag("cols")
 
-  for row, colinfo in Utility.sorted_pairs(self.colinfo) do
-    self:_write_col_info(self.colinfo[row])
+  for col, colinfo in Utility.sorted_pairs(self.colinfo) do
+    self:_write_col_info(self.colinfo[col])
   end
 
   self:_xml_end_tag("cols")
@@ -2539,6 +2595,94 @@ function Worksheet:_write_outline_pr()
   end
 
   self:_xml_empty_tag("outlinePr", attributes)
+end
+
+----
+-- Write the <sheetProtection> element.
+--
+function Worksheet:_write_sheet_protection()
+
+  local attributes = {}
+
+  if not self.protect_options then
+     return
+  end
+
+  local options = self.protect_options
+
+  if options.password then
+    table.insert(attributes, {["password"] = options.password})
+  end
+
+  if options.sheet then
+     table.insert(attributes, {["sheet"] = "1"})
+  end
+
+  if options.content then
+     table.insert(attributes, {["content"] = "1"})
+  end
+
+  if not options.objects then
+     table.insert(attributes, {["objects"] = "1"})
+  end
+
+  if not options.scenarios then
+     table.insert(attributes, {["scenarios"] = "1"})
+  end
+
+  if options.format_cells then
+     table.insert(attributes, {["formatCells"] = "0"})
+  end
+
+  if options.format_columns then
+     table.insert(attributes, {["formatColumns"] = "0"})
+  end
+
+  if options.format_rows then
+     table.insert(attributes, {["formatRows"] = "0"})
+  end
+
+  if options.insert_columns then
+     table.insert(attributes, {["insertColumns"] = "0"})
+  end
+
+  if options.insert_rows then
+     table.insert(attributes, {["insertRows"] = "0"})
+  end
+
+  if options.insert_hyperlinks then
+     table.insert(attributes, {["insertHyperlinks"] = "0"})
+  end
+
+  if options.delete_columns then
+     table.insert(attributes, {["deleteColumns"] = "0"})
+  end
+
+  if options.delete_rows then
+     table.insert(attributes, {["deleteRows"] = "0"})
+  end
+
+  if not options.select_locked_cells then
+    table.insert(attributes, {["selectLockedCells"] = "1"})
+  end
+
+  if options.sort then
+     table.insert(attributes, {["sort"] = "0"})
+  end
+
+  if options.autofilter then
+     table.insert(attributes, {["autoFilter"] = "0"})
+  end
+
+  if options.pivot_tables then
+     table.insert(attributes, {["pivotTables"] = "0"})
+  end
+
+  if not options.select_unlocked_cells then
+    table.insert(attributes, {["selectUnlockedCells"] = "1"})
+  end
+
+  self:_xml_empty_tag("sheetProtection", attributes)
 end
 
 
