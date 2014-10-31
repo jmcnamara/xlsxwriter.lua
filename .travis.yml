@@ -12,6 +12,9 @@ install:
   - sudo luarocks install lzlib ZLIB_LIBDIR=/lib/x86_64-linux-gnu/
   - sudo luarocks install zipwriter
   - sudo pip install pytest
+  - if [ $LUA = "lua5.1" ]; then
+      sudo luarocks install bit32;
+    fi
 
 script:
   - prove --exec="$LUA" --ext=lua -r test/unit
