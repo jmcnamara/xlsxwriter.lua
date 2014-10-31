@@ -2,10 +2,15 @@ language: c
 
 env:
   - LUA=lua5.1
-#  - LUA=lua5.2
+  - LUA=lua5.2
 
 install:
-  - sudo apt-get  install -qq lua5.1
+  - if [ $LUA = "lua5.1" ]; then
+      sudo apt-get  install -qq lua5.1
+    fi
+  - if [ $LUA = "lua5.2" ]; then
+      sudo apt-get  install -qq lua5.2
+    fi
   - sudo apt-get  install luarocks
   - sudo luarocks install lua-testmore
   - sudo luarocks install lua-testlongstring
