@@ -1,0 +1,27 @@
+----
+-- Test cases for xlsxwriter.lua.
+--
+-- Test the a simple xlsxwriter.lua file with worksheet protection.
+--
+-- Copyright 2014, John McNamara, jmcnamara@cpan.org
+--
+
+local Workbook = require "xlsxwriter.workbook"
+
+local workbook  = Workbook:new("test_protect03.xlsx")
+local worksheet = workbook:add_worksheet()
+
+local unlocked = workbook:add_format({locked = false, hidden = false})
+local hidden   = workbook:add_format({locked = false, hidden = true})
+
+worksheet:protect('password')
+
+-- TODO. Simulate password until it is implemented.
+worksheet.protect_options.password = "83AF"
+
+worksheet:write("A1", 1)
+worksheet:write("A2", 2, unlocked)
+worksheet:write("A3", 3, hidden)
+
+workbook:close()
+

@@ -198,8 +198,8 @@ end
 ----
 -- Set the hidden property.
 --
-function Format:set_hidden()
-  self.hidden = true
+function Format:set_hidden(value)
+  self.hidden = value
 end
 
 ----
@@ -710,7 +710,7 @@ end
 function Format:_get_protection_properties()
   local attribs = {}
 
-  if not self.locked then
+  if self.locked ~= true and self.locked ~= 1 then
     table.insert(attribs, {["locked"] = "0"})
   end
 
