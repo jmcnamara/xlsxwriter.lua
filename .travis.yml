@@ -6,10 +6,10 @@ env:
 
 install:
   - if [ $LUA = "lua5.1" ]; then
-      sudo apt-get  install -qq lua5.1
+      sudo apt-get  install -qq lua5.1;
     fi
   - if [ $LUA = "lua5.2" ]; then
-      sudo apt-get  install -qq lua5.2
+      sudo apt-get  install -qq lua5.2;
     fi
   - sudo apt-get  install luarocks
   - sudo luarocks install lua-testmore
