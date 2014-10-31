@@ -2,7 +2,7 @@ language: c
 
 env:
   - LUA=lua5.1
-  - LUA=lua5.2
+  #- LUA=lua5.2
 
 install:
   - if [ $LUA = "lua5.1" ]; then
