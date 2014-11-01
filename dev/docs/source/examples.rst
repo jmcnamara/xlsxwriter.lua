@@ -23,3 +23,4 @@ directory of the ``xlsxwriter`` distribution.
    example_hide_sheet.rst
    example_headers_footers.rst
    example_text_indent.rst
+   example_protection.rst

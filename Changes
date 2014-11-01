@@ -1,4 +1,11 @@
 
+Release 0.0.6 - November 1 2014
+-------------------------------
+
+* Added the :func:`protect` worksheet method to allow protection of cells
+  from editing. Also added example program: :ref:`ex_protection`.
+  Issue `#4 <https://github.com/jmcnamara/xlsxwriter.lua/issues/4>`_.
+
 
 Release 0.0.5 - April 17 2014
 -----------------------------

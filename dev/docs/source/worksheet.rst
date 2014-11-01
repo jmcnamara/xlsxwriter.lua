@@ -926,3 +926,69 @@ tab::
 
 The colour can be a Html style ``#RRGGBB`` string or a limited number named
 colours, see :ref:`colors` and :ref:`ex_tab_colors` for more details.
+
+
+
+worksheet:protect()
+-------------------
+
+.. function:: protect()
+
+   Protect elements of a worksheet from modification.
+
+   :param password: A worksheet password.
+   :param options:  A table of worksheet options to protect.
+
+
+The ``protect()`` method is used to protect a worksheet from modification::
+
+    worksheet:protect()
+
+The ``protect()`` method also has the effect of enabling a cell's ``locked``
+and ``hidden`` properties if they have been set. A *locked* cell cannot be
+edited and this property is on by default for all cells. A *hidden* cell will
+display the results of a formula but not the formula itself. These properties
+can be set using the :func:`set_locked` and :func:`set_hidden` format methods.
+
+You can optionally add a password to the worksheet protection::
+
+    worksheet:protect("abc123")
+
+Passing the empty string ``""`` is the same as turning on protection without a
+password.
+
+You can specify which worksheet elements you wish to protect by passing a
+table in the ``options`` argument with any or all of the following keys::
+
+    -- Default values are shown.
+    options = {
+      ["objects"]               = false,
+      ["scenarios"]             = false,
+      ["format_cells"]          = false,
+      ["format_columns"]        = false,
+      ["format_rows"]           = false,
+      ["insert_columns"]        = false,
+      ["insert_rows"]           = false,
+      ["insert_hyperlinks"]     = false,
+      ["delete_columns"]        = false,
+      ["delete_rows"]           = false,
+      ["select_locked_cells"]   = true,
+      ["sort"]                  = false,
+      ["autofilter"]            = false,
+      ["pivot_tables"]          = false,
+      ["select_unlocked_cells"] = true,
+    }
+
+The default boolean values are shown above. Individual elements can be
+protected as follows::
+
+    worksheet:protect("acb123", {["insert_rows"] = 1})
+
+See also the :func:`set_locked` and :func:`set_hidden` format methods and
+:ref:`ex_protection`.
+
+.. Note::
+   Worksheet level passwords in Excel offer very weak protection. They do not
+   encrypt your data and are very easy to deactivate. Full workbook encryption
+   is not supported by ``xlsxwriter.lua`` since it requires a completely different
+   file format and would take several man months to implement.

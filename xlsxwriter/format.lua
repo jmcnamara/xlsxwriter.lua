@@ -199,7 +199,11 @@ end
 -- Set the hidden property.
 --
 function Format:set_hidden(value)
-  self.hidden = value
+  if value == nil then
+    self.hidden = true
+  else
+    self.hidden = value
+  end
 end
 
 ----
