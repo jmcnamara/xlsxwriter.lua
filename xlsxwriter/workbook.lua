@@ -19,7 +19,7 @@ local Utility       = require "xlsxwriter.utility"
 ------------------------------------------------------------------------------
 
 -- The constructor inherits from xmlwriter.lua.
-local Workbook = {version = '0.0.5'}
+local Workbook = {version = '0.0.6'}
 setmetatable(Workbook,{__index = Xmlwriter})
 
 function Workbook:new(filename, options)
