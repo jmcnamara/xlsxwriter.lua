@@ -16,9 +16,6 @@ local hidden   = workbook:add_format({locked = false, hidden = true})
 
 worksheet:protect('password')
 
--- TODO. Simulate password until it is implemented.
-worksheet.protect_options.password = "83AF"
-
 worksheet:write("A1", 1)
 worksheet:write("A2", 2, unlocked)
 worksheet:write("A3", 3, hidden)

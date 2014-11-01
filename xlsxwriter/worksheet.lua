@@ -534,11 +534,6 @@ function Worksheet:protect(password, options)
   password = password or ''
   options  = options or {}
 
-  if password ~= '' then
-    -- password = self:_encode_password(password)
-    password = ''
-  end
-
   -- Default values for objects that can be protected.
   local defaults = {
     ["sheet"]                 = true,
@@ -569,8 +564,10 @@ function Worksheet:protect(password, options)
     end
   end
 
-  -- Set the password after the user defined values.
-  defaults[password] = password
+  if password ~= '' then
+    -- Set the password after the user defined values.
+    defaults.password = self:_encode_password(password)
+  end
 
   self.protect_options = defaults
 end
@@ -1719,6 +1716,46 @@ function Worksheet:_sort_pagebreaks(breaks)
 
   return unique_breaks
 end
+
+----
+-- _encode_password(plaintext)
+--
+-- Based on the algorithm provided by Daniel Rentz of OpenOffice.
+--
+function Worksheet:_encode_password(plaintext)
+
+
+  -- Use ZipWriter's import of bit/bit32 on Lua5.1/5.2.
+  local ziputils = require "ZipWriter.utils"
+  local bit = ziputils.bit
+
+  local password_hash = 0x0000
+  local count         = #plaintext
+  local i             = 1
+  local digits        = {}
+
+  for char in string.gmatch(plaintext, "%a") do
+    char = string.byte(char)
+    char = bit.lshift(char, i)
+
+    local low_15  = bit.band(char, 0x7FFF)
+    local high_15 = bit.band(char, 0x3fff8000)
+
+    char = bit.bor(low_15, high_15)
+    digits[i] = char
+    i = i + 1
+  end
+
+  for i = 1, count do
+    password_hash = bit.bxor(password_hash, digits[i])
+  end
+
+  password_hash = bit.bxor(password_hash, count)
+  password_hash = bit.bxor(password_hash, 0xCE4B)
+
+  return string.format("%X", password_hash)
+end
+
 
 ------------------------------------------------------------------------------
 --

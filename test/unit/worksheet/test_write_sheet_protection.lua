@@ -51,10 +51,6 @@ worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
 worksheet:protect(password, options)
-
--- TODO. Simulate password until it is implemented.
-worksheet.protect_options.password = "83AF"
-
 worksheet:_write_sheet_protection()
 
 got = worksheet:_get_data()
@@ -379,10 +375,6 @@ worksheet = Worksheet:new()
 worksheet:_set_filehandle(io.tmpfile())
 
 worksheet:protect(password, options)
-
--- TODO. Simulate password until it is implemented.
-worksheet.protect_options.password = "996B"
-
 worksheet:_write_sheet_protection()
 
 got = worksheet:_get_data()
