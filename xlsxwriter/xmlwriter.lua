@@ -255,7 +255,7 @@ local escape_attrib_tbl = {
 }
 
 function Xmlwriter._escape_attributes(attribute)
-  return string.gsub(data, '[&"<>]', escape_attrib_tbl)
+  return string.gsub(attribute, '[&"<>]', escape_attrib_tbl)
 end
 
 ----
