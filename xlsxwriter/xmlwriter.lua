@@ -247,23 +247,30 @@ end
 ----
 -- Escape XML characters in attributes.
 --
+local escape_attrib_tbl = {
+	['&'] = '&amp;',
+	['"'] = '&quot;',
+	['<'] = '&lt;',
+	['>'] = '&gt;',
+}
+
 function Xmlwriter._escape_attributes(attribute)
-  attribute = string.gsub(attribute, '&', '&amp;')
-  attribute = string.gsub(attribute, '"', '&quot;')
-  attribute = string.gsub(attribute, '<', '&lt;')
-  attribute = string.gsub(attribute, '>', '&gt;')
-  return attribute
+  return string.gsub(attribute, '[&"<>]', escape_attrib_tbl)
 end
 
 ----
 -- Escape XML characters in data sections of tags. Double quotes
 -- are not escaped by Excel in XML data.
 --
+
+local escape_data_tbl = {
+	['&'] = '&amp;',
+	['<'] = '&lt;',
+	['>'] = '&gt;',
+}
+
 function Xmlwriter._escape_data(data)
-  data = string.gsub(data, '&', '&amp;')
-  data = string.gsub(data, '<', '&lt;')
-  data = string.gsub(data, '>', '&gt;')
-  return data
+  return string.gsub(data, '[&<>]', escape_data_tbl)
 end
 
 return Xmlwriter
