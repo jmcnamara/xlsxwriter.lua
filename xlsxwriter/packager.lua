@@ -37,7 +37,7 @@
 -- The Packager class coordinates the classes that represent the
 -- elements of the package and writes them into the XLSX file.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 require "xlsxwriter.strict"
 

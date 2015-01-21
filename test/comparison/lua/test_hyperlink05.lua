@@ -5,7 +5,7 @@
 -- This example doesn't have any link formatting and tests the relationship
 -- linkage code.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

@@ -4,7 +4,7 @@
 --
 -- Note: The source file must be UTF-8 encoded.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

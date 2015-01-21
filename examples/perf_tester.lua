@@ -10,7 +10,7 @@
 --
 --        Where row_max is an integer, and the other options are 1 or 0.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

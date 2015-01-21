@@ -2,7 +2,7 @@
 --
 -- Example of how to use the xlsxwriter.lua module to write hyperlinks.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

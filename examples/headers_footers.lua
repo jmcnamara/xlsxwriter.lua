@@ -30,7 +30,7 @@
 --
 -- See the main XlsxWriter documentation for more information.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

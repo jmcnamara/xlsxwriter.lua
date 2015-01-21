@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'xlsxwriter.lua'
-copyright = u'2013-2014, John McNamara'
+copyright = u'2014-2015, John McNamara'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -268,7 +268,7 @@ texinfo_documents = [
 epub_title = u'xlsxwriter.lua'
 epub_author = u'John McNamara'
 epub_publisher = u'John McNamara'
-epub_copyright = u'2013-2014, John McNamara'
+epub_copyright = u'2014-2015, John McNamara'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.

@@ -2,7 +2,7 @@
 --
 -- A simple example of merging cells with the xlsxwriter Lua module.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

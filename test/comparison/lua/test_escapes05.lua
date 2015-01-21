@@ -4,7 +4,7 @@
 -- Test the creation of a simple xlsxwriter.lua file.
 -- Check encoding of rich strings.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"

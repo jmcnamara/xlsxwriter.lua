@@ -6,7 +6,7 @@
 -- This example generates a spreadsheet with some Polish text from a file
 -- with UTF-8 encoded text.
 --
--- Copyright 2014, John McNamara, jmcnamara@cpan.org
+-- Copyright 2014-2015, John McNamara, jmcnamara@cpan.org
 --
 
 local Workbook = require "xlsxwriter.workbook"
