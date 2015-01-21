@@ -43,3 +43,6 @@ class TestCompareXLSXFiles(base_test_class.XLSXBaseTest):
 
     def test_format10(self):
         self.run_lua_test('test_format10')
+
+    def test_format11(self):
+        self.run_lua_test('test_format11')

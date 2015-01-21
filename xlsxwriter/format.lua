@@ -514,8 +514,7 @@ end
 -- properties passed to the constructor.
 --
 function Format:set_valign(value)
-  if not value then return end
-  self.valign = value
+  self:set_align(value)
 end
 
 ----
