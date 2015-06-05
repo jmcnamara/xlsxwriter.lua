@@ -2398,9 +2398,9 @@ function Worksheet:_write_cell(row, col, cell)
 
     attributes[#attributes + 1] = {["s"] = xf_index}
 
-  elseif self.set_rows[row] and self.set_rows[row][1] then
+  elseif self.set_rows[row] and self.set_rows[row][2] then
 
-    local row_xf = self.set_rows[row][1]
+    local row_xf = self.set_rows[row][2]
     attributes[#attributes + 1] = {["s"] = row_xf:_get_xf_index()}
 
   elseif self.col_formats[col] then
