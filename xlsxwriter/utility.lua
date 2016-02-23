@@ -67,7 +67,8 @@ end
 -- Convert a zero indexed row and column cell reference to a A1 style string.
 --
 function Utility.rowcol_to_cell(row, col)
-  row = row + 1
+  row = math.modf(row + 1)
+  col = math.modf(col)
   local col_str = Utility.col_to_name_abs(col, false)
   return col_str .. row
 end
@@ -77,7 +78,8 @@ end
 -- with Excel absolute indexing.
 --
 function Utility.rowcol_to_cell_abs(row, col, row_abs, col_abs)
-  row = row + 1
+  row = math.modf(row + 1)
+  col = math.modf(col)
   row_abs = row_abs and "$" or ""
   local col_str = Utility.col_to_name_abs(col, col_abs)
   return col_str .. row_abs .. row

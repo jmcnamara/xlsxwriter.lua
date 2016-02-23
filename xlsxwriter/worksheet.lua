@@ -2301,7 +2301,7 @@ function Worksheet:_write_row(r, spans, height, format,
     height = self.default_row_height
   end
 
-  local attributes = {{["r"] = r + 1}}
+  local attributes = {{["r"] = math.modf(r + 1)}}
 
   -- Get the format index.
   if format then
@@ -2564,8 +2564,8 @@ function Worksheet:_write_col_info(colinfo)
   end
 
   local attributes = {
-    {["min"]   = firstcol + 1},
-    {["max"]   = lastcol  + 1},
+    {["min"]   = math.modf(firstcol + 1)},
+    {["max"]   = math.modf(lastcol  + 1)},
     {["width"] = width},
   }
 
