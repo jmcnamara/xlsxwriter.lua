@@ -38,7 +38,11 @@ end
 
 mt.__index = function (t, n)
   if not mt.__declared[n] and what() ~= "C" then
-    error("variable '"..n.."' is not declared", 2)
+    if n == "unpack" and t == _G and table[n] then
+      return rawget(table, n)
+    else
+      error("variable '"..n.."' is not declared", 2)
+    end
   end
   return rawget(t, n)
 end
