@@ -103,8 +103,8 @@ function Utility.cell_to_rowcol(cell)
   end
 
   -- Convert 1-index to zero-index
-  row = row - 1
-  col = col - 1
+  row = math.modf(row - 1)
+  col = math.modf(col - 1)
 
   return row, col
 end
