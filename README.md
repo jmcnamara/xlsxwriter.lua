@@ -2,6 +2,10 @@
 
 A Lua module for creating Excel XLSX files.
 
+Note: this module is no longer maintained. It is functional and if it meets
+your requirements then please use it. However, no new features will be added.
+
+
 ## The xlsxwriter module
 
 Xlsxwriter is a Lua  module that can be used to write text, numbers, formulas
