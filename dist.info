@@ -9,4 +9,5 @@ maintainer = "John McNamara"
 depends = {
   "lua >= 5.1",
   "ZipWriter",
+  "struct",
 }
